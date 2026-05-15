@@ -277,9 +277,43 @@ def main() -> int:
              {"evaluators": ["groundedness", "relevance", "tom_contoso", "friendliness"],
               "target": "modelo_a"}),
         ],
+        # SSE multiagentes: per-chip + per-pattern routing so the trace and
+        # the final answer match the user's intent (vendas / suporte / regs).
+        # Pattern-distinct fixtures come first (matched via the body's
+        # `"pattern":"..."` substring); within handoff, intent keywords
+        # disambiguate between suporte / vendas / regulamentos.
+        "/sections/ato1_multiagentes/api/run/stream": [
+            ("sequential_default", '"pattern":"sequential"',
+             {"message": "Quero contratar fibra de 500Mbps e quero saber a política de cancelamento.",
+              "pattern": "sequential"}),
+            ("concurrent_default", '"pattern":"concurrent"',
+             {"message": "Quero contratar fibra de 500Mbps e quero saber a política de cancelamento.",
+              "pattern": "concurrent"}),
+            ("group_chat_default", '"pattern":"group_chat"',
+             {"message": "Compare opções de plano fibra para uma residência.",
+              "pattern": "group_chat"}),
+            ("magentic_default", '"pattern":"magentic"',
+             {"message": "Compare opções de plano fibra para uma residência.",
+              "pattern": "magentic"}),
+            # Handoff variants — match by message keyword.
+            ("handoff_suporte", "modem",
+             {"message": "Minha internet caiu, modem com luz vermelha. O que faço?",
+              "pattern": "handoff"}),
+            ("handoff_suporte_alt", "caiu",
+             {"message": "Minha internet caiu, modem com luz vermelha. O que faço?",
+              "pattern": "handoff"}),
+            ("handoff_regulamentos", "cancelamento",
+             {"message": "Quais as regras de cancelamento e multa de fidelidade?",
+              "pattern": "handoff"}),
+            ("handoff_vendas", "contratar",
+             {"message": "Quero contratar fibra de 500Mbps e quero saber a política de cancelamento.",
+              "pattern": "handoff"}),
+        ],
     }
     for path, scenarios in dispatch_samples.items():
         entries = []
+        is_stream_path = "/stream" in path
+        ext = "sse" if is_stream_path else "json"
         for scenario in scenarios:
             # Accept 3-tuples (slug, keyword, body) or 4-tuples (slug, keyword, industry, body).
             if len(scenario) == 4:
@@ -295,7 +329,7 @@ def main() -> int:
                 if r.status_code >= 400:
                     print(f"[build] WARN dispatch {path}[{slug}] -> {r.status_code}", file=sys.stderr)
                     continue
-                rel = path.lstrip("/") + f".sample.{slug}.json"
+                rel = path.lstrip("/") + f".sample.{slug}.{ext}"
                 _write(out_dir / rel, r.text)
                 entries.append({"match": keyword, "fixture": (base_url + "/" + rel) if base_url else ("/" + rel)})
                 captured += 1

@@ -258,6 +258,80 @@ _MOCK_REPLIES = {
     ),
 }
 
+# ----------------------------------------------------------------------------
+#  Intent classifier (used by handoff + magentic to route to the right agent
+#  AND to pick a richer, intent-specific final answer when running in mock
+#  mode). Heuristic keyword match — keeps the demo deterministic.
+# ----------------------------------------------------------------------------
+_INTENT_KEYWORDS: Dict[str, List[str]] = {
+    "suporte": [
+        "caiu", "sem sinal", "sem internet", "modem", "roteador", "lenta",
+        "instabilidade", "luz vermelha", "led vermelho", "não conecta",
+        "nao conecta", "wifi", "wi-fi", "travando", "problema", "defeito",
+        "não funciona", "nao funciona", "suporte", "técnico", "tecnico",
+        "reparo", "chamado",
+    ],
+    "vendas": [
+        "contratar", "comprar", "assinar", "plano", "promo", "promoção",
+        "promocao", "preço", "preco", "valor", "oferta", "fibra", "móvel",
+        "movel", "controle", "pré-pago", "pre-pago", "tv", "pacote",
+        "portabilidade", "upgrade",
+    ],
+    "regulamentos": [
+        "fidelização", "fidelizacao", "fidelidade", "multa", "cancelar",
+        "cancelamento", "política", "politica", "contrato", "lgpd",
+        "privacidade", "rescisão", "rescisao", "lei",
+    ],
+}
+
+_INTENT_REPLIES: Dict[str, str] = {
+    "suporte": (
+        "[agente-triagem → agente-suporte] Classifiquei como **problema técnico**.\n\n"
+        "**Diagnóstico Contoso Fibra (agente-suporte):**\n"
+        "1. **LED vermelho no modem** indica perda de sinal óptico — geralmente cabo de fibra "
+        "danificado/desconectado ou interrupção na rede externa.\n"
+        "2. Verifique se o conector SC/APC está firme na entrada do modem e se não há dobras "
+        "acentuadas no cabo até a roseta.\n"
+        "3. Faça um power-cycle: desligue da tomada por 30s e religue. Aguarde 2min — se o LED "
+        "voltar a verde, problema resolvido.\n"
+        "4. Persistindo o LED vermelho, é falha externa (caixa CTO ou cabo de rua). Já abri o "
+        "**protocolo #C-208411** na sua conta — ETA típica em área urbana: **4 h**.\n\n"
+        "Quer receber atualizações por WhatsApp ou e-mail?"
+    ),
+    "vendas": (
+        "[agente-triagem → agente-vendas] Classifiquei como **intenção de contratação**.\n\n"
+        "**Recomendação Contoso (agente-vendas):**\n"
+        "• **Contoso Fibra 500Mbps** (SKU CONTOSO-FIB-500) — R$ 119,90/mês\n"
+        "• Wi-Fi 6 incluso, instalação gratuita, fidelidade de 12 meses\n"
+        "• Suporta 4–6 dispositivos simultâneos em streaming/games\n\n"
+        "Política aplicável (validada pelo agente-regulamentos): **POL-VEN-007** — fidelidade "
+        "de 12 meses, multa proporcional. Confirma o CEP que eu valido cobertura e já abro a "
+        "proposta na sua conta?"
+    ),
+    "regulamentos": (
+        "[agente-triagem → agente-regulamentos] Classifiquei como **dúvida contratual**.\n\n"
+        "**Política POL-VEN-007 (agente-regulamentos):**\n"
+        "• Fidelidade de 12 meses para planos residenciais subsidiados.\n"
+        "• Multa de cancelamento antecipado: **(parcelas restantes × R$ 75)**.\n"
+        "• **Isenção** em casos comprovados de mudança para endereço sem cobertura ou descumprimento "
+        "de SLA pela operadora.\n"
+        "• Direito de arrependimento de 7 dias corridos a partir da ativação (CDC art. 49).\n\n"
+        "Quer que eu calcule a multa exata na sua conta ou abra o protocolo de cancelamento?"
+    ),
+}
+
+
+def _classify_intent(message: str) -> str:
+    """Pick the best target agent for the user's message. Defaults to 'vendas'."""
+    msg = (message or "").lower()
+    best: Optional[str] = None
+    best_score = 0
+    for intent, kws in _INTENT_KEYWORDS.items():
+        score = sum(1 for k in kws if k in msg)
+        if score > best_score:
+            best, best_score = intent, score
+    return best or "vendas"
+
 
 @router.post("/api/run/stream")
 async def run_stream(payload: RunRequest, request: Request):
@@ -271,6 +345,20 @@ async def run_stream(payload: RunRequest, request: Request):
     pattern = PATTERNS.get(pattern_id, PATTERNS["magentic"])
     use_real = is_real(request)
     t0 = time.time()
+
+    # Intent-aware routing for handoff (and magentic): replace the static
+    # "ordering" with one that ends on the agent that actually matches the
+    # user's intent, so the demo trace + final answer agree with the prompt.
+    intent = _classify_intent(payload.message)
+    if pattern_id == "handoff":
+        ordering_dyn = ["orchestrator", intent if intent in AGENTS else "vendas"]
+    elif pattern_id == "magentic":
+        # Magentic dynamically picks the right specialist. Always start with
+        # produtos (catalog lookup) then hand to the intent-matched agent.
+        tail = intent if intent in AGENTS and intent != "produtos" else "vendas"
+        ordering_dyn = ["produtos", tail] if tail != "produtos" else ["produtos", "vendas"]
+    else:
+        ordering_dyn = list(pattern["ordering"])
 
     async def gen():
         # 1) start
@@ -287,7 +375,7 @@ async def run_stream(payload: RunRequest, request: Request):
         await asyncio.sleep(0.45)
 
         # 3) per-pattern emissão
-        ordering: List[str] = list(pattern["ordering"])
+        ordering: List[str] = ordering_dyn
 
         if pattern_id == "concurrent":
             # fan-out: dispara todos os tool_start praticamente juntos
@@ -351,7 +439,12 @@ async def run_stream(payload: RunRequest, request: Request):
         if use_real:
             answer = await _call_mafw(payload.message)
         if not answer:
-            answer = _MOCK_REPLIES.get(pattern_id, _MOCK_REPLIES["magentic"])
+            # Intent-specific reply wins for handoff & magentic; other patterns
+            # keep their pattern-specific narrative.
+            if pattern_id in ("handoff", "magentic") and intent in _INTENT_REPLIES:
+                answer = _INTENT_REPLIES[intent]
+            else:
+                answer = _MOCK_REPLIES.get(pattern_id, _MOCK_REPLIES["magentic"])
 
         yield _sse({
             "type": "done",
