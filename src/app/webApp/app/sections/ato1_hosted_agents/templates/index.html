@@ -53,7 +53,7 @@
        data-tx-source-real="{{ _tx.get('source_real_title', 'Real') }}"
        data-tx-source-sim="{{ _tx.get('source_sim_title', 'Simulação local') }}"
        data-tx-mock-notice="{{ _tx.get('mock_notice', 'Modo demonstração estático — sem backend. Resposta gerada localmente.') }}"
-       data-tx-mock-answer-template="{{ _tx.get('mock_answer_template', 'Resposta simulada para \\'{q}\\': é o mesmo código, só muda quem opera.') }}"
+       data-tx-mock-answer-template='{{ _tx.get("mock_answer_template", "Resposta simulada para {q}: é o mesmo código nos dois runtimes.") }}'
        data-tx-mock-detail-hosted="{{ _tx.get('mock_detail_hosted', 'mock · Foundry Hosted (api offline)') }}"
        data-tx-mock-detail-local="{{ _tx.get('mock_detail_local', 'mock · Local container (api offline)') }}"></div>
 
