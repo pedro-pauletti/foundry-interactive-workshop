@@ -10,11 +10,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/css/styles.css?v={{ request.state.static_version }}">
   <script>
-    // Apply saved theme + sidebar state before paint to avoid flicker
+    // Apply saved theme + sidebar state before paint to avoid flicker.
+    // Default is the light ("white") theme; only switch away if the user
+    // explicitly selected dark.
     (function () {
       try {
         var t = localStorage.getItem("theme");
-        if (t === "white") document.documentElement.setAttribute("data-theme", "white");
+        if (t !== "dark") document.documentElement.setAttribute("data-theme", "white");
         var s = localStorage.getItem("sidebar");
         if (s === "collapsed") document.documentElement.setAttribute("data-sidebar", "collapsed");
       } catch (e) {}

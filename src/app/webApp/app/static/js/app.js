@@ -105,9 +105,9 @@
     });
   }
 
-  let current = "dark";
+  let current = "white";
   try {
-    if (localStorage.getItem("theme") === "white") current = "white";
+    if (localStorage.getItem("theme") === "dark") current = "dark";
   } catch (e) {}
   apply(current);
 
