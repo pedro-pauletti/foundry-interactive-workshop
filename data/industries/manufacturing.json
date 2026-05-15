@@ -81,6 +81,27 @@
   "modelagem_examples": [
     {
       "keywords": [
+        "linha",
+        "capacidade",
+        "produção",
+        "producao"
+      ],
+      "base": "A capacidade de uma linha de produção depende de vários fatores como número de turnos, velocidade de cada estação, tempo de ciclo, OEE e mix de produtos. Geralmente é expressa em unidades por hora ou por turno. Para saber a capacidade exata, recomendo consultar o MES ou o supervisor da linha, que terão os dados de takt time e disponibilidade atualizados.",
+      "ft": "Linha **A3** — capacidade nominal **180 un/h** (takt 20s) · capacidade efetiva **142 un/h** (OEE 79%).\nTurno atual: **128 un/h** (gap −10% vs. meta).\nTop ofensores: microparadas na estação P4 (sensor óptico) e troca de ferramenta T7 acima do padrão SMED.\nQuer abrir OS de manutenção preditiva ou ver o detalhamento por estação?"
+    },
+    {
+      "keywords": [
+        "lote",
+        "defeito",
+        "qualidade",
+        "refugo",
+        "m-20"
+      ],
+      "base": "Em caso de lote com defeito, o procedimento padrão é segregar o material, registrar uma não-conformidade no sistema da qualidade, fazer análise de causa raiz (por exemplo Ishikawa ou 5 porquês) e abrir um plano de ação corretiva. Dependendo da severidade, pode ser necessário acionar o cliente ou fornecedor.",
+      "ft": "Lote **M-204** — segregar e bloquear no WMS (status `QA-HOLD`).\nAções imediatas conforme **SOP-QUA-007**:\n1. Abrir NC no QMS (módulo CAPA) · prazo D+1\n2. Coletar 5 amostras p/ análise dimensional + visual\n3. Notificar cliente se já expedido (rastreabilidade via lote-pai)\n4. Disposição em até 72h: retrabalho, sucata ou desvio aprovado\nQuer que eu gere o draft da NC e notifique o QA-líder?"
+    },
+    {
+      "keywords": [
         "cnc",
         "setup",
         "máquina"
@@ -92,10 +113,11 @@
       "keywords": [
         "vibra",
         "ruído",
-        "tremendo"
+        "tremendo",
+        "torno"
       ],
-      "base": "Vibração excessiva em motores pode indicar desalinhamento, desbalanceamento ou rolamento desgastado. Recomenda-se análise técnica.",
-      "ft": "Diagnóstico ISO 10816:\n• 4.5–7.1 mm/s RMS = **desalinhamento provável** (abrir OS preditiva, prazo 72h)\n• > 7.1 mm/s = **parada imediata** (SOP-MNT-018, NR-12)\nQual o valor atual lido e o tag do motor?"
+      "base": "Vibração anormal em um torno CNC pode ter várias causas: desbalanceamento da peça, ferramenta gasta, rolamento do fuso desgastado, ou problema de fixação. Recomendo parar a máquina, inspecionar visualmente e chamar a manutenção para análise de vibração.",
+      "ft": "Diagnóstico **ISO 10816** (torno CNC):\n• 4.5–7.1 mm/s RMS = **desalinhamento provável** → abrir OS preditiva (prazo 72h)\n• > 7.1 mm/s = **parada imediata** (SOP-MNT-018 · NR-12, LOTO)\nQual o valor RMS atual e o tag do equipamento? Posso já abrir a OS na CMMS."
     },
     {
       "keywords": [
@@ -103,12 +125,12 @@
         "perda",
         "performance"
       ],
-      "base": "OEE mede a eficiência geral do equipamento combinando disponibilidade, performance e qualidade. Identifique as principais perdas para melhorar.",
+      "base": "OEE mede a eficiência geral do equipamento combinando disponibilidade, performance e qualidade. Para melhorar, é preciso identificar onde estão as maiores perdas — normalmente paradas não planejadas, microparadas e refugo.",
       "ft": "Linha **A1** — meta OEE 78%, atual lida do MES. Top 3 perdas mês:\n1. Setup/Ajuste (12%) — projeto SMED em curso\n2. Microparadas (8%) — ação: poka-yoke posto P3\n3. Refugo (3%) — CEP estabilizado\nQuer drill-down por turno?"
     }
   ],
   "modelagem_default": {
-    "base": "Olá! Posso ajudar com informações técnicas gerais. O que você precisa saber?",
+    "base": "Posso tentar ajudar com informações gerais sobre operações industriais, mas não tenho contexto específico da sua planta, equipamentos ou indicadores. Em geral, o melhor caminho é consultar o supervisor da linha, o MES ou a documentação técnica do equipamento. Pode me dar mais detalhes sobre o que você precisa?",
     "ft": "Olá! Sou o assistente técnico Contoso Industries. Posso ajudar com:\n• Setup e operação de equipamentos\n• Diagnóstico preditivo e manutenção\n• OEE, TPM e indicadores de linha\n• Procedimentos de segurança (NR-10, NR-12, LOTO)\nQual o tag do equipamento ou linha?"
   },
   "evaluator_dataset": [
