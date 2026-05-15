@@ -153,42 +153,27 @@ def _retrieve(query: str, mode: str, kb: Optional[List[dict]] = None) -> List[di
 
 
 def _mock_answer(query: str, citations: List[dict], mode: str, fallback: Optional[str] = None) -> str:
+    """Plain-text assistant-style answers. The chat bubble renders via
+    ``textContent`` so we avoid Markdown (no **bold**, no leading ``#``)."""
     if not citations:
         return fallback or "Não encontrei informação sobre isso na base de conhecimento. Pode reformular a pergunta?"
-    refs = ", ".join(f"[{c['id']}]" for c in citations)
 
     if mode == "simple":
-        # Resposta curta: trecho do único documento.
+        # Resposta curta e direta, baseada no único documento recuperado.
         c = citations[0]
-        return (
-            f"Com base no documento mais relevante:\n\n"
-            f"{c['trecho']}\n\n"
-            f"Fonte: [{c['id']}]"
-        )
+        return f"{c['trecho']}\n\nFonte: [{c['id']}]"
 
     if mode == "semantic":
-        # Resposta de 2 parágrafos sintetizando os dois documentos.
-        parts = [c["trecho"] for c in citations[:2]]
-        return (
-            "Combinando os documentos mais relevantes (vetor + reranker):\n\n"
-            f"• {parts[0]}\n\n"
-            f"• {parts[1] if len(parts) > 1 else parts[0]}\n\n"
-            f"Fontes: {refs}"
-        )
+        # Síntese fluida de 2 documentos, sem preâmbulo nem bullets.
+        a, b = citations[0], (citations[1] if len(citations) > 1 else citations[0])
+        refs = ", ".join(f"[{c['id']}]" for c in citations[:2])
+        return f"{a['trecho']}\n\n{b['trecho']}\n\nFontes: {refs}"
 
-    # agentic: planejamento + 3 documentos + síntese final.
-    bullets = "\n".join(f"• **{c['titulo']}** — {c['trecho']}" for c in citations[:3])
-    return (
-        "**Plano de busca (agentic):**\n"
-        "1. Decompor a pergunta em sub-tópicos.\n"
-        "2. Consultar múltiplos índices em paralelo.\n"
-        "3. Fundir resultados por score e relevância semântica.\n\n"
-        "**Evidências recuperadas:**\n"
-        f"{bullets}\n\n"
-        "**Síntese:** as fontes acima cobrem os principais aspectos da sua pergunta — "
-        "consolide priorizando o documento de maior score e use os demais como contexto complementar.\n\n"
-        f"Fontes: {refs}"
-    )
+    # agentic: resposta consolidada usando até 3 fontes, em prosa contínua.
+    paras = [c["trecho"] for c in citations[:3]]
+    refs = ", ".join(f"[{c['id']}]" for c in citations[:3])
+    body = "\n\n".join(paras)
+    return f"{body}\n\nFontes: {refs}"
 
 
 # ============================================================================
