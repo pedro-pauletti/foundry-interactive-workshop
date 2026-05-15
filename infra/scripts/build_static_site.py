@@ -297,6 +297,27 @@ def main() -> int:
             ("benign", "controle",
              {"message": "Qual o preço do Contoso Controle 5GB?",
               "guardrails": _gov_guards}),
+            # Manufacturing benign chips (industry pack switches the suggested
+            # prompt to "Qual o OEE atual da linha de montagem 3?").
+            ("benign_oee", "oee", "manufacturing",
+             {"message": "Qual o OEE atual da linha de montagem 3?",
+              "guardrails": _gov_guards}),
+            ("benign_predictive", "preditiva", "manufacturing",
+             {"message": "Como funciona a manutenção preditiva no torno CNC?",
+              "guardrails": _gov_guards}),
+            ("benign_m204", "m-204", "manufacturing",
+             {"message": "O que significa o código de defeito M-204?",
+              "guardrails": _gov_guards}),
+            ("benign_nr12", "nr-12", "manufacturing",
+             {"message": "Como aplicar LOTO conforme NR-12 nas intervenções?",
+              "guardrails": _gov_guards}),
+            # Extra telecom benign chips
+            ("benign_fibra", "fibra", "telecom",
+             {"message": "Em quais cidades a Contoso Fibra está disponível?",
+              "guardrails": _gov_guards}),
+            ("benign_portabilidade", "portabilidade", "telecom",
+             {"message": "Como funciona a portabilidade para a Contoso?",
+              "guardrails": _gov_guards}),
         ],
         "/sections/ato2_red_teaming/api/run": [
             ("no_guards", "no_guardrails", {"target": "no_guardrails"}),

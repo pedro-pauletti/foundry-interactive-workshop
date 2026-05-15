@@ -133,6 +133,52 @@ _BENIGN_RESPONSES = [
 ]
 
 
+# Intent-aware benign replies: keep the demo deterministic and make sure the
+# mock answer makes sense for the suggested chips (telecom + manufacturing).
+# Order matters — first keyword hit wins.
+_BENIGN_INTENTS: list[tuple[tuple[str, ...], str]] = [
+    # --- Manufacturing chips ---
+    (("oee", "linha 3", "linha3"),
+     "OEE de ontem · linha 3 = **76,2%** (Disponibilidade 90% · Performance 87% · "
+     "Qualidade 97,2%). Maior perda: 28min em setup do torno CNC-3. Fonte: MES."),
+    (("manutenção preditiva", "manutencao preditiva", "torno cnc"),
+     "A manutenção preditiva do torno CNC-3 usa vibração (acelerômetro) + corrente do "
+     "motor, com modelo treinado em 12 meses de histórico. Alerta dispara em ≥0,8 g RMS "
+     "no eixo Z — janela típica de 72h antes da falha."),
+    (("m-204", "m204", "defeito"),
+     "**M-204** = falha de concentricidade no eixo usinado (>0,05mm). Ação padrão: "
+     "isolar o lote, reverificar o setup do torno CNC-3 e abrir RNC no MES."),
+    (("nr-12", "nr12", "loto", "epi"),
+     "Toda intervenção em equipamento energizado exige **LOTO** conforme NR-10/NR-12. "
+     "Cortinas de luz, proteções fixas e parada de emergência <600 ms são obrigatórias."),
+    (("aql", "amostragem", "inspeção embalagem", "inspecao embalagem"),
+     "Inspeção por amostragem **AQL 1.0** conforme NBR 5426 nível II — aceita até "
+     "7 NC em amostra de 200 unidades."),
+    # --- Telecom chips ---
+    (("controle 5gb", "controle 5 gb", "controle"),
+     "Contoso Controle 5GB custa **R$ 54,99/mês** com ligações ilimitadas e WhatsApp "
+     "grátis. Quer que eu valide cobertura no seu CEP?"),
+    (("fibra", "500mbps", "1gb", "cobertura"),
+     "Contoso Fibra está disponível em mais de **4.000 municípios**. Plano 500 Mbps "
+     "= R$ 119,90/mês, Wi-Fi 6 incluso, instalação gratuita."),
+    (("portabilidade", "portar"),
+     "Portabilidade Contoso leva até 3 dias úteis · gratuita · CPF do titular + última "
+     "fatura da operadora atual."),
+    (("fatura", "boleto", "segunda via", "2a via"),
+     "Pra 2ª via da fatura: app Contoso → *Minhas Faturas* → escolher o mês → "
+     "*Compartilhar PDF*. Posso enviar pelo WhatsApp cadastrado?"),
+]
+
+
+def _benign_reply(message: str, fallback: List[str]) -> str:
+    """Pick a benign reply that actually relates to the user's prompt."""
+    msg = (message or "").lower()
+    for keywords, reply in _BENIGN_INTENTS:
+        if any(k in msg for k in keywords):
+            return reply
+    return random.choice(fallback) if fallback else _BENIGN_RESPONSES[0]
+
+
 def _evaluate_guardrails_real(text: str, enabled: List[str], stage: str = "input") -> Optional[Dict]:
     """Real evaluation: Content Safety (analyze_text) + Prompt Shields (REST) + PII regex.
     Always overlays the heuristic so explicit attacks are caught even if a remote
@@ -428,7 +474,7 @@ async def chat(payload: GuardChatRequest, request: Request) -> GuardChatResponse
         raw = _generate_real(payload.message, system_prompt=sys_prompt)
     if raw is None:
         time.sleep(1.4 + random.uniform(0, 0.7))
-        raw = random.choice(benign)
+        raw = _benign_reply(payload.message, benign)
         # Keep source="real" if the input guardrail call was real — a model
         # refusal/content-filter is itself a real guardrail signal.
 
