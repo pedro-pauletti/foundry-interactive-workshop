@@ -351,6 +351,9 @@ async def inject_menu(request: Request, call_next):
     request.state.real_mode_disabled = real_mode_disabled()
     request.state.static_version = STATIC_VERSION
     request.state.static_demo = os.getenv("STATIC_BUILD", "0").lower() in ("1", "true", "yes")
+    request.state.pages_base_url = os.getenv("PAGES_BASE_URL", "").rstrip("/")
+    request.state.default_lang = default_lang()
+    request.state.default_industry = default_industry()
     return await call_next(request)
 
 

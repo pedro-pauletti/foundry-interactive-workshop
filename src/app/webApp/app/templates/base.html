@@ -27,6 +27,11 @@
     // When set, intercept POSTs / streaming POSTs to per-section APIs and
     // serve pre-captured mock fixtures so every demo still produces a result.
     window.STATIC_DEMO = {{ 'true' if request.state.static_demo else 'false' }};
+    window.STATIC_LANG = "{{ request.state.lang or 'pt' }}";
+    window.STATIC_INDUSTRY = "{{ request.state.industry or 'telecom' }}";
+    window.STATIC_REPO_BASE = "{{ request.state.pages_base_url or '' }}";
+    window.STATIC_DEFAULT_LANG = "{{ request.state.default_lang or 'pt' }}";
+    window.STATIC_DEFAULT_INDUSTRY = "{{ request.state.default_industry or 'telecom' }}";
     (function () {
       if (!window.STATIC_DEMO) return;
       var origFetch = window.fetch.bind(window);
@@ -84,11 +89,15 @@
         }).catch(function () { dispatchCache[pathOnly] = null; return null; });
       }
       function pickFixture(pathOnly, init, isStream) {
-        var defaultFixture = pathOnly + (isStream ? '.sample.sse' : '.sample.json');
+        // Variant snapshots live under <repo>/i/<lang>/<industry>/sections/...
+        // but the section fixtures are written only once at the root. Strip
+        // the variant prefix here so all variants reuse the same captures.
+        var fixturePath = pathOnly.replace(/\/i\/[a-z]{2}\/[a-z0-9_]+\//, '/');
+        var defaultFixture = fixturePath + (isStream ? '.sample.sse' : '.sample.json');
         var bodyStr = '';
         try { if (init && init.body) bodyStr = String(init.body).toLowerCase(); } catch (e) {}
         if (!bodyStr) return Promise.resolve(defaultFixture);
-        return getDispatch(pathOnly).then(function (entries) {
+        return getDispatch(fixturePath).then(function (entries) {
           if (!entries || !Array.isArray(entries)) return defaultFixture;
           for (var i = 0; i < entries.length; i++) {
             var e = entries[i];
@@ -146,6 +155,42 @@
         } catch (e) {}
         return origFetch(input, init);
       };
+
+      // ---- Variant switcher (language / industry) ----------------------
+      // On Pages there is no backend, so the POST /api/{language,industry}
+      // handlers in app.js can't update the cookie. Instead, navigate to
+      // the pre-rendered variant under <repo>/i/<lang>/<industry>/...
+      function _variantNavigate(lang, industry) {
+        var base = window.STATIC_REPO_BASE || '';
+        var defLang = window.STATIC_DEFAULT_LANG || 'pt';
+        var defInd = window.STATIC_DEFAULT_INDUSTRY || 'telecom';
+        var path = window.location.pathname;
+        if (base && path.indexOf(base) === 0) path = path.slice(base.length);
+        path = path.replace(/^\/i\/[a-z]{2}\/[a-z0-9_]+/, '');
+        if (!path) path = '/';
+        var prefix = (lang === defLang && industry === defInd)
+          ? '' : '/i/' + lang + '/' + industry;
+        // Ensure trailing slash on directory-style routes for Pages.
+        var target = base + prefix + path;
+        if (target.indexOf('.') === -1 && target.slice(-1) !== '/') target += '/';
+        window.location.href = target;
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        var indSel = document.getElementById('industry-select');
+        var lngSel = document.getElementById('language-select');
+        if (indSel) {
+          indSel.addEventListener('change', function (e) {
+            e.stopImmediatePropagation();
+            _variantNavigate(window.STATIC_LANG, indSel.value);
+          }, true);
+        }
+        if (lngSel) {
+          lngSel.addEventListener('change', function (e) {
+            e.stopImmediatePropagation();
+            _variantNavigate(lngSel.value, window.STATIC_INDUSTRY);
+          }, true);
+        }
+      });
     })();
   </script>
 </head>

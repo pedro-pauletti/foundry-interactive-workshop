@@ -63,6 +63,26 @@ def _rewrite_html(html: str, base_url: str) -> str:
     return html
 
 
+def _rewrite_html_variant(html: str, repo_base: str, variant_base: str) -> str:
+    """Rewrite for variant snapshots under ``/i/<lang>/<industry>/``.
+
+    All section/api/route URLs get the variant prefix so the user stays on
+    their localized snapshot. Static assets (``/static/...``) are rewritten
+    to the repo root so we don't have to duplicate the CSS/JS tree per
+    variant.
+    """
+    repo = (repo_base or "").rstrip("/")
+    variant = (variant_base or "").rstrip("/")
+    if not variant:
+        return _rewrite_html(html, repo)
+    # 1. Standard rewrite with the variant prefix.
+    html = re.sub(r'(href|src|action)="/(?!/)', rf'\1="{variant}/', html)
+    html = re.sub(r"""fetch\((["'])/(?!/)""", rf"fetch(\1{variant}/", html)
+    # 2. Point /static/ back to the repo root so we share assets.
+    html = html.replace(f'{variant}/static/', f'{repo}/static/')
+    return html
+
+
 def _rewrite_js(js: str, base_url: str) -> str:
     if not base_url:
         return js
@@ -486,6 +506,67 @@ def main() -> int:
                    json.dumps(entries, ensure_ascii=False))
 
     print(f"[build] captured {captured} demo API fixtures")
+
+    # 3c. Build per-(language × industry) variant snapshots under
+    # ``dist/i/<lang>/<industry>/`` so the sidebar selectors actually take
+    # the user to a re-rendered version of the same page in the chosen
+    # language and industry pack. Section fixtures stay at root — the
+    # base.html shim strips the ``/i/<lang>/<industry>/`` prefix before
+    # looking them up, and static assets are shared via _rewrite_html_variant.
+    from fastapi.testclient import TestClient  # type: ignore
+    import app as _webapp_module  # type: ignore
+
+    langs = [l["code"] for l in _webapp_module.list_languages()]
+    inds = [i["slug"] for i in _webapp_module.list_industries()]
+    try:
+        default_l = _webapp_module.default_lang()
+    except Exception:
+        default_l = "pt"
+    try:
+        default_i = _webapp_module.default_industry()
+    except Exception:
+        default_i = "telecom"
+
+    variant_pages = 0
+    for lang in langs:
+        for industry in inds:
+            if lang == default_l and industry == default_i:
+                continue  # already rendered at root
+            variant_root = out_dir / "i" / lang / industry
+            variant_base = (f"{base_url}/i/{lang}/{industry}"
+                            if base_url else f"/i/{lang}/{industry}")
+            # Fresh TestClient pinned to the variant's cookies.
+            vclient = TestClient(_webapp_module.app,
+                                 cookies={"lang": lang, "industry": industry,
+                                          "demo_mode": "mock"})
+            for url, dst_rel in [(u, p.relative_to(out_dir)) for u, p in routes]:
+                try:
+                    resp = vclient.get(url, follow_redirects=True)
+                    if resp.status_code != 200:
+                        continue
+                    html = _rewrite_html_variant(resp.text, base_url, variant_base)
+                    _write(variant_root / dst_rel, html)
+                    variant_pages += 1
+                except Exception as exc:
+                    print(f"[build] WARN variant {lang}/{industry} {url}: {exc!r}",
+                          file=sys.stderr)
+            # Per-variant lightweight API stubs (so the sidebar shows the
+            # right "current" selection after the navigation).
+            try:
+                _write(variant_root / "api/demo-mode",
+                       json.dumps({"mode": "mock", "default": "mock",
+                                   "real_disabled": True}, ensure_ascii=False))
+                _write(variant_root / "api/industry",
+                       json.dumps(vclient.get("/api/industry").json(),
+                                  ensure_ascii=False))
+                _write(variant_root / "api/language",
+                       json.dumps(vclient.get("/api/language").json(),
+                                  ensure_ascii=False))
+            except Exception as exc:
+                print(f"[build] WARN variant {lang}/{industry} stubs: {exc!r}",
+                      file=sys.stderr)
+    print(f"[build] rendered {variant_pages} variant pages "
+          f"({len(langs)}×{len(inds)} languages×industries)")
 
     # 4. Pages housekeeping.
     _write(out_dir / ".nojekyll", "")
