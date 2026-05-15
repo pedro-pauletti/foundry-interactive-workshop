@@ -139,6 +139,10 @@ def main() -> int:
         "api/demo-mode": {"mode": "mock", "default": "mock", "real_disabled": True},
         "api/industry": client.get("/api/industry").json(),
         "api/language": client.get("/api/language").json(),
+        # Per-section API stubs — kept up to date when the section ships an
+        # internal listing endpoint that the JS calls on page load.
+        "sections/ato1_hosted_agents/api/agents":
+            client.get("/sections/ato1_hosted_agents/api/agents").json(),
     }
     for rel, payload in api_stubs.items():
         # Write as a plain file (no extension) so the existing JS calls to

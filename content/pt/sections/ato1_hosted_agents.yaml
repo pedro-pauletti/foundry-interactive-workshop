@@ -25,3 +25,7 @@ texts:
   network_error_prefix: "Erro de rede: "
   source_real_title: Real
   source_sim_title: Simulação local
+  mock_notice: "Modo demonstração estático — sem backend Foundry/container. Resposta gerada localmente para mostrar o fluxo."
+  mock_answer_template: "Resposta simulada para '{q}': este é o MESMO código de agente, executado tanto no container local quanto no Foundry Hosted Agent. A resposta seria idêntica nos dois runtimes — o que muda é quem opera (você × Foundry), a latência e a observabilidade."
+  mock_detail_hosted: "mock · Foundry Hosted (api offline)"
+  mock_detail_local: "mock · Local container (api offline)"

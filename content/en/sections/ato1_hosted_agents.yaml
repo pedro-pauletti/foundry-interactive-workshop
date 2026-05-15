@@ -25,3 +25,7 @@ texts:
   network_error_prefix: "Network error: "
   source_real_title: Real
   source_sim_title: Local simulation
+  mock_notice: "Static demo mode — no Foundry/container backend. Response generated locally to illustrate the flow."
+  mock_answer_template: "Simulated answer for '{q}': this is the SAME agent code, executed both in the local container and the Foundry Hosted Agent. The answer would be identical in both runtimes — what changes is the operator (you × Foundry), latency, and observability."
+  mock_detail_hosted: "mock · Foundry Hosted (api offline)"
+  mock_detail_local: "mock · Local container (api offline)"
