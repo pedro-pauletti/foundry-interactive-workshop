@@ -343,6 +343,28 @@ def main() -> int:
             ("no_guards", "no_guardrails", {"target": "no_guardrails"}),
             ("with_guards", "with_guardrails", {"target": "with_guardrails"}),
         ],
+        # RAG retrieval modes — dispatch by `"mode":"..."` substring so each
+        # strategy toggle returns a visibly different answer (top-k, scores,
+        # method label) instead of the same canned response.
+        "/sections/ato1_rag_chat/api/chat": [
+            ("simple", '"mode":"simple"',
+             {"message": "Quais opções de banda larga fibra acima de 500Mbps?",
+              "mode": "simple", "dataset": "auto", "previous_response_id": None}),
+            ("semantic", '"mode":"semantic"',
+             {"message": "Quais opções de banda larga fibra acima de 500Mbps?",
+              "mode": "semantic", "dataset": "auto", "previous_response_id": None}),
+            ("agentic", '"mode":"agentic"',
+             {"message": "Quais opções de banda larga fibra acima de 500Mbps?",
+              "mode": "agentic", "dataset": "auto", "previous_response_id": None}),
+        ],
+        "/sections/ato1_rag_chat/api/evaluate": [
+            ("simple", '"mode":"simple"',
+             {"mode": "simple", "dataset": "auto"}),
+            ("semantic", '"mode":"semantic"',
+             {"mode": "semantic", "dataset": "auto"}),
+            ("agentic", '"mode":"agentic"',
+             {"mode": "agentic", "dataset": "auto"}),
+        ],
         # A2A orchestrator (SSE) — match the chips on this section.
         # First-match wins; keep "langgraph" before "fibra"/"contratar".
         "/sections/ato3_custo_integracao/api/orchestrate/stream": [
