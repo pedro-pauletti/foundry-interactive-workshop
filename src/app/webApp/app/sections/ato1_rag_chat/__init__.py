@@ -123,31 +123,72 @@ def _retrieve(query: str, mode: str, kb: Optional[List[dict]] = None) -> List[di
     for doc in source_kb:
         text = (doc["titulo"] + " " + doc["trecho"] + " " + " ".join(doc["tags"])).lower()
         score = sum(1 for w in q.split() if len(w) > 2 and w in text)
-        if score > 0:
-            scored.append((score, doc))
+        scored.append((score, doc))
     scored.sort(key=lambda x: -x[0])
+    kw_hits = [s for s in scored if s[0] > 0]
+
     if mode == "simple":
-        # keyword only, top-2, no rerank
-        return [dict(d, score=round(0.4 + s * 0.1, 2), method="keyword") for s, d in scored[:2]]
+        # keyword (BM25) — apenas 1 doc, sem rerank, score modesto.
+        if not kw_hits:
+            return []
+        s, d = kw_hits[0]
+        return [dict(d, score=round(0.42 + s * 0.06, 2), method="keyword")]
+
     if mode == "semantic":
-        # simulate vector + reranker — boost score, top-3
-        return [dict(d, score=round(0.65 + s * 0.08, 2), method="hybrid+rerank") for s, d in scored[:3]]
-    # agentic: query planning → multiple sub-queries → fusion → top-3
-    fused = [dict(d, score=round(0.78 + s * 0.06, 2), method="agentic-fusion") for s, d in scored[:3]]
-    return fused
+        # vetor + reranker — recupera 2 docs (faz fallback p/ KB quando keyword falha).
+        pool = kw_hits if len(kw_hits) >= 2 else (kw_hits + [t for t in scored if t not in kw_hits])
+        top = pool[:2]
+        return [
+            dict(d, score=round(0.78 + max(s, 0) * 0.05 - i * 0.04, 2), method="hybrid+rerank")
+            for i, (s, d) in enumerate(top)
+        ]
+
+    # agentic: query planning → sub-queries → fusion → sempre 3 docs.
+    pool = kw_hits if len(kw_hits) >= 3 else (kw_hits + [t for t in scored if t not in kw_hits])
+    top = pool[:3]
+    return [
+        dict(d, score=round(0.86 + max(s, 0) * 0.04 - i * 0.03, 2), method="agentic-fusion")
+        for i, (s, d) in enumerate(top)
+    ]
 
 
 def _mock_answer(query: str, citations: List[dict], mode: str, fallback: Optional[str] = None) -> str:
     if not citations:
         return fallback or "Não encontrei informação sobre isso na base de conhecimento. Pode reformular a pergunta?"
-    intro = {
-        "simple": "Com base no documento mais relevante:",
-        "semantic": "Combinando os documentos relevantes da base:",
-        "agentic": "Após decompor sua pergunta e consultar múltiplas fontes:",
-    }.get(mode, "Resposta:")
-    body = " ".join(c["trecho"] for c in citations[:2])
     refs = ", ".join(f"[{c['id']}]" for c in citations)
-    return f"{intro}\n\n{body}\n\nFontes: {refs}"
+
+    if mode == "simple":
+        # Resposta curta: trecho do único documento.
+        c = citations[0]
+        return (
+            f"Com base no documento mais relevante:\n\n"
+            f"{c['trecho']}\n\n"
+            f"Fonte: [{c['id']}]"
+        )
+
+    if mode == "semantic":
+        # Resposta de 2 parágrafos sintetizando os dois documentos.
+        parts = [c["trecho"] for c in citations[:2]]
+        return (
+            "Combinando os documentos mais relevantes (vetor + reranker):\n\n"
+            f"• {parts[0]}\n\n"
+            f"• {parts[1] if len(parts) > 1 else parts[0]}\n\n"
+            f"Fontes: {refs}"
+        )
+
+    # agentic: planejamento + 3 documentos + síntese final.
+    bullets = "\n".join(f"• **{c['titulo']}** — {c['trecho']}" for c in citations[:3])
+    return (
+        "**Plano de busca (agentic):**\n"
+        "1. Decompor a pergunta em sub-tópicos.\n"
+        "2. Consultar múltiplos índices em paralelo.\n"
+        "3. Fundir resultados por score e relevância semântica.\n\n"
+        "**Evidências recuperadas:**\n"
+        f"{bullets}\n\n"
+        "**Síntese:** as fontes acima cobrem os principais aspectos da sua pergunta — "
+        "consolide priorizando o documento de maior score e use os demais como contexto complementar.\n\n"
+        f"Fontes: {refs}"
+    )
 
 
 # ============================================================================
@@ -311,20 +352,32 @@ async def chat(payload: ChatRequest, request: Request) -> ChatResponse:
                 content = real_answer
                 source = "real"
 
+    synthetic_latency_ms: Optional[int] = None
     if content is None:
         # Mock path (também usado quando real falha)
         citations_raw = _retrieve(payload.message, payload.mode, kb=_kb_for(request))
-        delay = {"simple": 1.0, "semantic": 1.8, "agentic": 2.8}.get(payload.mode, 1.6)
-        time.sleep(delay + random.uniform(0, 0.6))
+        # Latência sintética por estratégia — reflete o custo real esperado:
+        #   simple   ~120ms  (keyword puro, sem rerank)
+        #   semantic ~520ms  (vetor + reranker)
+        #   agentic  ~1900ms (planejamento + múltiplas chamadas + fusão)
+        lat_band = {
+            "simple":   (90, 180),
+            "semantic": (420, 680),
+            "agentic":  (1700, 2300),
+        }.get(payload.mode, (400, 800))
+        synthetic_latency_ms = random.randint(*lat_band)
+        if not os.getenv("STATIC_BUILD"):
+            time.sleep(synthetic_latency_ms / 1000.0)
         content = _mock_answer(payload.message, citations_raw, payload.mode, fallback=_fallback_for(request))
 
     citations = [Citation(**c) for c in citations_raw]
+    latency_ms = synthetic_latency_ms if synthetic_latency_ms is not None else int((time.time() - t0) * 1000)
     return ChatResponse(
         response_id=f"resp-{int(time.time()*1000)}",
         content=content,
         citations=citations,
         mode=payload.mode,
-        latency_ms=int((time.time() - t0) * 1000),
+        latency_ms=latency_ms,
         source=source,
     )
 
@@ -453,7 +506,8 @@ async def evaluate_rag(payload: EvaluationRequest, request: Request) -> Evaluati
     use_real = is_real(request)
     if not use_real:
         # Make the demo feel like a real evaluator suite is running.
-        await asyncio.sleep(2.8 + random.uniform(0, 1.0))
+        if not os.getenv("STATIC_BUILD"):
+            await asyncio.sleep(2.8 + random.uniform(0, 1.0))
     per_q: List[PerQuestionResult] = []
 
     # When the user picks a specific dataset, only run questions that target it.

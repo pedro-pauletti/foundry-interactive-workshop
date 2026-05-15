@@ -108,6 +108,19 @@
             var pathOnly = url.split('?')[0];
             var initialDelay = isStream ? (200 + Math.floor(Math.random() * 200))
                                         : (450 + Math.floor(Math.random() * 600));
+            // RAG demo: latência percebida deve variar por estratégia.
+            if (/\/ato1_rag_chat\/api\/chat(\?|$)/.test(pathOnly)) {
+              try {
+                var _body = (init && init.body) ? String(init.body).toLowerCase() : '';
+                if (_body.indexOf('"mode":"simple"') !== -1) {
+                  initialDelay = 90 + Math.floor(Math.random() * 90);
+                } else if (_body.indexOf('"mode":"semantic"') !== -1) {
+                  initialDelay = 420 + Math.floor(Math.random() * 260);
+                } else if (_body.indexOf('"mode":"agentic"') !== -1) {
+                  initialDelay = 1700 + Math.floor(Math.random() * 600);
+                }
+              } catch (_e) { /* keep default */ }
+            }
             return sleep(initialDelay).then(function () {
               return pickFixture(pathOnly, init, isStream).then(function (fixture) {
                 return origFetch(fixture, { method: 'GET' }).then(function (r) {
