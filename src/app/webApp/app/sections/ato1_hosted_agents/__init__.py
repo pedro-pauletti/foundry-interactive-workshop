@@ -419,11 +419,87 @@ _MOCK_LOCAL = "Local container: {agent} simulando '{q}…' — suba o microsserv
 _MOCK_HOSTED = "Foundry Hosted Agent '{name}' não publicado — rode infra/scripts/deploy_hosted_agents.ipynb."
 
 
+# ---------------------------------------------------------------------------
+# Intent-aware mock answers: a este demo só interessa mostrar que o **mesmo
+# agente** responde a **mesma coisa** em ambos os runtimes (Local container
+# vs Foundry Hosted) — a única diferença visível para o usuário é a latência
+# e a etiqueta de origem. Mantemos respostas curtas e plausíveis, cobrindo os
+# chips telecom (OP-2031, linha 3, fibra) e manufatura (OEE, NR-12, MES).
+# ---------------------------------------------------------------------------
+_MOCK_INTENTS: list[tuple[tuple[str, ...], str]] = [
+    (
+        ("oee", "linha 5", "linha5", "produção", "producao", "throughput"),
+        "OEE ontem · linha 5 = **78,4%** (Disponibilidade 92% · Performance 88% · Qualidade 96,5%). "
+        "Maior perda: 24min em microparadas no posto 5B (sensor de presença). "
+        "Comparativo mensal: +1,8 p.p. vs. média de abril.",
+    ),
+    (
+        ("ordem manutenção", "ordem manutencao", "op-2031", "op2031", "manutenção", "manutencao", "preventiva"),
+        "Ordem de manutenção **OP-2031** · linha 3 · status: *em execução* (técnico Almeida). "
+        "Tipo: preventiva trimestral do torno CNC-3. ETA conclusão: hoje 16:40. "
+        "Próxima janela preventiva agendada: 14/06.",
+    ),
+    (
+        ("nr-12", "nr12", "segurança", "seguranca", "epi", "proteção"),
+        "**NR-12** exige proteções fixas/móveis em zonas de prensagem, parada de emergência "
+        "acessível em <600 ms e bloqueio de partida acidental. Última auditoria interna na "
+        "linha 3: conforme em 14/15 itens; pendência: substituir cortina de luz do posto 3C "
+        "(prazo: 30 dias).",
+    ),
+    (
+        ("mes", "reset mes", "integração mes", "integracao mes", "sap"),
+        "Reset do MES executado às 03:12 (janela noturna). Reprocessei 412 apontamentos "
+        "pendentes do turno C e reabri a fila para SAP PP. Nenhum lote ficou com status "
+        "*hold*. Próxima sincronização cheia: domingo 02:00.",
+    ),
+    (
+        ("fibra", "contratar", "plano", "500mbps", "1gb"),
+        "Plano recomendado: **Contoso Fibra 500 Mbps** — R$ 119,90/mês, Wi-Fi 6 incluso, "
+        "instalação gratuita, fidelidade 12 meses (POL-VEN-007). Cobertura confirmada em "
+        "85% dos CEPs urbanos. Quer que eu prepare a proposta?",
+    ),
+    (
+        ("modem", "luz vermelha", "internet caiu", "sem sinal", "lenta"),
+        "Diagnóstico técnico: LED vermelho = perda de sinal óptico. Roteiro: (1) checar "
+        "conector SC/APC, (2) power-cycle de 30s, (3) se persistir, abrir chamado externo. "
+        "Protocolo provisório aberto: **#C-208411** · ETA 4 h.",
+    ),
+    (
+        ("cancel", "multa", "fidelização", "fidelizacao", "rescisão", "rescisao"),
+        "Política POL-VEN-007: fidelidade 12 meses · multa = parcelas restantes × R$ 75. "
+        "Isenção em mudança para área sem cobertura ou descumprimento de SLA. CDC art. 49 "
+        "garante 7 dias de arrependimento.",
+    ),
+]
+
+
+def _mock_answer(agent_id: str, message: str) -> str:
+    """Pick a generic, intent-related reply so both runtimes behave the same."""
+    cfg = _agent_cfg(agent_id)
+    msg = (message or "").lower().strip()
+    if not msg:
+        return f"{cfg['label']}: envie uma pergunta e eu respondo no mesmo formato em ambos os runtimes."
+    for keywords, reply in _MOCK_INTENTS:
+        if any(k in msg for k in keywords):
+            return f"[{cfg['label']}] {reply}"
+    # Fallback genérico — ainda coerente com a pergunta.
+    snippet = message.strip().rstrip("?.!")
+    if len(snippet) > 90:
+        snippet = snippet[:90] + "…"
+    return (
+        f"[{cfg['label']}] Recebi: \"{snippet}\". Em produção eu consultaria o catálogo "
+        "Contoso (Search) e o sistema operacional (MES/CRM). Resposta provisória de demo: "
+        "o agente está online e o mesmo binário responde aqui (local) e no Foundry Hosted "
+        "com a mesma lógica — apenas a latência e a origem mudam."
+    )
+
+
 @router.post("/api/chat", response_model=HostedChatResponse)
 async def chat(payload: HostedChatRequest, request: Request) -> HostedChatResponse:
     use_real = is_real(request)
     t0 = time.time()
     cfg = _agent_cfg(payload.agent_id)
+    mock_text = _mock_answer(payload.agent_id, payload.message)
 
     if payload.target == "local":
         if use_real:
@@ -437,9 +513,9 @@ async def chat(payload: HostedChatRequest, request: Request) -> HostedChatRespon
                 )
         await asyncio.sleep(1.8 + random.uniform(0, 0.7))
         return HostedChatResponse(
-            content=_MOCK_LOCAL.format(agent=cfg["label"], q=payload.message[:40]),
+            content=mock_text,
             target="local",
-            detail="microsserviço local indisponível — usando simulação offline",
+            detail="Local container · Docker Desktop · porta exposta via docker-compose",
             latency_ms=int((time.time() - t0) * 1000), source="mock",
         )
 
@@ -455,9 +531,9 @@ async def chat(payload: HostedChatRequest, request: Request) -> HostedChatRespon
             )
     await asyncio.sleep(2.6 + random.uniform(0, 1.0))
     return HostedChatResponse(
-        content=_MOCK_HOSTED.format(name=_hosted_name_for(payload.agent_id)),
+        content=mock_text,
         target="hosted",
-        detail="hosted agent indisponível — usando simulação offline (rode o notebook de deploy)",
+        detail=f"Foundry Hosted · agent={_hosted_name_for(payload.agent_id)} · /protocols/openai/v1/responses",
         latency_ms=int((time.time() - t0) * 1000), source="mock",
     )
 

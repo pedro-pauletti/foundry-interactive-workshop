@@ -237,6 +237,39 @@ def main() -> int:
     # MUST be lowercase and should appear verbatim in the user's prompt.
     _gov_guards = ["content_safety", "prompt_shield", "pii", "groundedness"]
     dispatch_samples = {
+        "/sections/ato1_hosted_agents/api/chat": [
+            # Same agent · two runtimes — fixtures discriminate by INTENT
+            # only (message content). The frontend overrides the runtime
+            # label client-side so hosted/local toggle still feels alive.
+            # Order matters: most specific intent keywords first.
+            ("oee", "oee",
+             {"message": "Qual o OEE de ontem na linha 5?", "target": "hosted",
+              "agent_id": "mafw", "session_id": None}),
+            ("linha5", "linha 5",
+             {"message": "Qual o OEE de ontem na linha 5?", "target": "hosted",
+              "agent_id": "mafw", "session_id": None}),
+            ("ordem", "op-2031",
+             {"message": "Status da ordem de manutenção OP-2031 na linha 3?",
+              "target": "hosted", "agent_id": "mafw", "session_id": None}),
+            ("ordem_alt", "ordem manuten",
+             {"message": "Status da ordem de manutenção OP-2031 na linha 3?",
+              "target": "hosted", "agent_id": "mafw", "session_id": None}),
+            ("nr12", "nr-12",
+             {"message": "Resumo das exigências da NR-12 para a linha 3.",
+              "target": "hosted", "agent_id": "mafw", "session_id": None}),
+            ("nr12_alt", "nr12",
+             {"message": "Resumo das exigências da NR-12 para a linha 3.",
+              "target": "hosted", "agent_id": "mafw", "session_id": None}),
+            ("mes", "reset mes",
+             {"message": "Faz o reset do MES e me dá o status.", "target": "hosted",
+              "agent_id": "mafw", "session_id": None}),
+            ("fibra", "fibra",
+             {"message": "Quero contratar fibra 500Mbps", "target": "hosted",
+              "agent_id": "mafw", "session_id": None}),
+            ("suporte", "modem",
+             {"message": "Minha internet caiu, modem com luz vermelha. O que faço?",
+              "target": "hosted", "agent_id": "mafw", "session_id": None}),
+        ],
         "/sections/ato1_modelagem/api/compare": [
             # Telecom chips (Pages default industry):
             ("fibra", "fibra", "telecom", {"message": "Quero contratar fibra de 500Mbps"}),
