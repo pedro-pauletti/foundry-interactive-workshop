@@ -1,0 +1,35 @@
+# VCS / IDE
+.git
+.gitignore
+.vscode
+.github
+
+# Workshop artifacts not needed in the webApp image
+.azure
+infra
+data
+scripts
+docs
+!data/contoso
+!data/industries
+
+# Notebooks / other service folders (each service has its own image)
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.ipynb_checkpoints
+
+# Secrets — never copy any real .env into the image
+**/.env
+**/.env.*
+!**/example.env
+
+# Other top-level service folders so webApp's image stays small
+src/app/agentOperations
+src/app/cosmosOperations
+src/app/searchOperations
+src/foundry
+src/search
+src/fabric

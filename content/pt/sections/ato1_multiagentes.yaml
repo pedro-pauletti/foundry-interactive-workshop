@@ -1,0 +1,48 @@
+texts:
+  intro_title: "Microsoft Agent Framework (MAF) + Foundry Workflows"
+  intro_lede: >-
+    O <strong>Microsoft Agent Framework</strong> é o SDK pro-code que padroniza os
+    builders de orquestração — <em>sequential, concurrent, handoff, group chat e
+    magentic</em> — e roda local ou em qualquer host. Os <strong>Foundry Workflows</strong>
+    expressam a mesma topologia de forma declarativa (YAML), versionável no Foundry Projects.
+    Ambos cobrem o <strong>req 1.4.5</strong> (orquestração multi-agente) do Framework IA Contoso.
+  demo_eyebrow: Demo Interativa
+  demo_title: "Escolha o padrão e veja a topologia em tempo real"
+  demo_lede: >-
+    Selecione um dos 5 padrões do MAF — o diagrama à esquerda re-renderiza e o trace SSE
+    abaixo mostra a ordem real dos hops. Mesma pergunta, comportamentos distintos.
+  source_mock_title: "Simulação local"
+  source_real_title: "Resposta do MAFW real"
+  when_label: "Quando usar:"
+  trace_title: "Trace em streaming"
+  legend_local: "Local · MAF"
+  legend_foundry: "Foundry · prompt-based"
+  try_label: "Tente:"
+  chip_multi: "→ multi-domínio"
+  chip_support: "→ suporte"
+  chip_compare: "→ comparação"
+  send_button: Enviar
+  reset_title: Limpar
+  status_ready: "Pronto."
+  status_running: "Executando padrão {pattern}…"
+  status_done: "Concluído em {ms}ms."
+  status_http_error: "Erro HTTP {code}"
+  error_prefix: "Erro: "
+  meta_template: "fonte={source} · padrão={pattern}"
+  trace_start_label: "▶ start"
+  trace_hop_label: "→ hop"
+  trace_end_label: "✓ end"
+  trace_done_label: "⚑ done"
+  pattern_word: "padrão="
+  no_answer: "(sem resposta)"
+  final_label: "Resposta final"
+  procode_eyebrow: "Pro-code · MAF (Python)"
+  procode_title: "Builders do Microsoft Agent Framework"
+  procode_lede: >-
+    Os 5 padrões expostos acima mapeiam 1-para-1 nos builders do SDK. Mesma topologia,
+    código consistente — local, container ou hosted no Foundry.
+  lowcode_eyebrow: "Low-code · Foundry Workflows (YAML)"
+  lowcode_title: "Mesmo padrão, declarativo e versionável"
+  lowcode_lede: >-
+    O Foundry Workflows expressa a topologia em YAML — versionável no Foundry Project,
+    com branching, fan-out, retry e timeout de fábrica.

@@ -1,0 +1,90 @@
+[
+  {
+    "regulations": [
+      {
+        "policyId": "RH-001",
+        "title": "Política de Trabalho Híbrido",
+        "category": "Recursos Humanos",
+        "subcategory": "Modelo de trabalho",
+        "version": "3.2",
+        "effectiveDate": "2025-02-01",
+        "owner": "Diretoria de Pessoas",
+        "audience": "Todos os colaboradores CLT",
+        "summary": "Define o modelo híbrido com mínimo de 2 dias presenciais por semana e teto de 3 dias remotos, sujeito à aprovação do gestor direto.",
+        "content": "Os colaboradores CLT devem cumprir presencialmente no mínimo 2 dias por semana, preferencialmente terças e quintas, no escritório de lotação. Trabalho 100% remoto exige aprovação formal do diretor da área e revisão semestral. Equipes de campo e atendimento ao cliente em loja seguem regras específicas anexas. Estagiários têm regime mínimo de 3 dias presenciais."
+      },
+      {
+        "policyId": "RH-002",
+        "title": "Política de Férias e Ausências",
+        "category": "Recursos Humanos",
+        "subcategory": "Benefícios",
+        "version": "2.0",
+        "effectiveDate": "2024-11-15",
+        "owner": "Diretoria de Pessoas",
+        "audience": "Todos os colaboradores CLT",
+        "summary": "Regras de programação, fracionamento (até 3 períodos) e antecipação de férias, alinhadas à Reforma Trabalhista.",
+        "content": "Férias podem ser fracionadas em até 3 períodos, sendo um deles obrigatoriamente de 14 dias corridos e os demais com no mínimo 5 dias. A solicitação deve ser feita com 30 dias de antecedência via portal de RH. A venda de até 1/3 das férias é permitida mediante registro em sistema. Faltas justificadas seguem o anexo II (luto, casamento, doação de sangue, etc)."
+      },
+      {
+        "policyId": "RH-003",
+        "title": "Código de Conduta e Ética",
+        "category": "Recursos Humanos",
+        "subcategory": "Compliance",
+        "version": "5.1",
+        "effectiveDate": "2025-01-10",
+        "owner": "Comitê de Ética",
+        "audience": "Todos os colaboradores, terceiros e parceiros",
+        "summary": "Princípios éticos da companhia, vedações a conflito de interesses, brindes acima de R$200 e relacionamentos com fornecedores.",
+        "content": "É vedado aceitar brindes ou hospitalidades acima de R$200 de fornecedores ou parceiros sem aprovação do Comitê de Ética. Relações afetivas entre superior hierárquico e subordinado direto devem ser declaradas em até 30 dias. Denúncias podem ser feitas anonimamente pelo Canal de Ética operado por terceiro independente. Violações sujeitam o colaborador a advertência, suspensão ou demissão por justa causa."
+      },
+      {
+        "policyId": "RH-004",
+        "title": "Política de Diversidade, Equidade e Inclusão",
+        "category": "Recursos Humanos",
+        "subcategory": "DEI",
+        "version": "2.3",
+        "effectiveDate": "2024-09-01",
+        "owner": "Diretoria de Pessoas",
+        "audience": "Todos os colaboradores",
+        "summary": "Compromissos da companhia com pluralidade de raça, gênero, orientação sexual, deficiência e geração, com metas mensuráveis.",
+        "content": "A companhia tem meta de 50% de mulheres em cargos de liderança até 2027 e de 30% de pessoas negras em cargos de média liderança. Processos seletivos para cargos de gerência devem apresentar shortlist diversa. É proibida qualquer forma de discriminação, assédio moral ou sexual. Casos devem ser reportados ao Canal de Ética. A companhia mantém grupos de afinidade abertos a todos os colaboradores."
+      },
+      {
+        "policyId": "RH-005",
+        "title": "Política de Reembolso de Despesas",
+        "category": "Recursos Humanos",
+        "subcategory": "Financeiro",
+        "version": "4.0",
+        "effectiveDate": "2025-03-01",
+        "owner": "Diretoria Financeira",
+        "audience": "Todos os colaboradores",
+        "summary": "Limites de reembolso para refeição, transporte, hospedagem e materiais de home office.",
+        "content": "Refeição em viagem nacional: até R$80 por refeição em capital, R$60 em interior. Hospedagem: até R$450 por diária em capital. Transporte por aplicativo só é reembolsado em horários fora do expediente comercial ou em deslocamentos a clientes. Material de home office (cadeira, monitor) tem teto único de R$2500 a cada 36 meses. Reembolsos sem nota fiscal não são aceitos."
+      },
+      {
+        "policyId": "RH-006",
+        "title": "Política de Treinamento e Desenvolvimento",
+        "category": "Recursos Humanos",
+        "subcategory": "Educação corporativa",
+        "version": "1.4",
+        "effectiveDate": "2024-12-05",
+        "owner": "Diretoria de Pessoas",
+        "audience": "Todos os colaboradores efetivos",
+        "summary": "Verba anual individual de capacitação e regras para subsídio de pós-graduação.",
+        "content": "Cada colaborador efetivo tem verba anual de até R$3000 para cursos livres relacionados ao plano de desenvolvimento aprovado pelo gestor. Subsídio de pós-graduação cobre 70% do valor até R$25 mil, mediante contrato de permanência mínima de 24 meses após a conclusão. Cursos no idioma inglês têm 100% de subsídio se aplicáveis ao cargo."
+      },
+      {
+        "policyId": "RH-007",
+        "title": "Política de Saúde e Bem-Estar",
+        "category": "Recursos Humanos",
+        "subcategory": "Benefícios",
+        "version": "3.0",
+        "effectiveDate": "2025-04-01",
+        "owner": "Diretoria de Pessoas",
+        "audience": "Todos os colaboradores e dependentes",
+        "summary": "Plano de saúde, programa de bem-estar mental, ginástica laboral e licenças parentais ampliadas.",
+        "content": "Plano de saúde nacional categoria executivo é oferecido para todos os colaboradores e dependentes diretos com coparticipação de 20%. Programa de saúde mental inclui até 12 sessões anuais com psicólogos parceiros sem custo. Licença maternidade de 180 dias, paternidade de 30 dias e adoção equivalente à maternidade. Auxílio fertilidade até R$15 mil por ciclo (limite de 3 ciclos)."
+      }
+    ]
+  }
+]

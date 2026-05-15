@@ -1,0 +1,90 @@
+[
+  {
+    "regulations": [
+      {
+        "policyId": "SI-001",
+        "title": "Política de Senhas e Autenticação",
+        "category": "Segurança da Informação",
+        "subcategory": "Identidade",
+        "version": "4.1",
+        "effectiveDate": "2025-01-15",
+        "owner": "CISO",
+        "audience": "Todos os colaboradores e prestadores",
+        "summary": "Define complexidade mínima de senhas, MFA obrigatório e rotação para contas privilegiadas.",
+        "content": "Senhas corporativas devem ter no mínimo 14 caracteres com letras maiúsculas, minúsculas, números e símbolos. MFA via Microsoft Authenticator ou FIDO2 é obrigatório para 100% dos colaboradores. Contas privilegiadas (administradores) devem rotacionar senha a cada 60 dias e usar PIM (Privileged Identity Management) com just-in-time. Senhas não podem ser reaproveitadas dentro de 12 meses."
+      },
+      {
+        "policyId": "SI-002",
+        "title": "Política de Classificação da Informação",
+        "category": "Segurança da Informação",
+        "subcategory": "Governança de dados",
+        "version": "3.0",
+        "effectiveDate": "2024-10-20",
+        "owner": "CISO",
+        "audience": "Todos os colaboradores",
+        "summary": "Quatro níveis: Público, Interno, Confidencial e Restrito, com regras de manuseio para cada um.",
+        "content": "Toda informação produzida deve ser rotulada com Microsoft Purview Information Protection. Confidencial e Restrito exigem criptografia em repouso e em trânsito, e só podem ser compartilhados externamente via canal aprovado (OneDrive com expiração e MIP). Documentos Restrito não podem ser impressos sem autorização do Data Owner. Reuniões com discussão de informação Restrito não podem ser gravadas em ferramentas não corporativas."
+      },
+      {
+        "policyId": "SI-003",
+        "title": "Política de Uso Aceitável de Recursos de TI",
+        "category": "Segurança da Informação",
+        "subcategory": "Endpoints",
+        "version": "5.2",
+        "effectiveDate": "2025-02-10",
+        "owner": "CISO",
+        "audience": "Todos os usuários da rede corporativa",
+        "summary": "Regras de uso de notebooks, redes Wi-Fi públicas, dispositivos pessoais (BYOD) e softwares não homologados.",
+        "content": "Notebooks corporativos devem manter o agente de EDR e o disco criptografado com BitLocker ativos. É proibida a instalação de software fora do catálogo Company Portal. Conexões em Wi-Fi públicas exigem uso da VPN corporativa. BYOD é permitido apenas para acesso a e-mail e calendário via Intune com policy de container. Acesso a sites de jogos online, torrent e cripto-mining é bloqueado pelo proxy."
+      },
+      {
+        "policyId": "SI-004",
+        "title": "Política de Resposta a Incidentes",
+        "category": "Segurança da Informação",
+        "subcategory": "SecOps",
+        "version": "2.5",
+        "effectiveDate": "2024-12-01",
+        "owner": "CSIRT",
+        "audience": "Times de TI, segurança e gestores",
+        "summary": "Fluxo de detecção, contenção, erradicação e lições aprendidas, com SLAs por severidade.",
+        "content": "Incidentes de severidade Crítica devem ser comunicados ao CSIRT em até 15 minutos da detecção. Severidade Alta: 1 hora. O CSIRT é responsável por contenção e coordenação. Em incidentes envolvendo dados pessoais, o DPO deve ser acionado em até 4 horas para avaliação de notificação à ANPD nos termos da LGPD. Pós-incidente, é obrigatório post-mortem em até 10 dias úteis."
+      },
+      {
+        "policyId": "SI-005",
+        "title": "Política de Acesso a Sistemas (Joiners/Movers/Leavers)",
+        "category": "Segurança da Informação",
+        "subcategory": "Identidade",
+        "version": "3.1",
+        "effectiveDate": "2024-11-01",
+        "owner": "CISO",
+        "audience": "RH, gestores e TI",
+        "summary": "Provisionamento de acessos por papel, revisão trimestral e revogação imediata em desligamentos.",
+        "content": "Acessos são concedidos por papel (RBAC) com aprovação do gestor e do Data Owner do sistema. Revisões de acesso são executadas trimestralmente via Microsoft Entra Access Reviews. Em desligamentos, todos os acessos devem ser revogados em até 4 horas após a comunicação formal. Em transferências entre áreas, acessos antigos devem ser revogados em até 5 dias úteis após a movimentação."
+      },
+      {
+        "policyId": "SI-006",
+        "title": "Política de Uso de Inteligência Artificial Generativa",
+        "category": "Segurança da Informação",
+        "subcategory": "IA Responsável",
+        "version": "1.3",
+        "effectiveDate": "2025-04-15",
+        "owner": "CISO + Comitê de IA Responsável",
+        "audience": "Todos os colaboradores",
+        "summary": "Define quais ferramentas de IA Gen são autorizadas, vedações de envio de dados sensíveis e exigência de revisão humana.",
+        "content": "Ferramentas autorizadas: Microsoft 365 Copilot, GitHub Copilot Business, Microsoft Foundry com agentes corporativos e ChatGPT Enterprise (mediante aprovação). É vedado submeter dados Confidencial ou Restrito, dados pessoais de clientes ou código proprietário a ferramentas de IA pública (versão gratuita ou pessoal). Conteúdo gerado por IA usado em comunicação externa deve ser revisado por humano qualificado e identificado quando exigido por lei."
+      },
+      {
+        "policyId": "SI-007",
+        "title": "Política de Backup e Continuidade",
+        "category": "Segurança da Informação",
+        "subcategory": "Resiliência",
+        "version": "2.8",
+        "effectiveDate": "2025-03-20",
+        "owner": "Diretoria de Infraestrutura",
+        "audience": "Times de TI",
+        "summary": "Estratégia 3-2-1, RPO/RTO por criticidade de sistema e testes periódicos de restore.",
+        "content": "Sistemas Tier 1 (faturamento, ativação): RPO 15 min, RTO 1h. Tier 2 (CRM, BI): RPO 4h, RTO 8h. Backups são armazenados em duas regiões Azure geo-redundantes com retenção de 1 ano (mensal) e 7 anos (anual). Testes de restore Tier 1 são obrigatórios trimestralmente; Tier 2 semestralmente. Falhas em testes de restore disparam ação corretiva em até 30 dias."
+      }
+    ]
+  }
+]

@@ -1,0 +1,62 @@
+name: Deploy public demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install webApp dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/app/webApp/requirements.txt
+          pip install httpx  # FastAPI TestClient dependency
+
+      - name: Resolve Pages base URL
+        id: base
+        run: |
+          # repo name is the second segment of GITHUB_REPOSITORY (owner/repo)
+          repo="${GITHUB_REPOSITORY##*/}"
+          echo "base_url=/$repo" >> "$GITHUB_OUTPUT"
+
+      - name: Build static site
+        env:
+          DISABLE_REAL_MODE: "1"
+          DEMO_MODE_DEFAULT: "mock"
+          LANG_DEFAULT: "pt"
+          PAGES_BASE_URL: ${{ steps.base.outputs.base_url }}
+        run: |
+          python infra/scripts/build_static_site.py --out dist --base-url "$PAGES_BASE_URL"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,48 @@
+texts:
+  intro_title: "Microsoft Agent Framework (MAF) + Foundry Workflows"
+  intro_lede: >-
+    The <strong>Microsoft Agent Framework</strong> is the pro-code SDK that standardizes
+    orchestration builders — <em>sequential, concurrent, handoff, group chat and
+    magentic</em> — and runs locally or in any host. <strong>Foundry Workflows</strong>
+    express the same topology declaratively (YAML), versionable in Foundry Projects.
+    Both cover <strong>req 1.4.5</strong> (multi-agent orchestration) of the Contoso AI Framework.
+  demo_eyebrow: Interactive demo
+  demo_title: "Pick a pattern and see the topology in real time"
+  demo_lede: >-
+    Select one of MAF's 5 patterns — the diagram on the left re-renders and the SSE trace
+    below shows the actual hop order. Same question, different behaviors.
+  source_mock_title: "Local simulation"
+  source_real_title: "Response from the real MAFW"
+  when_label: "When to use:"
+  trace_title: "Streaming trace"
+  legend_local: "Local · MAF"
+  legend_foundry: "Foundry · prompt-based"
+  try_label: "Try:"
+  chip_multi: "→ multi-domain"
+  chip_support: "→ support"
+  chip_compare: "→ comparison"
+  send_button: Send
+  reset_title: Clear
+  status_ready: "Ready."
+  status_running: "Running pattern {pattern}…"
+  status_done: "Completed in {ms}ms."
+  status_http_error: "HTTP error {code}"
+  error_prefix: "Error: "
+  meta_template: "source={source} · pattern={pattern}"
+  trace_start_label: "▶ start"
+  trace_hop_label: "→ hop"
+  trace_end_label: "✓ end"
+  trace_done_label: "⚑ done"
+  pattern_word: "pattern="
+  no_answer: "(no response)"
+  final_label: "Final answer"
+  procode_eyebrow: "Pro-code · MAF (Python)"
+  procode_title: "Microsoft Agent Framework builders"
+  procode_lede: >-
+    The 5 patterns above map 1-to-1 to SDK builders. Same topology,
+    consistent code — local, container or hosted in Foundry.
+  lowcode_eyebrow: "Low-code · Foundry Workflows (YAML)"
+  lowcode_title: "Same pattern, declarative and versionable"
+  lowcode_lede: >-
+    Foundry Workflows expresses the topology in YAML — versionable in the Foundry Project,
+    with branching, fan-out, retry and timeout out of the box.

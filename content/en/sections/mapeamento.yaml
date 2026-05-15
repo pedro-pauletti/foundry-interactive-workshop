@@ -1,0 +1,30 @@
+section:
+  title: Contoso Requirements × Microsoft Stack Mapping
+  description: >-
+    The Contoso AI Framework requirements and how each product or capability
+    in the Microsoft stack (Foundry, Agent 365, APIM, Entra, Purview) addresses them.
+  eyebrow: Section 1 · Mapping Overview
+
+texts:
+  how_to_read_eyebrow: How to read this table
+  how_to_read_title: Each row = one Contoso AI Framework requirement
+  how_to_read_lede: >-
+    This is the <strong>consolidated view</strong> from Section 2 of the mapping document. Use the
+    free-text search and the <strong>pillar</strong> / <strong>fulfillment status</strong> filters to
+    quickly find a requirement. The other agenda sections demo the capabilities referenced here in detail.
+  legend_complete: "<span class=\"badge badge--ok\">Complete</span> &mdash; natively addressed by a stack product."
+  legend_partial: "<span class=\"badge badge--warn\">Partial</span> &mdash; covered by combining products or requires customization."
+  legend_integration: "<span class=\"badge badge--err\">Needs integration</span> &mdash; depends on orchestration with an external system/dashboard."
+  free_search_label: Free-text search
+  free_search_placeholder: Search by requirement, description, or service…
+  clear_filters: Clear filters
+  filter_pillar: Pillar
+  filter_status: Status
+  filter_all: All
+  th_id: ID
+  th_pillar: Pillar
+  th_requirement: Requirement
+  th_service: Microsoft service
+  th_status: Status
+  th_demo: View demo
+  count_template: "{visible} of {total} requirements shown"

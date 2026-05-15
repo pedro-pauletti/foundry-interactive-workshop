@@ -1,0 +1,90 @@
+[
+  {
+    "regulations": [
+      {
+        "policyId": "LGPD-001",
+        "title": "Política Geral de Proteção de Dados Pessoais",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "4.0",
+        "effectiveDate": "2025-01-01",
+        "owner": "DPO",
+        "audience": "Todos os colaboradores e parceiros",
+        "summary": "Princípios da LGPD aplicados às operações: bases legais, finalidade, minimização e direitos dos titulares.",
+        "content": "Todo tratamento de dados pessoais deve ter base legal documentada (consentimento, execução de contrato, obrigação legal, legítimo interesse, etc) e finalidade específica. Coleta deve ser minimizada ao estritamente necessário. Os titulares têm direito de acesso, correção, anonimização, portabilidade, eliminação e oposição. Solicitações de titular devem ser respondidas em até 15 dias via canal oficial dpo@conectatel.com.br."
+      },
+      {
+        "policyId": "LGPD-002",
+        "title": "Política de Consentimento e Bases Legais",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "2.1",
+        "effectiveDate": "2024-09-15",
+        "owner": "DPO",
+        "audience": "Áreas de Marketing, CRM, Vendas e Produto",
+        "summary": "Quando exigir consentimento, como coletar e como permitir revogação a qualquer tempo.",
+        "content": "Consentimento é exigido para: marketing direto além do contrato, compartilhamento com parceiros não essenciais, uso de cookies não estritamente necessários e tratamento de dados sensíveis. O consentimento deve ser livre, informado, inequívoco e granular. Revogação deve ser tão fácil quanto a concessão. Histórico de consentimentos é mantido por 5 anos. Em campanhas de marketing, o opt-out deve estar visível em todas as comunicações."
+      },
+      {
+        "policyId": "LGPD-003",
+        "title": "Política de Compartilhamento e Transferência Internacional",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "2.0",
+        "effectiveDate": "2024-12-10",
+        "owner": "DPO + Jurídico",
+        "audience": "TI, Compras, Parcerias",
+        "summary": "Regras de due diligence em fornecedores e cláusulas contratuais para transferência fora do Brasil.",
+        "content": "Compartilhamento de dados pessoais com terceiros exige avaliação prévia do DPO via formulário PIA (Privacy Impact Assessment). Contratos com operadores devem conter cláusulas-padrão LGPD obrigatórias. Transferência internacional só é permitida para países com nível adequado de proteção, mediante cláusulas-padrão da ANPD ou consentimento específico do titular. Hosting em nuvem deve preferir regiões Brasil (brazilsouth) sempre que viável."
+      },
+      {
+        "policyId": "LGPD-004",
+        "title": "Política de Retenção e Descarte de Dados",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "3.2",
+        "effectiveDate": "2025-02-20",
+        "owner": "DPO",
+        "audience": "TI, áreas de negócio",
+        "summary": "Tempos máximos de retenção por tipo de dado e processo seguro de descarte.",
+        "content": "Dados de clientes ativos: enquanto durar o contrato + 5 anos (prescrição cível). Dados de prospects sem conversão: 12 meses. Dados de candidatos não contratados: 6 meses. Logs de acesso a sistemas: 12 meses. Após o prazo, dados devem ser anonimizados ou descartados de forma irreversível, incluindo backups. Exceções devem ser justificadas e aprovadas pelo DPO."
+      },
+      {
+        "policyId": "LGPD-005",
+        "title": "Política de Resposta a Incidentes Envolvendo Dados Pessoais",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "2.4",
+        "effectiveDate": "2024-11-25",
+        "owner": "DPO + CSIRT",
+        "audience": "CSIRT, gestores, comunicação",
+        "summary": "Fluxo de notificação à ANPD e aos titulares quando há risco relevante.",
+        "content": "Incidentes envolvendo dados pessoais devem ser comunicados ao DPO em até 4 horas após detecção pelo CSIRT. O DPO conduz a avaliação de risco usando metodologia ENISA adaptada. Quando o risco for relevante, a ANPD deve ser notificada em até 3 dias úteis e os titulares afetados em até 5 dias. A comunicação ao titular deve ser clara, em português acessível e indicar medidas mitigatórias."
+      },
+      {
+        "policyId": "LGPD-006",
+        "title": "Política de Tratamento de Dados de Crianças e Adolescentes",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "1.2",
+        "effectiveDate": "2024-08-01",
+        "owner": "DPO",
+        "audience": "Áreas de Marketing, Produto e Atendimento",
+        "summary": "Regras adicionais quando o titular for menor de 18 anos, especialmente menor de 12.",
+        "content": "Tratamento de dados de menores de 12 anos exige consentimento específico de ao menos um dos pais ou responsável legal, comprovado por mecanismo razoável (documento + selfie ou validação por cartão de crédito). Comunicação dirigida a crianças deve ser em linguagem apropriada à faixa etária e jamais incluir gamificação que induza ao consumo. Linhas familiares contratadas pelos pais para menores são permitidas com a anuência registrada na ativação."
+      },
+      {
+        "policyId": "LGPD-007",
+        "title": "Política de Avaliação de Impacto à Proteção de Dados (RIPD/DPIA)",
+        "category": "Privacidade de Dados",
+        "subcategory": "LGPD",
+        "version": "1.5",
+        "effectiveDate": "2025-03-10",
+        "owner": "DPO",
+        "audience": "Times de Produto, IA, Engenharia",
+        "summary": "Quando elaborar o Relatório de Impacto à Proteção de Dados Pessoais e como conduzi-lo.",
+        "content": "DPIA/RIPD é obrigatório quando há tratamento em larga escala, dados sensíveis, monitoramento sistemático, decisões automatizadas com efeito significativo (incluindo modelos de IA generativa que tomam decisões sobre titulares) ou novas tecnologias. O documento deve descrever finalidades, riscos, medidas mitigatórias e consulta à área de IA Responsável quando aplicável. O RIPD é validado pelo DPO e revisitado anualmente ou após mudanças relevantes."
+      }
+    ]
+  }
+]

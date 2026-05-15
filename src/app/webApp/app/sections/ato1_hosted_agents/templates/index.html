@@ -1,0 +1,224 @@
+{% extends "_section_page.html" %}
+
+{% set _tx = request.state.texts %}
+
+{% block extra_content %}
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Mesmo agente · dois runtimes — Local container × Foundry Hosted') }}</h2>
+  <p class="page-summary__lede">
+    {{ _tx.get('demo_lede', '') | safe }}
+  </p>
+</section>
+
+<section class="card card--active" style="margin-top:16px;">
+  <div id="ha-agent-row" class="ha-agent-row">
+    <label class="ha-agent-row__label" for="ha-agent-select"><i class="fa-solid fa-server"></i> {{ _tx.get('agent_label', 'Agente:') }}</label>
+    <select id="ha-agent-select" class="ha-select"></select>
+    <button type="button" id="ha-reset" class="btn btn--ghost" title="{{ _tx.get('reset_title', 'Nova sessão') }}"><i class="fa-solid fa-rotate-left"></i></button>
+  </div>
+
+  <div class="ha-toggles" role="tablist" aria-label="Runtime do agente" style="margin-top:10px;">
+    <label class="ha-toggle is-active">
+      <input type="radio" name="ha-target" value="hosted" checked>
+      <i class="fa-solid fa-cloud"></i> {{ _tx.get('toggle_hosted', 'Foundry Hosted (mesmo container)') }}
+    </label>
+    <label class="ha-toggle">
+      <input type="radio" name="ha-target" value="local">
+      <i class="fa-solid fa-cube"></i> {{ _tx.get('toggle_local', 'Local container (Docker Desktop)') }}
+    </label>
+  </div>
+
+  <div class="rag-suggested" style="margin-top:10px;">
+    <span class="muted" style="font-size:12px;">{{ _tx.get('try_label', 'Tente:') }}</span>
+    {% for c in chips %}
+    <button class="ha-chip" data-q="{{ c.prompt }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div id="ha-messages" class="agent-chat__messages"
+       data-tx-no-agents="{{ _tx.get('no_agents_detected', '(nenhum agente detectado)') }}"
+       data-tx-runtime-label="{{ _tx.get('runtime_label', 'Runtime: {target}') }}"
+       data-tx-runtime-hosted="{{ _tx.get('runtime_hosted', 'Foundry Hosted') }}"
+       data-tx-runtime-local="{{ _tx.get('runtime_local', 'Local container') }}"
+       data-tx-session-reset="{{ _tx.get('status_session_reset', 'Sessão reiniciada.') }}"
+       data-tx-calling="{{ _tx.get('status_calling', 'Chamando {target}…') }}"
+       data-tx-ready="{{ _tx.get('status_ready', 'Pronto.') }}"
+       data-tx-failure="{{ _tx.get('status_failure', 'Falha.') }}"
+       data-tx-network-failure="{{ _tx.get('status_network_failure', 'Falha de rede.') }}"
+       data-tx-error-prefix="{{ _tx.get('error_prefix', 'Erro: ') }}"
+       data-tx-network-error-prefix="{{ _tx.get('network_error_prefix', 'Erro de rede: ') }}"
+       data-tx-source-real="{{ _tx.get('source_real_title', 'Real') }}"
+       data-tx-source-sim="{{ _tx.get('source_sim_title', 'Simulação local') }}"></div>
+
+  <form id="ha-form" class="agent-chat__form">
+    <input id="ha-input" type="text" autocomplete="off" placeholder="{{ request.state.industry_pack.get('placeholders', {}).get('hosted_agents', 'Pergunte ao hosted agent…') }}">
+    <button type="submit" class="btn btn--primary"><i class="fa-solid fa-paper-plane"></i> {{ _tx.get('send_button', 'Enviar') }}</button>
+  </form>
+
+  <div class="rag-status">
+    <span id="ha-status">{{ _tx.get('status_ready', 'Pronto.') }}</span>
+    <span id="ha-meta" class="muted"></span>
+  </div>
+</section>
+
+<style>
+  .ha-toggles { display:flex; gap:10px; flex-wrap:wrap; }
+  .ha-toggle {
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    padding:10px 14px; border:1px solid var(--border-color); border-radius:10px;
+    background: var(--background-light); color: var(--text-secondary);
+    font-size: 13px; font-weight: 500;
+  }
+  .ha-toggle input { display:none; }
+  .ha-toggle.is-active {
+    background: var(--primary-light); border-color: var(--primary-color);
+    color: var(--text-primary); box-shadow: 0 0 0 1px var(--primary-color) inset;
+  }
+  .ha-toggle i { color: var(--accent-color); }
+  .ha-agent-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .ha-agent-row__label { font-size:12px; color:var(--text-secondary); }
+  .ha-select {
+    padding:6px 10px; border-radius:8px; border:1px solid var(--border-color);
+    background: var(--background-light); color: var(--text-primary); font-size:13px;
+  }
+  .ha-chip {
+    background: var(--background-lighter); border: 1px solid var(--border-color);
+    color: var(--text-secondary); border-radius: 999px; padding: 4px 12px;
+    font-size: 12px; cursor: pointer;
+  }
+  .ha-chip:hover { background: var(--primary-light); color: var(--text-primary); border-color: var(--primary-color); }
+  .agent-chat__messages {
+    min-height: 220px; max-height: 460px; overflow-y: auto;
+    padding: 12px; display:flex; flex-direction:column; gap:12px;
+    background: var(--background-dark); border-radius: var(--radius-sm);
+    border:1px solid var(--border-color); margin-top:12px;
+  }
+  .agent-chat__form { display:flex; gap:8px; margin-top:12px; }
+  .agent-chat__form input {
+    flex:1; padding:10px 14px; border-radius:10px;
+    border:1px solid var(--border-color); background: var(--background-light);
+    color: var(--text-primary); font-size:14px;
+  }
+  .agent-chat__msg { padding:10px 14px; border-radius:12px; max-width:85%; line-height:1.6; font-size:14px; white-space:pre-wrap; }
+  .agent-chat__msg--user { align-self:flex-end; background: var(--user-message-bg); color:#fff; }
+  .agent-chat__msg--bot  { align-self:flex-start; background: var(--assistant-message-bg); border:1px solid var(--border-color); color: var(--text-primary); }
+  .agent-chat__msg--err  { align-self:flex-start; background: rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; }
+  .ha-meta-line { font-size:11px; color: var(--text-muted); margin-top:-6px; align-self:flex-start; max-width:85%; font-family:'JetBrains Mono', monospace; }
+  .rag-status { display:flex; justify-content:space-between; font-size:12px; margin-top:8px; color: var(--text-muted); }
+</style>
+
+<script>
+(function () {
+  const form = document.getElementById('ha-form');
+  const input = document.getElementById('ha-input');
+  const messages = document.getElementById('ha-messages');
+  const statusEl = document.getElementById('ha-status');
+  const meta = document.getElementById('ha-meta');
+  const resetBtn = document.getElementById('ha-reset');
+  const select = document.getElementById('ha-agent-select');
+  const toggles = document.querySelectorAll('.ha-toggle');
+  const TX = messages.dataset;
+
+  let target = 'hosted';
+  let sessionId = null;
+  let agents = [];
+
+  function refreshSelect() {
+    select.innerHTML = '';
+    if (!agents.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = TX.txNoAgents || '(nenhum agente detectado)';
+      select.appendChild(opt);
+      return;
+    }
+    agents.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = a.label + '  ·  hosted=' + a.hosted_name;
+      select.appendChild(opt);
+    });
+  }
+
+  fetch('/sections/ato1_hosted_agents/api/agents').then(r => r.json()).then(data => {
+    agents = data.agents || [];
+    refreshSelect();
+  }).catch(() => refreshSelect());
+
+  function targetLabel(t) {
+    return t === 'hosted' ? (TX.txRuntimeHosted || 'Foundry Hosted') : (TX.txRuntimeLocal || 'Local container');
+  }
+
+  toggles.forEach(t => t.addEventListener('click', () => {
+    toggles.forEach(x => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    target = t.querySelector('input').value;
+    sessionId = null;
+    statusEl.textContent = (TX.txRuntimeLabel || 'Runtime: {target}').replace('{target}', targetLabel(target));
+  }));
+
+  document.querySelectorAll('.ha-chip').forEach(c => c.addEventListener('click', () => {
+    input.value = c.dataset.q; input.focus();
+  }));
+
+  resetBtn.addEventListener('click', () => {
+    sessionId = null; messages.innerHTML = ''; meta.textContent = '';
+    statusEl.textContent = TX.txSessionReset || 'Sessão reiniciada.';
+  });
+
+  function append(cls, text) {
+    const d = document.createElement('div');
+    d.className = 'agent-chat__msg ' + cls;
+    d.textContent = text;
+    messages.appendChild(d);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function appendMeta(text) {
+    const d = document.createElement('div');
+    d.className = 'ha-meta-line';
+    d.textContent = text;
+    messages.appendChild(d);
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    append('agent-chat__msg--user', text);
+    input.value = '';
+    statusEl.textContent = (TX.txCalling || 'Chamando {target}…').replace('{target}', targetLabel(target));
+    const body = {
+      message: text,
+      target,
+      agent_id: select.value || 'mafw',
+      session_id: sessionId,
+    };
+    try {
+      const res = await fetch('/sections/ato1_hosted_agents/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        append('agent-chat__msg--err', (TX.txErrorPrefix || 'Erro: ') + (err.detail || res.statusText));
+        statusEl.textContent = TX.txFailure || 'Falha.';
+        return;
+      }
+      const data = await res.json();
+      sessionId = data.session_id || sessionId;
+      append('agent-chat__msg--bot', data.content);
+      appendMeta(data.detail);
+      statusEl.textContent = TX.txReady || 'Pronto.';
+      const srcTitle = data.source === 'real' ? (TX.txSourceReal || 'Real') : (TX.txSourceSim || 'Simulação local');
+      meta.innerHTML = '<span class="source-badge source-badge--' + data.source + '" title="' + srcTitle + '"><i class="fa-solid ' + (data.source === 'real' ? 'fa-bolt' : 'fa-flask') + '"></i></span> · ' + data.target + ' · ' + data.latency_ms + 'ms';
+    } catch (e) {
+      append('agent-chat__msg--err', (TX.txNetworkErrorPrefix || 'Erro de rede: ') + e.message);
+      statusEl.textContent = TX.txNetworkFailure || 'Falha de rede.';
+    }
+  });
+})();
+</script>
+{% endblock %}

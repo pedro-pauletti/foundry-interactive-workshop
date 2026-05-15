@@ -1,0 +1,63 @@
+texts:
+  starting_eyebrow: Starting point · size choice
+  starting_title: "Before techniques: SLM or LLM?"
+  starting_p1: >-
+    <strong>SLMs (Small Language Models)</strong> — models &lt; 10B parameters such as
+    <em>Phi-4</em>, <em>Mistral-Small</em> and <em>Llama-3.2-3B</em> — are not a
+    modeling technique; they're an <strong>architectural decision</strong>. Low latency,
+    low cost, can even run at the edge. They shine in well-defined tasks (intent
+    classification, entity extraction, routing). In Foundry, SLMs appear as dedicated
+    deployments or via <em>Models-as-a-Service</em>.
+  starting_p2: >-
+    <strong>Contoso case:</strong> intent classifier on the IVR before routing to the
+    agent (Phi-4 at ~3ms/req vs GPT-4o at ~280ms/req). Once the base is decided
+    (SLM or LLM), the <strong>4 specialization techniques</strong> below come in.
+  techniques_title: The 4 specialization techniques available in Foundry
+  techniques_lede: >-
+    Specializing = taking a base model (SLM or LLM) and <strong>shaping it</strong> for
+    your domain. The 4 techniques below cover the spectrum: <em>distillation</em> (cheaper),
+    <em>SFT</em> (format/vocabulary), <em>RLHF</em> (subjective alignment) and
+    <em>DPO</em> (simplified alignment). All hosted in Foundry Models with
+    governance and lineage.
+  when_use_label: "When to use:"
+  contoso_case_label: "Contoso case:"
+  demo_eyebrow: Interactive demo
+  demo_title: Same input · two models · same second
+  mock_badge_title: Local simulation
+  demo_lede: >-
+    On the left, the <strong>base model</strong> (raw gpt-4o-mini). On the right, the same
+    backbone after <strong>SFT + DPO</strong> for the Contoso domain. Compare response,
+    latency, cost and <em>brand alignment</em>.
+  compare_button: Compare
+  try_label: "Try:"
+  base_model_label: Base model
+  ft_model_label: Specialized model (Contoso)
+  base_body_placeholder: Send a question to compare.
+  ft_body_placeholder: The fine-tuned response appears here.
+  status_ready: Ready.
+  pipeline_eyebrow: Fine-tuning pipeline in Foundry
+  pipeline_title: How to go from baseline to the Contoso model
+  pipeline_step_1: "<strong>1 · Collect dataset</strong> of real anonymized conversations (Foundry Traces → versioned dataset)"
+  pipeline_step_2: "<strong>2 · Curate pairs</strong> (input, ideal response) — human supervision via Foundry Annotations"
+  pipeline_step_3: "<strong>3 · SFT job</strong> in Foundry Models: point to the JSONL, choose the base model, trigger training"
+  pipeline_step_4: "<strong>4 · Evaluate</strong> with Custom Evaluators from act 2 (groundedness, brand alignment, safety)"
+  pipeline_step_5: "<strong>5 · Optional DPO</strong> to fix regressions — preferences dataset (chosen, rejected)"
+  pipeline_step_6: "<strong>6 · Deploy</strong> as a Foundry Model Endpoint; agents point to the new `model` in agent.yaml"
+  kpi_model: model
+  kpi_latency: latency
+  kpi_tokens_in: tokens in
+  kpi_tokens_out: tokens out
+  kpi_cost: cost
+  kpi_groundedness: groundedness
+  kpi_brand_alignment: brand alignment
+  stage_tokenizing: Tokenizing prompt…
+  stage_loading_base: Loading base model weights (gpt-4o-mini)…
+  stage_loading_adapter: Loading LoRA adapter (SFT + DPO) from the Contoso checkpoint…
+  stage_inferring: Running inference on both models in parallel…
+  stage_evaluating: Computing groundedness and brand alignment…
+  no_response: (no response)
+  error_prefix: "Error: "
+  http_error_prefix: "HTTP error "
+  completed_template: "Completed in {ms}ms."
+  source_real_title: Real LLM response
+  source_mock_title: Local simulation

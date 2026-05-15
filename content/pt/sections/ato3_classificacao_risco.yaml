@@ -1,0 +1,48 @@
+texts:
+  intro_title: Por que classificar risco antes do deploy?
+  intro_lede: >-
+    Classificação de risco transforma um requisito subjetivo ("é seguro?") em
+    <strong>critérios mensuráveis</strong> que viram <em>policy-as-code</em>.
+    Sem isso, o <strong>PL 2338/2023</strong> (Marco Legal da IA, em tramitação) e a
+    <strong>LGPD art. 20</strong> (revisão de decisões automatizadas) viram processos
+    manuais lentos. Com Custom Azure Policy no Foundry Control Plane, vira <em>guardrail
+    automatizado</em>.
+  marco_eyebrow: "Marco regulatório · PL 2338/2023"
+  marco_title: 5 pilares aplicáveis a sistemas Contoso
+  dims_eyebrow: "Dimensões de risco · critérios parametrizáveis"
+  dims_title: As 4 perguntas que toda Custom Policy precisa responder
+  dims_options_label: "opções"
+  demo_eyebrow: "Demo Interativa · Custom Azure Policy"
+  demo_title: Simule a avaliação de risco em runtime
+  demo_badge_title: Simulação local — lógica equivalente à Custom Policy real
+  demo_lede: >-
+    Configure um caso de uso. O endpoint executa o mesmo algoritmo que a Custom Policy
+    rodaria no Foundry Control Plane: cálculo de score → classificação alto/médio/baixo
+    → ação <em>deny / audit / allow</em>.
+  form_finalidade: Finalidade
+  form_publico: Público impactado
+  form_dados: Sensibilidade dos dados
+  form_reversibilidade: Reversibilidade
+  form_aia: Avaliação de Impacto Algorítmico (AIA) anexada
+  form_submit: Avaliar contra a Policy
+  presets_label: "Presets:"
+  preset_alto_sem_aia: "→ alto risco sem AIA"
+  preset_alto_com_aia: "→ alto risco COM AIA"
+  preset_medio: "→ risco médio típico"
+  preset_baixo: "→ risco baixo"
+  result_score_placeholder: "score: —"
+  result_triggers_label: "Triggers regulatórios:"
+  result_risk_prefix: "Risco "
+  result_score_prefix: "score: "
+  http_error_prefix: "Erro HTTP "
+  policy_eyebrow: "Custom Azure Policy · JSON real"
+  policy_title: É exatamente este o ARM/Bicep que vai pro Control Plane
+  policy_lede: >-
+    Implantação via <code>az policy definition create</code> + <code>az policy assignment</code>
+    no escopo da Management Group corporativa. Roda em <em>create</em>/<em>update</em> de qualquer
+    recurso do tipo Foundry Agent.
+  policy_details_summary: Ver JSON completo
+  impl_eyebrow: "Implementação prática · passo a passo"
+  impl_title: Como essa Custom Policy é criada e aplicada de verdade
+  integrations_eyebrow: Integrações para fechar o ciclo
+  integrations_title: A policy sozinha não basta — o que precisa estar conectado

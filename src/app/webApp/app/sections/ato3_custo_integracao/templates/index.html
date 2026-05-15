@@ -1,0 +1,802 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Transversal"] %}
+{% set requisitos = [
+  {"id": "1.5.1", "titulo": "Custo / consumo de tokens"},
+  {"id": "1.5.2", "titulo": "Integração com agentes externos (IBM, Salesforce, ServiceNow, Copilot)"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title', 'A2A — Agent-to-Agent + APIM AI Gateway') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+  <div class="section-figure section-figure--row">
+    <figure>
+      <img src="/static/images/ai-gateway-architecture-diagram.png" alt="{{ _tx.get('fig1_alt', 'Arquitetura do APIM AI Gateway') }}">
+      <figcaption>{{ _tx.get('fig1_caption', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/custom-agent-architecture-a2a.png" alt="{{ _tx.get('fig2_alt', 'Arquitetura A2A entre agentes') }}">
+      <figcaption>{{ _tx.get('fig2_caption', '') }}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Orquestrar agentes via A2A — execução em tempo real') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active a2a-workbench" style="margin-top:16px;">
+  <!-- ===== LEFT: Live topology diagram ===== -->
+  <div class="a2a-workbench__diagram">
+    <div class="a2a-diagram">
+      <svg viewBox="0 0 760 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="{{ _tx.get('diagram_aria', 'Diagrama A2A') }}">
+        <!-- gateway -->
+        <g id="node-gateway" class="a2a-node a2a-node--gateway">
+          <rect x="10" y="155" width="120" height="50" rx="10" />
+          <text x="70" y="180" text-anchor="middle" dy=".3em">APIM Gateway</text>
+        </g>
+        <!-- orchestrator (MAF) -->
+        <g id="node-orchestrator" class="a2a-node a2a-node--orchestrator">
+          <circle cx="265" cy="180" r="48" />
+          <text x="265" y="175" text-anchor="middle">Orquestrador</text>
+          <text x="265" y="192" text-anchor="middle" class="a2a-node__sub">MAF</text>
+        </g>
+        <!-- 5 specialist nodes (2 local · 2 prompt · 1 hosted container) -->
+        <g id="node-especialista-produtos" class="a2a-node a2a-node--agent a2a-node--local">
+          <rect x="500" y="10" width="240" height="58" rx="10" />
+          <text x="620" y="34" text-anchor="middle">especialista-produtos</text>
+          <text x="620" y="53" text-anchor="middle" class="a2a-node__sub">Local · MAF + Azure Search</text>
+        </g>
+        <g id="node-especialista-regulamentos" class="a2a-node a2a-node--agent a2a-node--local">
+          <rect x="500" y="80" width="240" height="58" rx="10" />
+          <text x="620" y="104" text-anchor="middle">especialista-regulamentos</text>
+          <text x="620" y="123" text-anchor="middle" class="a2a-node__sub">Local · MAF + Azure Search</text>
+        </g>
+        <g id="node-especialista-vendas" class="a2a-node a2a-node--agent a2a-node--foundry">
+          <rect x="500" y="151" width="240" height="58" rx="10" />
+          <text x="620" y="175" text-anchor="middle">especialista-vendas</text>
+          <text x="620" y="194" text-anchor="middle" class="a2a-node__sub">Foundry · prompt-based</text>
+        </g>
+        <g id="node-especialista-suporte-tecnico" class="a2a-node a2a-node--agent a2a-node--foundry">
+          <rect x="500" y="221" width="240" height="58" rx="10" />
+          <text x="620" y="245" text-anchor="middle">especialista-suporte-tecnico</text>
+          <text x="620" y="264" text-anchor="middle" class="a2a-node__sub">Foundry · prompt-based</text>
+        </g>
+        <g id="node-langgraph-contoso" class="a2a-node a2a-node--agent a2a-node--hosted">
+          <rect x="500" y="292" width="240" height="58" rx="10" />
+          <text x="620" y="316" text-anchor="middle">langgraph-contoso</text>
+          <text x="620" y="335" text-anchor="middle" class="a2a-node__sub">Foundry Hosted · container</text>
+        </g>
+        <!-- edges -->
+        <g class="a2a-edges" stroke-linecap="round" fill="none">
+          <path id="edge-gateway-orchestrator" d="M130 180 L218 180" />
+          <path id="edge-orchestrator-especialista-produtos"        d="M308 150 C 380  90, 430  60, 500  39" />
+          <path id="edge-orchestrator-especialista-regulamentos"    d="M310 165 C 380 130, 430 115, 500 109" />
+          <path id="edge-orchestrator-especialista-vendas"          d="M313 180 C 380 180, 430 180, 500 180" />
+          <path id="edge-orchestrator-especialista-suporte-tecnico" d="M310 195 C 380 230, 430 245, 500 250" />
+          <path id="edge-orchestrator-langgraph-contoso"               d="M308 210 C 380 280, 430 310, 500 321" />
+        </g>
+        <!-- arrowheads -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-muted)" />
+          </marker>
+          <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="var(--accent-color)" />
+          </marker>
+        </defs>
+      </svg>
+      <div class="a2a-legend">
+        <span><span class="a2a-legend__dot a2a-legend__dot--local"></span> {{ _tx.get('legend_local', 'Local · MAF') }}</span>
+        <span><span class="a2a-legend__dot a2a-legend__dot--foundry"></span> {{ _tx.get('legend_foundry', 'Foundry · prompt-based') }}</span>
+        <span><span class="a2a-legend__dot a2a-legend__dot--hosted"></span> {{ _tx.get('legend_hosted', 'Foundry Hosted · container') }}</span>
+      </div>
+    </div>
+
+    <div class="a2a-progress" id="a2a-progress" hidden>
+      <div class="a2a-progress__title"><i class="fa-solid fa-stream"></i> {{ _tx.get('trace_title', 'Trace em streaming') }}</div>
+      <ol class="a2a-progress__list" id="a2a-progress-list"></ol>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT: Chat ===== -->
+  <div class="a2a-workbench__chat"
+       data-tx-status-ready="{{ _tx.get('status_ready', 'Pronto.') }}"
+       data-tx-status-routing="{{ _tx.get('status_routing', 'Roteando…') }}"
+       data-tx-status-connecting="{{ _tx.get('status_connecting', 'Conectando ao stream…') }}"
+       data-tx-status-running="{{ _tx.get('status_running', '⏱ executando…') }}"
+       data-tx-error-prefix="{{ _tx.get('error_prefix', 'Erro: ') }}"
+       data-tx-final-label-template="{{ _tx.get('final_label_template', 'Resposta consolidada · {ms}ms') }}"
+       data-tx-source-real-title="{{ _tx.get('source_real_title', 'Real') }}"
+       data-tx-source-mock-title="{{ _tx.get('source_mock_title', 'Simulação local') }}"
+       data-tx-meta-template="{{ _tx.get('meta_template', '· {ms}ms · {n} chamada(s)') }}"
+       data-tx-trace-start="{{ _tx.get('trace_start', '▶ start') }}"
+       data-tx-trace-end="{{ _tx.get('trace_end', '✓ end  ') }}"
+       data-tx-trace-done="{{ _tx.get('trace_done', '⚑ done ') }}"
+       data-tx-trace-error="{{ _tx.get('trace_error', '✗ error') }}"
+       data-tx-http-error="{{ _tx.get('http_error', 'HTTP {code}') }}">
+    <div class="rag-suggested">
+      <span class="muted" style="font-size:12px;">{{ _tx.get('try_label', 'Tente:') }}</span>
+      <button class="rag-chip" data-q="Quais planos de fibra vocês têm? Liste SKU e preço.">{{ _tx.get('chip_produtos', '→ produtos (local MAF)') }}</button>
+      <button class="rag-chip" data-q="Quero contratar fibra de 500Mbps na minha casa.">{{ _tx.get('chip_vendas', '→ vendas (Foundry prompt)') }}</button>
+      <button class="rag-chip" data-q="Minha internet caiu, modem com luz vermelha. O que faço?">{{ _tx.get('chip_suporte', '→ suporte (Foundry prompt)') }}</button>
+      <button class="rag-chip" data-q="Qual a política de uso aceitável de e-mail corporativo?">{{ _tx.get('chip_regulamentos', '→ regulamentos (local MAF)') }}</button>
+      <button class="rag-chip" data-q="Use o agente langgraph para me dar uma visão consolidada de planos de fibra.">{{ _tx.get('chip_langgraph', '→ langgraph (Hosted container)') }}</button>
+      <button class="rag-chip" data-q="Quero contratar fibra e também saber a política de cancelamento.">{{ _tx.get('chip_multi', '→ multi-agent (vendas + regulamentos)') }}</button>
+    </div>
+
+    <label class="gr-toggle" style="display:inline-flex;margin:8px 0 14px;font-size:13px;color:var(--text-secondary);">
+      <input type="checkbox" id="cache-toggle" checked style="margin-right:6px;">
+      {{ _tx.get('cache_toggle_label', 'Habilitar semantic caching (APIM)') }}
+    </label>
+
+    <div id="a2a-messages" class="agent-chat__messages"></div>
+
+    <form id="a2a-form" class="agent-chat__form">
+      <input id="a2a-input" type="text" autocomplete="off" placeholder="{{ request.state.industry_pack.get('placeholders', {}).get('custo_integracao', 'Faça uma pergunta…') }}">
+      <button type="submit" class="btn btn--primary"><i class="fa-solid fa-paper-plane"></i> {{ _tx.get('send_button', 'Enviar') }}</button>
+      <button type="button" id="a2a-reset" class="btn btn--ghost" title="{{ _tx.get('reset_title', 'Limpar') }}">
+        <i class="fa-solid fa-rotate-left"></i>
+      </button>
+    </form>
+
+    <div class="rag-status">
+      <span id="a2a-status">{{ _tx.get('status_ready', 'Pronto.') }}</span>
+      <span id="a2a-meta" class="muted"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- MCP Tools governadas pelo APIM AI Gateway (req 1.5.2)         -->
+<!-- ============================================================ -->
+<section class="card" style="margin-top:20px;"
+         data-tx-mcp-total-template="{{ _tx.get('mcp_total_template', 'Total: {ms} ms · {n} step(s)') }}"
+         data-tx-mcp-no-token="{{ _tx.get('mcp_no_token', '(sem token — bypass do gateway)') }}"
+         data-tx-http-error="{{ _tx.get('http_error', 'HTTP {code}') }}">
+  <span class="page-eyebrow"><i class="fa-solid fa-plug-circle-bolt"></i> {{ _tx.get('mcp_eyebrow', 'MCP Tools · governança via APIM AI Gateway') }}</span>
+  <h2 class="page-summary__title" style="margin:6px 0 8px 0;">{{ _tx.get('mcp_title', 'Tools externas passando por auth, rate-limit, content-safety e audit') }}
+    <span class="source-badge source-badge--mock" title="{{ _tx.get('mcp_tooltip', 'Simulação local — trace e rate-limit determinísticos') }}"><i class="fa-solid fa-flask"></i></span>
+  </h2>
+  <p class="page-summary__lede" style="margin-bottom:14px;">{{ _tx.get('mcp_lede', '') | safe }}</p>
+
+  <div class="mcp-toolbar">
+    <label class="mcp-toggle">
+      <input type="checkbox" id="mcp-gateway-toggle" checked>
+      <span><i class="fa-solid fa-shield-halved"></i> {{ _tx.get('mcp_toggle_label', 'Tools via APIM AI Gateway') }}</span>
+    </label>
+    <button class="btn btn--ghost mcp-tool-btn" data-tool="Salesforce.lookup_account">
+      <i class="fa-brands fa-salesforce"></i> Salesforce.lookup_account
+    </button>
+    <button class="btn btn--ghost mcp-tool-btn" data-tool="ServiceNow.create_incident">
+      <i class="fa-solid fa-headset"></i> ServiceNow.create_incident
+    </button>
+  </div>
+
+  <div class="mcp-panels">
+    <!-- Trace -->
+    <div class="mcp-panel">
+      <header><i class="fa-solid fa-route"></i> {{ _tx.get('mcp_trace_header', 'Trace de execução') }}</header>
+      <ol id="mcp-trace" class="mcp-trace"><li class="muted">{{ _tx.get('mcp_select_tool', 'Selecione uma tool para invocar…') }}</li></ol>
+      <div id="mcp-total" class="mcp-total muted"></div>
+    </div>
+
+    <!-- Token + Rate limit -->
+    <div class="mcp-panel">
+      <header><i class="fa-solid fa-key"></i> {{ _tx.get('mcp_token_header', 'Token preview & rate limit') }}</header>
+      <div class="mcp-token">
+        <small class="muted">{{ _tx.get('mcp_auth_label', 'Authorization header (mock)') }}</small>
+        <pre id="mcp-token" class="code-block" style="margin:6px 0 0 0;"><code>—</code></pre>
+      </div>
+      <div class="mcp-rl">
+        <div class="mcp-rl__head">
+          <span><i class="fa-solid fa-gauge-high"></i> {{ _tx.get('mcp_rate_label', 'Rate limit') }}</span>
+          <span id="mcp-rl-num" class="muted">—</span>
+        </div>
+        <div class="mcp-rl__bar"><div id="mcp-rl-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Audit log -->
+    <div class="mcp-panel mcp-panel--wide">
+      <header><i class="fa-solid fa-clipboard-list"></i> {{ _tx.get('mcp_audit_header', 'Audit log (Azure Log Analytics)') }}</header>
+      <table class="mcp-audit">
+        <thead><tr><th>{{ _tx.get('audit_th_timestamp', 'Timestamp') }}</th><th>{{ _tx.get('audit_th_tool', 'Tool') }}</th><th>{{ _tx.get('audit_th_gateway', 'Gateway') }}</th><th>{{ _tx.get('audit_th_status', 'Status') }}</th></tr></thead>
+        <tbody id="mcp-audit-body">
+          <tr class="muted"><td colspan="4">{{ _tx.get('mcp_no_calls', 'Nenhuma chamada ainda.') }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tool result -->
+    <div class="mcp-panel mcp-panel--wide">
+      <header><i class="fa-solid fa-circle-check"></i> {{ _tx.get('mcp_result_header', 'Resposta da tool') }}</header>
+      <pre id="mcp-result" class="code-block" style="margin:0;"><code>—</code></pre>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const trace    = document.getElementById('mcp-trace');
+  const total    = document.getElementById('mcp-total');
+  const tokenEl  = document.getElementById('mcp-token').querySelector('code');
+  const rlNum    = document.getElementById('mcp-rl-num');
+  const rlFill   = document.getElementById('mcp-rl-fill');
+  const auditBody= document.getElementById('mcp-audit-body');
+  const resultEl = document.getElementById('mcp-result').querySelector('code');
+  const toggle   = document.getElementById('mcp-gateway-toggle');
+  const MCP_HOST = trace.closest('.card');
+  const MTX = MCP_HOST ? MCP_HOST.dataset : {};
+  const mFmt = (tpl, vars) => Object.keys(vars||{}).reduce((s,k)=>s.replace('{'+k+'}', vars[k]), tpl||'');
+
+  function renderTrace(steps) {
+    trace.innerHTML = '';
+    let totalMs = 0;
+    steps.forEach(s => {
+      totalMs += s.ms;
+      const li = document.createElement('li');
+      li.className = 'mcp-step mcp-step--' + s.step.replace(/[^a-z]/g,'');
+      li.innerHTML =
+        '<span class="mcp-step__name"><i class="fa-solid fa-' +
+        ({auth:'lock','rate-limit':'gauge-high','content-safety':'shield','invoke':'bolt',audit:'clipboard-check'}[s.step] || 'circle') +
+        '"></i> ' + s.step + '</span>' +
+        '<span class="mcp-step__ms">' + s.ms + ' ms</span>' +
+        '<span class="mcp-step__detail muted">' + (s.detail || '') + '</span>';
+      trace.appendChild(li);
+    });
+    total.textContent = mFmt(MTX.txMcpTotalTemplate || 'Total: {ms} ms · {n} step(s)', {ms: totalMs, n: steps.length});
+  }
+
+  function pushAudit(entry, tool, gw) {
+    // remove placeholder
+    const placeholder = auditBody.querySelector('.muted');
+    if (placeholder) placeholder.remove();
+    const tr = document.createElement('tr');
+    const ts = entry ? new Date(entry.timestamp * 1000).toLocaleTimeString() : new Date().toLocaleTimeString();
+    tr.innerHTML =
+      '<td>' + ts + '</td>' +
+      '<td><code>' + tool + '</code></td>' +
+      '<td>' + (gw ? '<span class="mcp-pill mcp-pill--on">ON</span>' : '<span class="mcp-pill mcp-pill--off">BYPASS</span>') + '</td>' +
+      '<td><span class="mcp-pill mcp-pill--ok">ok</span></td>';
+    auditBody.insertBefore(tr, auditBody.firstChild);
+  }
+
+  async function invoke(tool) {
+    const gw = toggle.checked;
+    const resp = await fetch('/sections/ato3_custo_integracao/api/mcp/invoke', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tool, gateway: gw })
+    });
+    if (!resp.ok) { alert(mFmt(MTX.txHttpError || 'HTTP {code}', {code: resp.status})); return; }
+    const data = await resp.json();
+    renderTrace(data.trace);
+    tokenEl.textContent = data.token_preview || (MTX.txMcpNoToken || '(sem token — bypass do gateway)');
+    if (data.rate_limit) {
+      rlNum.textContent = data.rate_limit.used + ' / ' + data.rate_limit.quota + ' req/min';
+      const pct = (data.rate_limit.used / data.rate_limit.quota) * 100;
+      rlFill.style.width = pct + '%';
+      rlFill.dataset.level = pct > 80 ? 'high' : (pct > 50 ? 'mid' : 'low');
+    }
+    if (data.audit_entry) pushAudit(data.audit_entry, data.tool, true);
+    else                  pushAudit(null,             data.tool, false);
+    resultEl.textContent = JSON.stringify(data.result, null, 2);
+  }
+
+  document.querySelectorAll('.mcp-tool-btn').forEach(b => {
+    b.addEventListener('click', () => invoke(b.dataset.tool));
+  });
+})();
+</script>
+
+<style>
+  .mcp-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+  .mcp-toggle { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background: var(--background-light); border:1px solid var(--border-color); border-radius:10px; font-size:13px; cursor:pointer; }
+  .mcp-toggle input { accent-color: var(--accent-color); }
+
+  .mcp-panels { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .mcp-panel { background: var(--background-light); border:1px solid var(--border-color); border-radius: var(--radius-sm); padding:12px 14px; }
+  .mcp-panel--wide { grid-column: 1 / -1; }
+  .mcp-panel header { display:flex; align-items:center; gap:8px; font-weight:700; font-size:13px; color: var(--text-primary); margin-bottom:8px; }
+  .mcp-panel header i { color: var(--accent-color); }
+  @media (max-width: 900px) { .mcp-panels { grid-template-columns: 1fr; } }
+
+  .mcp-trace { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+  .mcp-step { display:grid; grid-template-columns: 150px 70px 1fr; gap:8px; align-items:center; padding:6px 10px; background: var(--background-dark); border-left: 3px solid var(--accent-color); border-radius:6px; font-size:12.5px; }
+  .mcp-step__name { font-family:'JetBrains Mono', monospace; color: var(--text-primary); font-weight:600; }
+  .mcp-step__name i { color: var(--accent-color); margin-right:4px; }
+  .mcp-step__ms   { font-family:'JetBrains Mono', monospace; color: var(--text-secondary); font-size:11.5px; }
+  .mcp-step__detail { font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mcp-step--invoke  { border-left-color:#4ade80; }
+  .mcp-step--audit   { border-left-color:#8aa1ff; }
+  .mcp-step--ratelimit { border-left-color:#ffd166; }
+  .mcp-step--contentsafety { border-left-color:#ff8e3c; }
+  .mcp-total { text-align:right; font-family:'JetBrains Mono', monospace; font-size:11.5px; margin-top:8px; }
+
+  .mcp-rl { margin-top:14px; }
+  .mcp-rl__head { display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; }
+  .mcp-rl__bar { height:10px; background: var(--background-dark); border-radius:6px; overflow:hidden; border:1px solid var(--border-color); }
+  .mcp-rl__bar > div { height:100%; width:0%; background:#4ade80; transition: width .35s ease; }
+  .mcp-rl__bar > div[data-level="mid"]  { background:#ffd166; }
+  .mcp-rl__bar > div[data-level="high"] { background:#ff8e3c; }
+
+  .mcp-audit { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .mcp-audit th, .mcp-audit td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--border-color); }
+  .mcp-audit th { font-size:11px; color: var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+  .mcp-pill { font-family:'JetBrains Mono', monospace; font-size:10.5px; padding:2px 8px; border-radius:999px; font-weight:700; }
+  .mcp-pill--on  { background: rgba(74,222,128,.18); color:#4ade80; border:1px solid #4ade80; }
+  .mcp-pill--off { background: rgba(255,142,60,.18); color:#ff8e3c; border:1px solid #ff8e3c; }
+  .mcp-pill--ok  { background: rgba(74,222,128,.12); color:#4ade80; }
+</style>
+
+<style>
+  /* ----- Side-by-side workbench ----- */
+  .a2a-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+  .a2a-workbench__diagram { position: sticky; top: 16px; }
+  @media (max-width: 1100px) {
+    .a2a-workbench { grid-template-columns: 1fr; }
+    .a2a-workbench__diagram { position: static; }
+  }
+
+  /* ----- Diagram ----- */
+  .a2a-diagram { margin: 0 auto; max-width: 760px; }
+  .a2a-diagram svg { width: 100%; height: auto; }
+  .a2a-node text { fill: var(--text-primary); font-size: 13px; font-weight: 600; pointer-events: none; }
+  .a2a-node__sub { font-size: 10px; font-weight: 400; fill: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  .a2a-node rect, .a2a-node circle {
+    fill: var(--background-light);
+    stroke: var(--border-color);
+    stroke-width: 1.5;
+    transition: all .25s ease;
+  }
+  .a2a-node--gateway rect { stroke: var(--accent-color); }
+  .a2a-node--orchestrator circle { stroke: var(--primary-color); stroke-width: 2; }
+  .a2a-node--local rect    { stroke: #6c8aff; }
+  .a2a-node--foundry rect  { stroke: #ff8e3c; }
+  .a2a-node--hosted rect   { stroke: #a872ff; }
+
+  @keyframes a2aPulse {
+    0%   { filter: drop-shadow(0 0 4px rgba(0, 188, 242, 0.45)); }
+    50%  { filter: drop-shadow(0 0 14px rgba(0, 188, 242, 0.85)); }
+    100% { filter: drop-shadow(0 0 4px rgba(0, 188, 242, 0.45)); }
+  }
+  .a2a-node.is-active rect, .a2a-node.is-active circle {
+    fill: var(--primary-light);
+    stroke: var(--accent-color);
+    stroke-width: 2.5;
+  }
+  .a2a-node.is-running rect, .a2a-node.is-running circle {
+    fill: var(--primary-light);
+    stroke: var(--accent-color);
+    stroke-width: 3;
+    animation: a2aPulse 1.4s ease-in-out infinite;
+  }
+  .a2a-legend {
+    display: flex; gap: 14px; justify-content: center; margin-top: 8px;
+    font-size: 12px; color: var(--text-secondary); flex-wrap: wrap;
+  }
+  .a2a-legend__dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle;
+    border: 1.5px solid;
+  }
+  .a2a-legend__dot--local   { border-color: #6c8aff; background: rgba(108,138,255,.15); }
+  .a2a-legend__dot--foundry { border-color: #ff8e3c; background: rgba(255,142,60,.15); }
+  .a2a-legend__dot--hosted  { border-color: #a872ff; background: rgba(168,114,255,.18); }
+
+  @keyframes a2aDash { to { stroke-dashoffset: -18; } }
+  .a2a-edges path {
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+    opacity: 0.55;
+    marker-end: url(#arrowhead);
+    transition: all .25s ease;
+  }
+  .a2a-edges path.is-active {
+    stroke: var(--accent-color);
+    stroke-width: 2.5;
+    stroke-dasharray: none;
+    opacity: 1;
+    marker-end: url(#arrowhead-active);
+  }
+  .a2a-edges path.is-running {
+    stroke: var(--accent-color);
+    stroke-width: 2.5;
+    stroke-dasharray: 6 5;
+    opacity: 1;
+    marker-end: url(#arrowhead-active);
+    animation: a2aDash 0.6s linear infinite;
+  }
+
+  /* ----- Streaming trace strip ----- */
+  .a2a-progress {
+    margin-top: 14px; padding: 12px 14px;
+    background: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    max-width: 760px;
+  }
+  .a2a-progress__title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--accent-color); font-weight: 700; margin-bottom: 8px;
+  }
+  .a2a-progress__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .a2a-progress__item {
+    display: flex; gap: 10px; align-items: baseline;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+  .a2a-progress__item .ts { color: var(--text-muted); min-width: 58px; }
+  .a2a-progress__item.done .tool { color: var(--accent-color); }
+  .a2a-progress__item.start .tool { color: var(--primary-color); }
+  .a2a-progress__item.error { color: #ff6b6b; }
+
+  /* ----- Suggested chips ----- */
+  .rag-suggested { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .rag-chip {
+    background: var(--background-lighter); border: 1px solid var(--border-color);
+    color: var(--text-secondary); border-radius: 999px; padding: 4px 12px;
+    font-size: 12px; cursor: pointer;
+  }
+  .rag-chip:hover { background: var(--primary-light); color: var(--text-primary); border-color: var(--primary-color); }
+
+  /* ----- Chat ----- */
+  .agent-chat__messages {
+    min-height: 240px; max-height: 540px; overflow-y: auto;
+    padding: 14px; display: flex; flex-direction: column; gap: 14px;
+    background: var(--background-dark); border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+  .agent-chat__form { display: flex; gap: 8px; margin-top: 12px; }
+  .agent-chat__form input {
+    flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--border-color); background: var(--background-light);
+    color: var(--text-primary); font-size: 14px;
+  }
+  .agent-chat__form input:focus { outline: none; border-color: var(--primary-color); }
+
+  .agent-chat__msg { padding: 10px 14px; border-radius: 12px; max-width: 90%; line-height: 1.6; font-size: 14px; }
+  .agent-chat__msg--user {
+    align-self: flex-end; background: var(--user-message-bg); color: #fff;
+    border: none; white-space: pre-wrap;
+  }
+
+  .a2a-agent-msg { align-self: flex-start; max-width: 96%; width: 96%; }
+  .a2a-agent-msg__head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+    font-size: 12px; color: var(--text-secondary); flex-wrap: wrap;
+  }
+  .a2a-agent-msg__icon {
+    width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--primary-light); color: var(--accent-color); font-size: 13px;
+    border: 1px solid var(--border-color);
+  }
+  .a2a-agent-msg__name { font-weight: 700; color: var(--text-primary); font-size: 13px; }
+  .a2a-agent-msg__badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; padding: 2px 7px;
+    border-radius: 999px; background: var(--background-lighter);
+    border: 1px solid var(--border-color); color: var(--text-secondary);
+  }
+  .a2a-agent-msg__time { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-color); }
+  .a2a-agent-msg__count {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; padding: 2px 7px;
+    border-radius: 999px; background: var(--primary-light); color: var(--primary-color);
+    border: 1px solid var(--border-color); font-weight: 600;
+  }
+  .a2a-agent-msg__bubble {
+    background: var(--assistant-message-bg); border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-color); color: var(--text-primary);
+    padding: 10px 14px; border-radius: 10px; line-height: 1.55; font-size: 14px;
+    min-height: 22px;
+  }
+  .a2a-agent-msg.is-running .a2a-agent-msg__bubble {
+    border-left-color: var(--primary-color);
+    background: var(--primary-light);
+  }
+  .a2a-agent-msg__bubble strong { font-weight: 700; }
+  .a2a-agent-msg__bubble--input {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--text-secondary); background: var(--background-lighter);
+    border-left-color: var(--primary-color); margin-bottom: 4px;
+  }
+
+  .typing-dots span {
+    display: inline-block; width: 6px; height: 6px; margin: 0 1px;
+    border-radius: 50%; background: var(--accent-color);
+    animation: a2aDot 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes a2aDot { 0%,80%,100% { opacity: .25; } 40% { opacity: 1; } }
+
+  .a2a-final {
+    align-self: stretch; padding: 12px 16px; margin-top: 4px;
+    background: var(--background-light); border: 1px solid var(--border-color);
+    border-top: 3px solid var(--primary-color); border-radius: 8px;
+    font-size: 14.5px; line-height: 1.6;
+  }
+  .a2a-final__label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--accent-color); font-weight: 700; margin-bottom: 6px;
+  }
+
+  .rag-status { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; color: var(--text-muted); }
+  .btn { border: 1px solid var(--border-color); background: var(--background-light); color: var(--text-primary); border-radius: 10px; cursor: pointer; font-size: 14px; padding: 10px 18px; }
+  .btn--primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+  .btn--primary:hover { background: var(--primary-hover); }
+  .btn--ghost { background: transparent; padding: 10px 14px; }
+</style>
+
+<script>
+(function () {
+  const messagesEl = document.getElementById('a2a-messages');
+  const form = document.getElementById('a2a-form');
+  const input = document.getElementById('a2a-input');
+  const statusEl = document.getElementById('a2a-status');
+  const meta = document.getElementById('a2a-meta');
+  const resetBtn = document.getElementById('a2a-reset');
+  const cacheToggle = document.getElementById('cache-toggle');
+  const chips = document.querySelectorAll('.rag-chip');
+  const progressEl = document.getElementById('a2a-progress');
+  const progressList = document.getElementById('a2a-progress-list');
+  const TX = (statusEl && statusEl.closest('.a2a-workbench__chat')) ? statusEl.closest('.a2a-workbench__chat').dataset : {};
+  const txFmt = (tpl, vars) => Object.keys(vars||{}).reduce((s,k)=>s.replace('{'+k+'}', vars[k]), tpl||'');
+
+  chips.forEach(c => c.addEventListener('click', () => { input.value = c.dataset.q; input.focus(); }));
+  resetBtn.addEventListener('click', () => {
+    messagesEl.innerHTML = '';
+    statusEl.textContent = TX.txStatusReady || 'Pronto.';
+    meta.textContent = '';
+    progressList.innerHTML = '';
+    progressEl.hidden = true;
+    resetDiagram();
+  });
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function mdLite(s) {
+    return escapeHtml(s)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+  }
+  function fmtClockHHMMSS(ts) {
+    const d = new Date(ts * 1000);
+    const p = n => String(n).padStart(2, '0');
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  function resetDiagram() {
+    document.querySelectorAll('.a2a-node').forEach(n => n.classList.remove('is-active','is-running'));
+    document.querySelectorAll('.a2a-edges path').forEach(p => p.classList.remove('is-active','is-running'));
+  }
+  function markNodeRunning(agentId) {
+    const n = document.getElementById('node-' + agentId);
+    if (n) { n.classList.remove('is-active'); n.classList.add('is-running'); }
+    const e = document.getElementById('edge-orchestrator-' + agentId);
+    if (e) { e.classList.remove('is-active'); e.classList.add('is-running'); }
+    const gw = document.getElementById('node-gateway');
+    const orch = document.getElementById('node-orchestrator');
+    const gwEdge = document.getElementById('edge-gateway-orchestrator');
+    if (gw) gw.classList.add('is-active');
+    if (orch) orch.classList.add('is-active');
+    if (gwEdge) gwEdge.classList.add('is-active');
+  }
+  function markNodeDone(agentId) {
+    const n = document.getElementById('node-' + agentId);
+    if (n) { n.classList.remove('is-running'); n.classList.add('is-active'); }
+    const e = document.getElementById('edge-orchestrator-' + agentId);
+    if (e) { e.classList.remove('is-running'); e.classList.add('is-active'); }
+  }
+
+  function pushTrace(evt) {
+    progressEl.hidden = false;
+    const li = document.createElement('li');
+    li.className = 'a2a-progress__item ' + (evt.type === 'tool_end' ? 'done' : evt.type === 'error' ? 'error' : 'start');
+    const ts = evt.ts ? fmtClockHHMMSS(evt.ts) : '';
+    const verb = evt.type === 'tool_start' ? (TX.txTraceStart || '▶ start') :
+                 evt.type === 'tool_end'   ? (TX.txTraceEnd || '✓ end  ') :
+                 evt.type === 'done'       ? (TX.txTraceDone || '⚑ done ') :
+                 evt.type === 'error'      ? (TX.txTraceError || '✗ error') : evt.type;
+    li.innerHTML = '<span class="ts">' + escapeHtml(ts) + '</span>' +
+                   '<span class="verb">' + verb + '</span>' +
+                   '<span class="tool">' + escapeHtml(evt.tool || evt.detail || '') + '</span>';
+    progressList.appendChild(li);
+    progressList.scrollTop = progressList.scrollHeight;
+  }
+
+  // One bubble per distinct agent, aggregating repeated calls.
+  // Map<agentId, {wrap, t0, running, calls, completed, lastPreview, agentId}>
+  const agentBubbles = new Map();
+  function resetAgentBubbles() { agentBubbles.clear(); }
+
+  function appendUser(text) {
+    const d = document.createElement('div');
+    d.className = 'agent-chat__msg agent-chat__msg--user';
+    d.textContent = text;
+    messagesEl.appendChild(d);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function appendAgentBubble(evt) {
+    const tool = evt.tool || 'agent';
+    const agentId = evt.agent_id || tool;
+    const name = evt.agent_name || tool;
+    const host = evt.host || '';
+    const icon = evt.icon || 'fa-solid fa-robot';
+    let entry = agentBubbles.get(agentId);
+    if (!entry) {
+      const wrap = document.createElement('div');
+      wrap.className = 'a2a-agent-msg is-running';
+      wrap.innerHTML =
+        '<div class="a2a-agent-msg__head">' +
+          '<span class="a2a-agent-msg__icon"><i class="' + escapeHtml(icon) + '"></i></span>' +
+          '<span class="a2a-agent-msg__name">' + escapeHtml(name) + '</span>' +
+          (host ? '<span class="a2a-agent-msg__badge">' + escapeHtml(host) + '</span>' : '') +
+          '<span class="a2a-agent-msg__count" hidden></span>' +
+          '<span class="a2a-agent-msg__time">' + (TX.txStatusRunning || '⏱ executando…') + '</span>' +
+        '</div>' +
+        '<div class="a2a-agent-msg__bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+      messagesEl.appendChild(wrap);
+      entry = { wrap, t0: performance.now(), running: 0, calls: 0, completed: 0, lastPreview: '', agentId };
+      agentBubbles.set(agentId, entry);
+    }
+    entry.calls += 1;
+    entry.running += 1;
+    entry.wrap.classList.add('is-running');
+    const timeEl = entry.wrap.querySelector('.a2a-agent-msg__time');
+    if (timeEl) timeEl.textContent = TX.txStatusRunning || '⏱ executando…';
+    const countEl = entry.wrap.querySelector('.a2a-agent-msg__count');
+    if (countEl) {
+      if (entry.calls > 1) { countEl.hidden = false; countEl.textContent = '× ' + entry.calls; }
+      else { countEl.hidden = true; }
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function completeAgentBubble(evt) {
+    const agentId = evt.agent_id || evt.tool || '';
+    const entry = agentBubbles.get(agentId);
+    if (!entry) return;
+    entry.completed += 1;
+    entry.running = Math.max(0, entry.running - 1);
+    if (evt.preview) entry.lastPreview = evt.preview;
+    const out = entry.wrap.querySelector('.a2a-agent-msg__bubble');
+    if (out) out.innerHTML = mdLite(entry.lastPreview || '');
+    if (entry.running === 0) {
+      entry.wrap.classList.remove('is-running');
+      const elapsed = Math.round(performance.now() - entry.t0);
+      const timeEl = entry.wrap.querySelector('.a2a-agent-msg__time');
+      if (timeEl) timeEl.textContent = elapsed + 'ms';
+    }
+  }
+
+  // After orchestrator finishes, decide whether intermediate bubbles add value.
+  // Single-agent path: hide them (final answer is enough). 2+ distinct agents:
+  // keep them so the user sees each contribution.
+  function finalizeAgentBubbles() {
+    if (agentBubbles.size < 2) {
+      for (const { wrap } of agentBubbles.values()) {
+        if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      }
+    }
+    agentBubbles.clear();
+  }
+
+  function appendFinal(text, durationMs) {
+    const d = document.createElement('div');
+    d.className = 'a2a-final';
+    d.innerHTML =
+      '<div class="a2a-final__label"><i class="fa-solid fa-flag-checkered"></i> ' + txFmt(TX.txFinalLabelTemplate || 'Resposta consolidada · {ms}ms', {ms: durationMs || 0}) + '</div>' +
+      '<div>' + mdLite(text) + '</div>';
+    messagesEl.appendChild(d);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  async function streamOrchestrate(payload) {
+    const res = await fetch('/sections/ato3_custo_integracao/api/orchestrate/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok || !res.body) throw new Error(txFmt(TX.txHttpError || 'HTTP {code}', {code: res.status}));
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n\n')) !== -1) {
+        const chunk = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 2);
+        for (const line of chunk.split('\n')) {
+          if (!line.startsWith('data:')) continue;
+          const raw = line.slice(5).trim();
+          if (!raw) continue;
+          let evt;
+          try { evt = JSON.parse(raw); } catch { continue; }
+          handleEvent(evt);
+        }
+      }
+    }
+  }
+
+  let __doneAt = 0;
+  function handleEvent(evt) {
+    if (evt.type === 'start') {
+      statusEl.textContent = TX.txStatusRouting || 'Roteando…';
+      pushTrace({ ts: evt.ts, type: 'start', tool: 'orchestrator · ' + (evt.message || '').slice(0, 80) });
+      const orch = document.getElementById('node-orchestrator');
+      if (orch) orch.classList.add('is-running');
+    } else if (evt.type === 'tool_start') {
+      pushTrace(evt);
+      if (evt.agent_id) markNodeRunning(evt.agent_id);
+      // Show an intermediate bubble per distinct agent (may be removed at
+      // the end if only one agent participated).
+      appendAgentBubble(evt);
+    } else if (evt.type === 'tool_end') {
+      pushTrace(evt);
+      completeAgentBubble(evt);
+      const tool = evt.tool || '';
+      const agentId = evt.agent_id || tool;
+      if (agentId) markNodeDone(agentId);
+    } else if (evt.type === 'done') {
+      pushTrace(evt);
+      const orch = document.getElementById('node-orchestrator');
+      if (orch) { orch.classList.remove('is-running'); orch.classList.add('is-active'); }
+      // Keep intermediate bubbles only when 2+ distinct agents contributed.
+      finalizeAgentBubbles();
+      // Always show the orchestrator's synthesized answer.
+      const tools = (evt.tool_calls || []);
+      if (evt.answer) appendFinal(evt.answer, evt.duration_ms);
+      statusEl.textContent = TX.txStatusReady || 'Pronto.';
+      const src = evt.source || 'real';
+      meta.innerHTML = '<span class="source-badge source-badge--' + src + '" title="' + (src === 'real' ? (TX.txSourceRealTitle || 'Real') : (TX.txSourceMockTitle || 'Simulação local')) + '"><i class="fa-solid ' + (src === 'real' ? 'fa-bolt' : 'fa-flask') + '"></i></span>' + txFmt(TX.txMetaTemplate || ' · {ms}ms · {n} chamada(s)', {ms: evt.duration_ms || 0, n: tools.length});
+    } else if (evt.type === 'error') {
+      pushTrace(evt);
+      statusEl.textContent = (TX.txErrorPrefix || 'Erro: ') + (evt.detail || '');
+    }
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    appendUser(text);
+    input.value = '';
+    statusEl.textContent = TX.txStatusConnecting || 'Conectando ao stream…';
+    meta.textContent = '';
+    progressList.innerHTML = '';
+    progressEl.hidden = true;
+    agentBubbles.clear();
+    resetDiagram();
+    try {
+      await streamOrchestrate({ message: text, enable_caching: cacheToggle.checked });
+    } catch (e) {
+      statusEl.textContent = (TX.txErrorPrefix || 'Erro: ') + e.message;
+    }
+  });
+})();
+</script>
+{% endblock %}

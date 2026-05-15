@@ -1,0 +1,48 @@
+texts:
+  intro_title: Why classify risk before deploy?
+  intro_lede: >-
+    Risk classification turns a subjective requirement ("is it safe?") into
+    <strong>measurable criteria</strong> that become <em>policy-as-code</em>.
+    Without it, <strong>PL 2338/2023</strong> (Brazil's AI Legal Framework, in progress) and
+    <strong>LGPD art. 20</strong> (review of automated decisions) become slow manual
+    processes. With Custom Azure Policy in Foundry Control Plane, it becomes an
+    <em>automated guardrail</em>.
+  marco_eyebrow: "Regulatory framework · PL 2338/2023"
+  marco_title: 5 pillars applicable to Contoso systems
+  dims_eyebrow: "Risk dimensions · parameterizable criteria"
+  dims_title: The 4 questions every Custom Policy must answer
+  dims_options_label: "options"
+  demo_eyebrow: "Interactive demo · Custom Azure Policy"
+  demo_title: Simulate runtime risk evaluation
+  demo_badge_title: Local simulation — logic equivalent to the real Custom Policy
+  demo_lede: >-
+    Configure a use case. The endpoint runs the same algorithm that the Custom Policy
+    would run in Foundry Control Plane: score → high/medium/low classification
+    → <em>deny / audit / allow</em> action.
+  form_finalidade: Purpose
+  form_publico: Impacted audience
+  form_dados: Data sensitivity
+  form_reversibilidade: Reversibility
+  form_aia: Algorithmic Impact Assessment (AIA) attached
+  form_submit: Evaluate against the Policy
+  presets_label: "Presets:"
+  preset_alto_sem_aia: "→ high risk without AIA"
+  preset_alto_com_aia: "→ high risk WITH AIA"
+  preset_medio: "→ typical medium risk"
+  preset_baixo: "→ low risk"
+  result_score_placeholder: "score: —"
+  result_triggers_label: "Regulatory triggers:"
+  result_risk_prefix: "Risk "
+  result_score_prefix: "score: "
+  http_error_prefix: "HTTP error "
+  policy_eyebrow: "Custom Azure Policy · real JSON"
+  policy_title: This is exactly the ARM/Bicep that ships to Control Plane
+  policy_lede: >-
+    Deployment via <code>az policy definition create</code> + <code>az policy assignment</code>
+    scoped at the corporate Management Group. Runs on <em>create</em>/<em>update</em> of any
+    Foundry Agent resource.
+  policy_details_summary: View full JSON
+  impl_eyebrow: "Practical implementation · step by step"
+  impl_title: How this Custom Policy is really created and applied
+  integrations_eyebrow: Integrations to close the loop
+  integrations_title: The policy alone isn't enough — what needs to be connected

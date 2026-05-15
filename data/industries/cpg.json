@@ -1,0 +1,229 @@
+{
+  "slug": "cpg",
+  "label": "Bens de Consumo (CPG)",
+  "company_name": "Contoso Goods",
+  "app_title": "Framework IA Contoso Goods",
+  "app_tagline": "Os 24 requisitos do Framework IA Contoso Goods e como cada um é endereçado pela stack Microsoft",
+  "assistant_persona": "Consultor de Trade & SAC Contoso Goods",
+  "section_description": "Assistente de varejo e SAC Contoso Goods respondendo com base no catálogo e políticas comerciais.",
+  "techniques_examples": {
+    "distillation": "Destilar GPT-4o → Phi-4 para responder FAQs de SAC sobre validade, conservação e ingredientes.",
+    "sft": "Padronizar saída em JSON para integrar com plataforma de e-commerce (Magento/VTEX).",
+    "rlhf": "Tom de marca Contoso Goods: caloroso, claro, em pt-BR coloquial, foco em benefício para o consumidor.",
+    "dpo": "Ajustes pontuais pós-lançamento de campanha para alinhar copy com novo posicionamento."
+  },
+  "ft_system_prompt": "Você é o assistente oficial da Contoso Goods (bens de consumo Brasil). Sempre que possível: (a) cite SKU/EAN do produto (ex: SKU CG-CAF-500), (b) informe validade, conservação e SAC, (c) feche com call-to-action de compra ou redirecionamento de SAC.",
+  "ft_model_label": "gpt-4o-mini-contoso-goods-ft-v2 (SFT + DPO)",
+  "ft_model_label_real": "gpt-4o-mini (simulando FT · system Contoso Goods)",
+  "knowledge_base": [
+    {
+      "id": "doc-prod-101",
+      "titulo": "Café Torrado e Moído Contoso Tradicional 500g",
+      "trecho": "SKU CG-CAF-500, EAN 7891234567890. Blend 100% arábica, torra média. Validade 12 meses, conservar em local seco. Sem glúten, sem lactose. Embalagem a vácuo.",
+      "tags": [
+        "café",
+        "alimentos",
+        "catálogo"
+      ]
+    },
+    {
+      "id": "doc-prod-202",
+      "titulo": "Achocolatado em Pó Contoso Kids 400g",
+      "trecho": "SKU CG-ACH-400. Fonte de 6 vitaminas e cálcio. Sem glúten. Selo Nutri-Score B. Validade 18 meses. Dissolução fria ou quente. Preço sugerido R$11,90.",
+      "tags": [
+        "achocolatado",
+        "infantil",
+        "alimentos"
+      ]
+    },
+    {
+      "id": "doc-trade-018",
+      "titulo": "Política de Trocas e Devolução",
+      "trecho": "Trocas em até 7 dias corridos para produto lacrado; até 90 dias em caso de defeito (CDC art. 26). Reembolso via mesmo meio de pagamento em até 10 dias úteis. SAC 0800-CONTOSO.",
+      "tags": [
+        "trade",
+        "sac",
+        "cdc"
+      ]
+    },
+    {
+      "id": "doc-camp-031",
+      "titulo": "Campanha Volta às Aulas — Kit Lancheira",
+      "trecho": "Campanha 15/jan a 28/fev. Compre 3 produtos da linha Kids e ganhe lancheira térmica (estoque limitado, 1 por CPF). Mecânica via cupom KIDS25 no checkout.",
+      "tags": [
+        "campanha",
+        "promoção",
+        "kids"
+      ]
+    },
+    {
+      "id": "doc-supply-044",
+      "titulo": "SLA de Entrega por Região",
+      "trecho": "Sudeste capital: 2 dias úteis. Sudeste interior: 4 dias úteis. Sul/Centro-Oeste: 5 dias úteis. Norte/Nordeste: 7-10 dias úteis. Frete grátis acima de R$99.",
+      "tags": [
+        "entrega",
+        "logística",
+        "frete"
+      ]
+    },
+    {
+      "id": "doc-saude-052",
+      "titulo": "Linha Saudável — Selos e Certificações",
+      "trecho": "Produtos da linha Vita Contoso possuem selo orgânico IBD, sem conservantes artificiais, sem corantes. Embalagens recicláveis (selo ABRE). Auditoria semestral.",
+      "tags": [
+        "saudável",
+        "orgânico",
+        "sustentabilidade"
+      ]
+    }
+  ],
+  "no_answer_fallback": "Não encontrei informação sobre isso no catálogo Contoso Goods. Posso te ajudar com produtos, validade, trocas, campanhas ou prazo de entrega?",
+  "modelagem_examples": [
+    {
+      "keywords": [
+        "café",
+        "produto",
+        "ingrediente"
+      ],
+      "base": "Existem diversos tipos de café no mercado, com diferentes blends e níveis de torra. Verifique o rótulo para detalhes específicos.",
+      "ft": "**Café Contoso Tradicional 500g** (SKU CG-CAF-500):\n• Blend 100% arábica, torra média\n• Embalagem a vácuo, validade 12 meses\n• Sem glúten, sem lactose\n• Preço sugerido R$ 18,90\nQuer ver opções da linha gourmet ou descafeinado?"
+    },
+    {
+      "keywords": [
+        "troca",
+        "devolver",
+        "defeito"
+      ],
+      "base": "Em geral, é possível trocar produtos comprados conforme as políticas da loja. Consulte os termos no comprovante de compra.",
+      "ft": "Política Contoso Goods (CDC art. 26):\n• **Produto lacrado**: troca em até 7 dias corridos\n• **Defeito de fabricação**: até 90 dias\n• Reembolso no mesmo meio de pagamento (10 dias úteis)\nAciona o SAC 0800-CONTOSO ou abre o protocolo aqui mesmo?"
+    },
+    {
+      "keywords": [
+        "entrega",
+        "frete",
+        "prazo"
+      ],
+      "base": "O prazo de entrega varia conforme a região e o serviço de logística contratado. Consulte no momento da compra.",
+      "ft": "SLA Contoso Goods por região:\n• Sudeste capital: **2 dias úteis**\n• Sudeste interior: **4 dias úteis**\n• Sul/CO: 5 dias · Norte/NE: 7-10 dias\n• Frete grátis acima de R$ 99\nMe passa o CEP que confirmo a janela?"
+    }
+  ],
+  "modelagem_default": {
+    "base": "Olá! Posso ajudar com informações sobre produtos. Em que posso ser útil?",
+    "ft": "Olá! Sou o assistente Contoso Goods. Posso ajudar com:\n• Informações de produtos (ingredientes, validade, certificações)\n• Política de trocas e devolução\n• Campanhas e promoções vigentes\n• Prazo de entrega e frete\nO que você procura hoje?"
+  },
+  "evaluator_dataset": [
+    {
+      "id": "ex-01",
+      "pergunta": "Qual a validade do Café Contoso Tradicional?",
+      "resposta_modelo_a": "O Café Contoso Tradicional 500g tem validade de 12 meses a partir da fabricação, em embalagem a vácuo.",
+      "resposta_modelo_b": "Acho que é um ano, mas confere o rótulo."
+    },
+    {
+      "id": "ex-02",
+      "pergunta": "Posso trocar um produto que comprei aberto?",
+      "resposta_modelo_a": "Para troca de produto aberto sem defeito não há obrigação legal; em caso de defeito (CDC art. 26) você tem até 90 dias.",
+      "resposta_modelo_b": "Acho difícil, mas tenta no SAC."
+    },
+    {
+      "id": "ex-03",
+      "pergunta": "O achocolatado Kids tem glúten?",
+      "resposta_modelo_a": "O Achocolatado Contoso Kids 400g (SKU CG-ACH-400) é sem glúten, com selo Nutri-Score B.",
+      "resposta_modelo_b": "Não me lembro, melhor olhar a embalagem."
+    },
+    {
+      "id": "ex-04",
+      "pergunta": "Em quanto tempo chega em Belo Horizonte?",
+      "resposta_modelo_a": "Para Sudeste capital (BH inclusive), o prazo é de 2 dias úteis com frete grátis acima de R$99.",
+      "resposta_modelo_b": "Geralmente uma semana, talvez menos."
+    },
+    {
+      "id": "ex-05",
+      "pergunta": "Vocês têm produto orgânico?",
+      "resposta_modelo_a": "Sim, a linha Vita Contoso possui selo orgânico IBD, sem conservantes nem corantes artificiais.",
+      "resposta_modelo_b": "Acho que sim, dá uma olhada no site."
+    }
+  ],
+  "governance_benign_responses": [
+    "Posso te ajudar com informações de produtos, trocas, campanhas vigentes ou prazo de entrega. Em que posso ser útil?",
+    "O Café Contoso Tradicional 500g (SKU CG-CAF-500) tem validade de 12 meses e preço sugerido de R$ 18,90.",
+    "O prazo de entrega para Sudeste capital é de 2 dias úteis, com frete grátis acima de R$ 99."
+  ],
+  "governance_system_prompt": "Você é o assistente Contoso Goods. Responda em pt-BR, caloroso e direto.",
+  "suggested_prompts": {
+    "rag_chat": [
+      {
+        "label": "trade marketing",
+        "prompt": "Qual a verba de trade marketing para o canal farmácia?"
+      },
+      {
+        "label": "SKU lançamento",
+        "prompt": "Quando entra o SKU de lançamento Q3?"
+      },
+      {
+        "label": "política devolução",
+        "prompt": "Qual a política de devolução de produto vencido?"
+      },
+      {
+        "label": "GTIN/EAN",
+        "prompt": "Como cadastro um novo GTIN no sistema?"
+      },
+      {
+        "label": "férias",
+        "prompt": "Como funciona o calendário de férias coletivas?"
+      },
+      {
+        "label": "código de ética",
+        "prompt": "Posso aceitar brindes de fornecedores?"
+      }
+    ],
+    "modelagem": [
+      {
+        "label": "→ pedido",
+        "prompt": "Quero subir um pedido de 1000 unidades do SKU 7891"
+      },
+      {
+        "label": "→ trade",
+        "prompt": "Como solicito verba para ponta de gôndola?"
+      },
+      {
+        "label": "→ logística",
+        "prompt": "Qual o lead time do CD Sudeste para o varejo?"
+      }
+    ],
+    "hosted_agents": [
+      {
+        "label": "preço sugerido",
+        "prompt": "Qual o preço sugerido do SKU 7891 no canal AS?"
+      },
+      {
+        "label": "ruptura",
+        "prompt": "Quais SKUs estão com ruptura crítica?"
+      },
+      {
+        "label": "promo Q3",
+        "prompt": "Quais promoções entram em julho?"
+      },
+      {
+        "label": "reset portal",
+        "prompt": "Como reseto a senha do portal B2B?"
+      }
+    ],
+    "governance_ok_example": {
+      "label": "Pergunta legítima",
+      "prompt": "Qual o preço sugerido do SKU 7891?"
+    }
+  },
+  "placeholders": {
+    "rag_chat": "Pergunte ao Curador Contoso (ex.: quantos SKUs no portfólio Hidratação?)",
+    "modelagem": "Pergunte algo (ex.: Quero abrir PDV no varejo regional Sul)…",
+    "hosted_agents": "Pergunte ao hosted agent (ex.: previsão de demanda do SKU SH-200 para Q3?)…",
+    "multiagentes": "Faça uma pergunta (ex.: lançar SKU novo e checar política de trade)…",
+    "custo_integracao": "Faça uma pergunta (ex.: previsão de demanda)…",
+    "governanca": "Tente um prompt malicioso ou benigno…  (Enter para enviar · Shift+Enter quebra linha)",
+    "prompt_versionado": "ex.: quantos SKUs no portfólio Hidratação?"
+  },
+  "rag_bases": {
+    "products": "Product Catalog (SKUs)",
+    "regulations": "Internal Regulations"
+  }
+}

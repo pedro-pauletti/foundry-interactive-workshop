@@ -1,0 +1,33 @@
+# Workshop UI strings — English
+chrome:
+  toggle_menu: Toggle menu
+  collapse_menu: Collapse menu
+  industry: Industry
+  industry_tooltip: Industry used in examples and demos
+  language: Language
+  language_tooltip: Interface language
+  home: Home
+  workshop: Workshop
+  azure_signin: Sign in to Azure
+  azure_signout: Sign out of Azure
+  azure_device_open: Open
+  azure_device_then: "and enter:"
+  demo_toggle_aria: Toggle demo mode
+  demo_real_tooltip: "Real mode — calls Foundry, Search, Content Safety. Falls back to local simulation if credentials are missing."
+  demo_mock_tooltip: "Offline mode — everything generated locally, no cost."
+  demo_locked_tooltip: "Real mode is disabled in this public deployment. Clone and run locally with your own Azure credentials to enable it."
+  public_demo_banner: "<strong>Public demo</strong> — running in <strong>mock mode only</strong>. To exercise real Foundry agents, Azure AI Search and Content Safety, clone the repo and run it locally with your own Azure subscription."
+
+groups:
+  overview: Overview
+  build: Build
+  validate: Validate
+  operate: Operate & Govern
+
+section_page:
+  pillars_label: "Contoso pillar(s) covered"
+  requirements_label: "Requirements covered:"
+  tutorial: Tutorial
+  howto_default: How to use this feature
+  key_message: Key message
+  body_lang_notice: "<strong>Heads up:</strong> the in-depth content below is still in Portuguese while translation is in progress. UI navigation and section headers are localized."

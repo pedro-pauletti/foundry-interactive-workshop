@@ -1,0 +1,229 @@
+{
+  "slug": "manufacturing",
+  "label": "Manufatura",
+  "company_name": "Contoso Industries",
+  "app_title": "Framework IA Contoso Industries",
+  "app_tagline": "Os 24 requisitos do Framework IA Contoso Industries e como cada um é endereçado pela stack Microsoft",
+  "assistant_persona": "Engenheiro de Operações Contoso Industries",
+  "section_description": "Assistente de operações industriais Contoso respondendo com base em manuais técnicos e OPLs.",
+  "techniques_examples": {
+    "distillation": "Destilar GPT-4o → Phi-4 para diagnóstico rápido de códigos de falha em CLPs (alta repetição).",
+    "sft": "Padronizar saída em JSON schema para integrar com SAP PM e abrir ordens de manutenção.",
+    "rlhf": "Tom técnico Contoso: objetivo, sem ambiguidade, sempre cita norma (ABNT/IEC).",
+    "dpo": "Iteração rápida pós-RLHF para corrigir respostas com risco de segurança operacional."
+  },
+  "ft_system_prompt": "Você é o assistente técnico oficial da Contoso Industries (manufatura). Sempre que possível: (a) cite código de equipamento e norma (ex: CNC-A12 / ABNT NBR 14039), (b) cite o procedimento padrão (ex: SOP-MNT-042), (c) feche com a próxima ação (abrir OS, isolar máquina, etc.).",
+  "ft_model_label": "gpt-4o-mini-contoso-ind-ft-v2 (SFT + DPO)",
+  "ft_model_label_real": "gpt-4o-mini (simulando FT · system Contoso Industries)",
+  "knowledge_base": [
+    {
+      "id": "doc-cnc-101",
+      "titulo": "Procedimento de Setup da CNC-A12",
+      "trecho": "O setup da CNC-A12 requer aquecimento de fuso por 15min, verificação de pressão hidráulica (mín. 45 bar) e calibração do zero-peça via apalpador renishaw conforme SOP-OPR-021.",
+      "tags": [
+        "cnc",
+        "setup",
+        "operação"
+      ]
+    },
+    {
+      "id": "doc-mnt-204",
+      "titulo": "Manutenção Preditiva — Análise de Vibração",
+      "trecho": "Sensores ISO 10816 instalados nos motores principais coletam vibração a cada 30min. Valores acima de 4.5 mm/s RMS indicam desalinhamento; acima de 7.1 mm/s exigem parada imediata e abertura de OS.",
+      "tags": [
+        "manutenção",
+        "preditiva",
+        "vibração"
+      ]
+    },
+    {
+      "id": "doc-oee-008",
+      "titulo": "Cálculo de OEE — Padrão Contoso",
+      "trecho": "OEE = Disponibilidade × Performance × Qualidade. Meta linha A1: 78%. Coleta automática via MES; perdas classificadas em 6 grandes perdas TPM.",
+      "tags": [
+        "oee",
+        "tpm",
+        "performance"
+      ]
+    },
+    {
+      "id": "doc-seg-013",
+      "titulo": "Bloqueio e Etiquetagem (LOTO)",
+      "trecho": "Toda intervenção em equipamento energizado exige LOTO conforme NR-10/NR-12. Cadeado individual, etiqueta com nome/data, validação por segundo eletricista antes de qualquer trabalho.",
+      "tags": [
+        "segurança",
+        "loto",
+        "nr-12"
+      ]
+    },
+    {
+      "id": "doc-qc-019",
+      "titulo": "Inspeção por Amostragem AQL 1.0",
+      "trecho": "Lotes acima de 1200 peças são inspecionados conforme NBR 5426 nível II, AQL 1.0. Aceita até 7 não-conformidades em amostra de 200; rejeita o lote acima disso.",
+      "tags": [
+        "qualidade",
+        "aql",
+        "inspeção"
+      ]
+    },
+    {
+      "id": "doc-erp-027",
+      "titulo": "Integração MES ↔ SAP PM",
+      "trecho": "Ordens de manutenção criadas no MES são propagadas ao SAP PM via interface IDoc a cada 5 min. Falhas de integração geram alerta no Teams do time de Confiabilidade.",
+      "tags": [
+        "mes",
+        "sap",
+        "integração"
+      ]
+    }
+  ],
+  "no_answer_fallback": "Não encontrei informação sobre isso na base de conhecimento Contoso Industries. Posso te ajudar com setup de equipamentos, manutenção, OEE, segurança ou qualidade?",
+  "modelagem_examples": [
+    {
+      "keywords": [
+        "cnc",
+        "setup",
+        "máquina"
+      ],
+      "base": "O setup de uma máquina CNC geralmente envolve aquecimento, calibração de eixos e verificação de ferramentas. Consulte o manual do equipamento para detalhes.",
+      "ft": "Setup **CNC-A12** (SOP-OPR-021):\n1. Aquecimento de fuso 15min @ 1500 rpm.\n2. Verificar pressão hidráulica (mín. **45 bar**).\n3. Zero-peça com apalpador Renishaw OMP-40.\n4. Validar offset T1 antes do primeiro corte.\nQuer que eu abra OS de validação dimensional?"
+    },
+    {
+      "keywords": [
+        "vibra",
+        "ruído",
+        "tremendo"
+      ],
+      "base": "Vibração excessiva em motores pode indicar desalinhamento, desbalanceamento ou rolamento desgastado. Recomenda-se análise técnica.",
+      "ft": "Diagnóstico ISO 10816:\n• 4.5–7.1 mm/s RMS = **desalinhamento provável** (abrir OS preditiva, prazo 72h)\n• > 7.1 mm/s = **parada imediata** (SOP-MNT-018, NR-12)\nQual o valor atual lido e o tag do motor?"
+    },
+    {
+      "keywords": [
+        "oee",
+        "perda",
+        "performance"
+      ],
+      "base": "OEE mede a eficiência geral do equipamento combinando disponibilidade, performance e qualidade. Identifique as principais perdas para melhorar.",
+      "ft": "Linha **A1** — meta OEE 78%, atual lida do MES. Top 3 perdas mês:\n1. Setup/Ajuste (12%) — projeto SMED em curso\n2. Microparadas (8%) — ação: poka-yoke posto P3\n3. Refugo (3%) — CEP estabilizado\nQuer drill-down por turno?"
+    }
+  ],
+  "modelagem_default": {
+    "base": "Olá! Posso ajudar com informações técnicas gerais. O que você precisa saber?",
+    "ft": "Olá! Sou o assistente técnico Contoso Industries. Posso ajudar com:\n• Setup e operação de equipamentos\n• Diagnóstico preditivo e manutenção\n• OEE, TPM e indicadores de linha\n• Procedimentos de segurança (NR-10, NR-12, LOTO)\nQual o tag do equipamento ou linha?"
+  },
+  "evaluator_dataset": [
+    {
+      "id": "ex-01",
+      "pergunta": "Qual a vibração máxima admissível no motor M-301?",
+      "resposta_modelo_a": "Conforme ISO 10816 zona C, alerta em 4.5 mm/s RMS e parada obrigatória acima de 7.1 mm/s.",
+      "resposta_modelo_b": "Acho que algo perto de 5 ou 6, mas vê com o pessoal da manutenção."
+    },
+    {
+      "id": "ex-02",
+      "pergunta": "Como abrir uma OS de manutenção corretiva?",
+      "resposta_modelo_a": "No MES, vá em Ordens → Nova Corretiva, informe tag do equipamento, modo de falha e criticidade. Propaga ao SAP PM em 5 min.",
+      "resposta_modelo_b": "Pede pro líder, ele abre."
+    },
+    {
+      "id": "ex-03",
+      "pergunta": "Posso destravar o painel sem LOTO se for rápido?",
+      "resposta_modelo_a": "Não. Qualquer intervenção em equipamento energizado exige LOTO conforme NR-10/NR-12, sem exceção.",
+      "resposta_modelo_b": "Se for coisa de minuto, dá pra pular, mas não fala pra ninguém."
+    },
+    {
+      "id": "ex-04",
+      "pergunta": "Qual a meta de OEE da linha A1?",
+      "resposta_modelo_a": "A meta de OEE da linha A1 é 78%, com coleta automática via MES e perdas classificadas pelas 6 grandes perdas TPM.",
+      "resposta_modelo_b": "Sei que é alta, uns 90% talvez."
+    },
+    {
+      "id": "ex-05",
+      "pergunta": "Qual AQL usamos na inspeção de embalagem?",
+      "resposta_modelo_a": "Inspeção por amostragem AQL 1.0 conforme NBR 5426 nível II — aceita até 7 NC em amostra de 200 unidades.",
+      "resposta_modelo_b": "Acho que 2.5 ou 4.0, depende do produto."
+    }
+  ],
+  "governance_benign_responses": [
+    "Posso te ajudar com setup de equipamentos, manutenção preditiva, OEE ou procedimentos de segurança. Qual a sua dúvida?",
+    "A linha A1 tem meta de OEE de 78% com coleta via MES integrada ao SAP PM.",
+    "Toda intervenção em equipamento energizado exige LOTO conforme NR-10/NR-12 — sem exceção."
+  ],
+  "governance_system_prompt": "Você é o assistente técnico Contoso Industries. Responda em pt-BR, objetivo e técnico.",
+  "suggested_prompts": {
+    "rag_chat": [
+      {
+        "label": "OEE linha 3",
+        "prompt": "Qual o OEE atual da linha de montagem 3?"
+      },
+      {
+        "label": "manutenção preditiva",
+        "prompt": "Como funciona a manutenção preditiva no torno CNC?"
+      },
+      {
+        "label": "defeito M-204",
+        "prompt": "O que significa o código de defeito M-204?"
+      },
+      {
+        "label": "política EHS",
+        "prompt": "Qual a política de EHS para soldadores?"
+      },
+      {
+        "label": "férias fabril",
+        "prompt": "Como funciona a escala de férias na fábrica?"
+      },
+      {
+        "label": "fornecedor tier-2",
+        "prompt": "Quais critérios para homologar fornecedor tier-2?"
+      }
+    ],
+    "modelagem": [
+      {
+        "label": "→ produção",
+        "prompt": "Qual a capacidade atual da linha 3?"
+      },
+      {
+        "label": "→ qualidade",
+        "prompt": "Tivemos um lote com defeito M-204, o que fazer?"
+      },
+      {
+        "label": "→ manutenção",
+        "prompt": "O torno CNC apresenta vibração anormal"
+      }
+    ],
+    "hosted_agents": [
+      {
+        "label": "OEE diário",
+        "prompt": "Qual o OEE de ontem na linha 5?"
+      },
+      {
+        "label": "ordem manutenção",
+        "prompt": "Como abro uma OS de manutenção corretiva?"
+      },
+      {
+        "label": "NR-12",
+        "prompt": "Quais EPIs são obrigatórios na prensa?"
+      },
+      {
+        "label": "reset MES",
+        "prompt": "Como faço reset da senha do MES?"
+      }
+    ],
+    "governance_ok_example": {
+      "label": "Pergunta legítima",
+      "prompt": "Qual o OEE da linha 3 ontem?"
+    }
+  },
+  "placeholders": {
+    "rag_chat": "Pergunte ao Curador Contoso (ex.: qual o lead time do SKU CT-450?)",
+    "modelagem": "Pergunte algo (ex.: Quero cotar 200 unidades da válvula CT-450)…",
+    "hosted_agents": "Pergunte ao hosted agent (ex.: status da OP-2031 da linha 3?)…",
+    "multiagentes": "Faça uma pergunta (ex.: cotar 200 un. do SKU CT-450 e checar capacidade)…",
+    "custo_integracao": "Faça uma pergunta (ex.: status da ordem de produção)…",
+    "governanca": "Tente um prompt malicioso ou benigno…  (Enter para enviar · Shift+Enter quebra linha)",
+    "prompt_versionado": "ex.: qual o lead time do SKU CT-450?"
+  },
+  "rag_bases": {
+    "products": "Manufacturing Catalog",
+    "regulations": "Internal Regulations"
+  }
+}

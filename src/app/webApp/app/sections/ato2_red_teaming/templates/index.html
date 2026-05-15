@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Performance", "Governança"] %}
+{% set requisitos = [
+  {"id": "1.2.2", "titulo": "Persona Sintética / Prompt Injection"},
+  {"id": "1.3.7", "titulo": "Testes com evidência (acurácia, vieses, privacidade)"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title', 'PyRIT + Foundry — red teaming automatizado') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+  <figure class="section-figure">
+    <img src="/static/images/how-ai-red-teaming-works.png" alt="{{ _tx.get('fig_alt', 'Como o AI Red Teaming funciona') }}">
+    <figcaption>{{ _tx.get('fig_cap', 'Fluxo do AI Red Teaming Agent: gera ataques via PyRIT, executa contra o agente alvo e produz scorecard auditável.') }}</figcaption>
+  </figure>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <h2 class="page-summary__title">{{ _tx.get('howto_title', 'Como criar uma red team run') }}</h2>
+<pre class="code-block"><code class="language-python">from azure.ai.evaluation.red_team import RedTeam, RiskCategory, AttackStrategy
+
+red_team = RedTeam(
+    azure_ai_project=project,
+    risk_categories=[
+        RiskCategory.HateUnfairness, RiskCategory.Violence,
+        RiskCategory.SelfHarm, RiskCategory.Sexual,
+    ],
+    attack_strategies=[
+        AttackStrategy.Flip, AttackStrategy.Base64, AttackStrategy.UnicodeConfusable,
+    ],
+    num_objectives=10,
+)
+result = await red_team.scan(target=meu_agente_callback,
+                             application_scenario="Curador de Conhecimento Contoso")
+</code></pre>
+</section>
+
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Dashboard de avaliação adversarial') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+  <div class="rt-controls"
+       data-tx-run-button="{{ _tx.get('run_button', 'Executar red team scan') }}"
+       data-tx-status-running-label="{{ _tx.get('status_running_label', 'escaneando…') }}"
+       data-tx-status-running="{{ _tx.get('status_running', 'Executando scan adversarial…') }}"
+       data-tx-status-done="{{ _tx.get('status_done', 'Scan completo · {n} ataques · {duration}ms') }}"
+       data-tx-source-real-title="{{ _tx.get('source_real_title', 'Real') }}"
+       data-tx-source-mock-title="{{ _tx.get('source_mock_title', 'Simulação local') }}"
+       data-tx-error-prefix="{{ _tx.get('error_prefix', 'Erro: ') }}"
+       data-tx-donut-caption="{{ _tx.get('donut_caption', 'pass rate') }}">
+    <div>
+      <label class="eval-group__label">{{ _tx.get('target_label', 'Target') }}</label>
+      <div class="eval-radios">
+        <label class="eval-radio"><input type="radio" name="rt-target" value="with_guardrails" checked> {{ _tx.get('target_with', 'Agente <strong>com</strong> guardrails') | safe }}</label>
+        <label class="eval-radio"><input type="radio" name="rt-target" value="no_guardrails"> {{ _tx.get('target_without', 'Agente <strong>sem</strong> guardrails') | safe }}</label>
+      </div>
+    </div>
+    <div>
+      <button id="rt-run" class="btn btn--primary"><i class="fa-solid fa-virus"></i> {{ _tx.get('run_button', 'Executar red team scan') }}</button>
+      <span id="rt-status" class="muted" style="font-size:12px;margin-left:10px;">{{ _tx.get('status_initial', '7 categorias × 6 estratégias.') }}</span>
+    </div>
+  </div>
+
+  <div id="rt-dashboard" style="display:none;">
+    <!-- KPI CARDS -->
+    <div class="rt-kpis">
+      <div class="rt-kpi"><div class="rt-kpi__lab">{{ _tx.get('kpi_total', 'Total attacks') }}</div><div class="rt-kpi__val" id="kpi-total">–</div></div>
+      <div class="rt-kpi"><div class="rt-kpi__lab">{{ _tx.get('kpi_pass', 'Pass rate') }}</div><div class="rt-kpi__val" id="kpi-pass">–</div></div>
+      <div class="rt-kpi"><div class="rt-kpi__lab">{{ _tx.get('kpi_asr', 'Attack success rate') }}</div><div class="rt-kpi__val" id="kpi-asr">–</div></div>
+      <div class="rt-kpi"><div class="rt-kpi__lab">{{ _tx.get('kpi_mean', 'Mean score') }}</div><div class="rt-kpi__val" id="kpi-mean">–</div></div>
+      <div class="rt-kpi"><div class="rt-kpi__lab">{{ _tx.get('kpi_thr', 'Threshold') }}</div><div class="rt-kpi__val" id="kpi-thr">–</div></div>
+    </div>
+
+    <!-- ROW 1 — donut + radar -->
+    <div class="rt-row">
+      <div class="rt-chart">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_donut', 'Pass / fail') }}</h4>
+        <div id="chart-donut"></div>
+      </div>
+      <div class="rt-chart rt-chart--wide">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_radar', 'Severidade média por categoria (radar)') }}</h4>
+        <div id="chart-radar"></div>
+      </div>
+    </div>
+
+    <!-- ROW 2 — hbar by metric + hbar by attack -->
+    <div class="rt-row">
+      <div class="rt-chart">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_bymetric', 'Pass rate por categoria') }}</h4>
+        <div id="chart-bymetric"></div>
+      </div>
+      <div class="rt-chart">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_byattack', 'Pass rate por estratégia') }}</h4>
+        <div id="chart-byattack"></div>
+      </div>
+    </div>
+
+    <!-- ROW 3 — heatmap + complexity -->
+    <div class="rt-row">
+      <div class="rt-chart rt-chart--wide">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_heatmap', 'Heatmap — attack success por categoria × estratégia') }}</h4>
+        <div id="chart-heatmap"></div>
+      </div>
+      <div class="rt-chart">
+        <h4 class="rt-chart__title">{{ _tx.get('chart_complexity', 'Complexidade dos ataques') }}</h4>
+        <div id="chart-complexity"></div>
+      </div>
+    </div>
+
+    <!-- TABLE — metric details -->
+    <h4 style="margin: 18px 0 8px;">{{ _tx.get('details_title', 'Detalhamento por categoria') }}</h4>
+    <div style="overflow-x:auto;">
+      <table class="rt-table">
+        <thead><tr>
+          <th>{{ _tx.get('th_category', 'Categoria') }}</th><th>{{ _tx.get('th_n', 'N') }}</th><th>{{ _tx.get('th_pass_rate', 'Pass rate') }}</th><th>{{ _tx.get('th_attack_success', 'Attack success') }}</th><th>{{ _tx.get('th_score_avg', 'Score médio') }}</th><th>{{ _tx.get('th_score_max', 'Score máx') }}</th>
+        </tr></thead>
+        <tbody id="tbl-metrics"></tbody>
+      </table>
+    </div>
+
+    <!-- TABLE — failed attacks -->
+    <h4 style="margin: 18px 0 8px;">{{ _tx.get('failed_title', 'Ataques que passaram pelos guardrails (top 8)') }}</h4>
+    <div style="overflow-x:auto;">
+      <table class="rt-table">
+        <thead><tr>
+          <th>{{ _tx.get('th_category', 'Categoria') }}</th><th>{{ _tx.get('th_strategy', 'Estratégia') }}</th><th>{{ _tx.get('th_complexity', 'Compl.') }}</th><th>{{ _tx.get('th_score', 'Score') }}</th><th>{{ _tx.get('th_input', 'Input') }}</th><th>{{ _tx.get('th_reason', 'Razão') }}</th>
+        </tr></thead>
+        <tbody id="tbl-failed"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rt-controls { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:16px; }
+  .rt-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px; }
+  .rt-kpi { background: var(--background-light); border:1px solid var(--border-color); border-top:3px solid var(--primary-color); border-radius:8px; padding:12px; text-align:center; }
+  .rt-kpi__lab { font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .rt-kpi__val { font-size:24px; font-weight:700; color:var(--primary-color); font-family:'JetBrains Mono', monospace; }
+  .rt-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .rt-chart { background: var(--background-light); border:1px solid var(--border-color); border-radius:8px; padding:14px; }
+  .rt-chart--wide { grid-column: span 1; }
+  @media (min-width: 1024px) { .rt-row:has(.rt-chart--wide) { grid-template-columns: 1fr 2fr; } }
+  .rt-chart__title { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); }
+  .rt-chart svg { width:100%; height:auto; display:block; }
+  .rt-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .rt-table th, .rt-table td { padding:8px 10px; border-bottom:1px solid var(--border-color); text-align:left; }
+  .rt-table th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); background: var(--background-light); }
+  .rt-table td.mono { font-family:'JetBrains Mono', monospace; font-size:12px; }
+  .rt-pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
+  .rt-pill--easy { background: rgba(34,197,94,.18); color:#16a34a; }
+  .rt-pill--moderate { background: rgba(245,158,11,.18); color:#d97706; }
+  .rt-pill--difficult { background: rgba(239,68,68,.18); color:#dc2626; }
+</style>
+
+<script>
+(function () {
+  const runBtn = document.getElementById('rt-run');
+  const statusEl = document.getElementById('rt-status');
+  const dash = document.getElementById('rt-dashboard');
+  const HOST = document.querySelector('.rt-controls');
+  const TX = HOST ? HOST.dataset : {};
+
+  // ---------- SVG helpers ---------------------------------------------------
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, txt) {
+    const n = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
+  function svg(w, h) {
+    const s = document.createElementNS(SVG_NS, 'svg');
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    s.setAttribute('width', '100%');
+    return s;
+  }
+
+  function donut(passed, failed) {
+    const total = passed + failed || 1;
+    const r = 60, cx = 90, cy = 90, c = 2 * Math.PI * r;
+    const passLen = (passed / total) * c;
+    const s = svg(180, 180);
+    s.appendChild(el('circle', { cx, cy, r, fill: 'none', stroke: '#dc2626', 'stroke-width': 22 }));
+    s.appendChild(el('circle', { cx, cy, r, fill: 'none', stroke: '#16a34a', 'stroke-width': 22,
+      'stroke-dasharray': `${passLen} ${c - passLen}`, transform: `rotate(-90 ${cx} ${cy})` }));
+    s.appendChild(el('text', { x: cx, y: cy - 4, 'text-anchor': 'middle', 'font-size': 22, 'font-weight': 700, fill: 'currentColor' },
+      Math.round((passed / total) * 100) + '%'));
+    s.appendChild(el('text', { x: cx, y: cy + 16, 'text-anchor': 'middle', 'font-size': 11, fill: 'currentColor', opacity: .6 }, (TX.txDonutCaption || 'pass rate')));
+    return s;
+  }
+
+  function hbar(rows, opts) {
+    opts = opts || {};
+    const W = 360, rowH = 26, padL = 130, padR = 50, padT = 8;
+    const H = padT + rows.length * rowH + 8;
+    const s = svg(W, H);
+    const max = opts.max != null ? opts.max : Math.max(1, ...rows.map(r => r.value));
+    rows.forEach((r, i) => {
+      const y = padT + i * rowH + 4;
+      s.appendChild(el('text', { x: padL - 8, y: y + 13, 'text-anchor': 'end', 'font-size': 11, fill: 'currentColor' }, r.label));
+      s.appendChild(el('rect', { x: padL, y, width: W - padL - padR, height: 16, fill: 'rgba(127,127,127,0.15)', rx: 3 }));
+      const w = ((W - padL - padR) * r.value) / max;
+      const color = r.color || (r.value >= 0.7 ? '#16a34a' : (r.value >= 0.4 ? '#f59e0b' : '#dc2626'));
+      s.appendChild(el('rect', { x: padL, y, width: w, height: 16, fill: color, rx: 3 }));
+      s.appendChild(el('text', { x: padL + w + 4, y: y + 13, 'font-size': 11, fill: 'currentColor' },
+        opts.fmt ? opts.fmt(r.value) : (r.value * 100).toFixed(0) + '%'));
+    });
+    return s;
+  }
+
+  function radar(metrics, values, threshold, maxScale) {
+    const cx = 170, cy = 160, R = 110;
+    const N = metrics.length;
+    const s = svg(340, 320);
+    // grid rings
+    for (let g = 1; g <= 4; g++) {
+      const rr = (R * g) / 4;
+      let pts = '';
+      for (let i = 0; i < N; i++) {
+        const a = (Math.PI * 2 * i) / N - Math.PI / 2;
+        pts += (i ? ' ' : '') + (cx + rr * Math.cos(a)) + ',' + (cy + rr * Math.sin(a));
+      }
+      s.appendChild(el('polygon', { points: pts, fill: 'none', stroke: 'currentColor', 'stroke-width': .5, opacity: .25 }));
+    }
+    // axis lines + labels
+    for (let i = 0; i < N; i++) {
+      const a = (Math.PI * 2 * i) / N - Math.PI / 2;
+      const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a);
+      s.appendChild(el('line', { x1: cx, y1: cy, x2: x, y2: y, stroke: 'currentColor', opacity: .25 }));
+      const lx = cx + (R + 22) * Math.cos(a), ly = cy + (R + 22) * Math.sin(a);
+      s.appendChild(el('text', { x: lx, y: ly, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 10, fill: 'currentColor' },
+        metrics[i].length > 14 ? metrics[i].slice(0, 12) + '…' : metrics[i]));
+    }
+    // threshold polygon
+    let tpts = '';
+    for (let i = 0; i < N; i++) {
+      const a = (Math.PI * 2 * i) / N - Math.PI / 2;
+      const rr = (threshold / maxScale) * R;
+      tpts += (i ? ' ' : '') + (cx + rr * Math.cos(a)) + ',' + (cy + rr * Math.sin(a));
+    }
+    s.appendChild(el('polygon', { points: tpts, fill: 'none', stroke: '#f59e0b', 'stroke-dasharray': '4 4', 'stroke-width': 1.2 }));
+    // values polygon
+    let vpts = '';
+    for (let i = 0; i < N; i++) {
+      const a = (Math.PI * 2 * i) / N - Math.PI / 2;
+      const rr = Math.min(1, values[i] / maxScale) * R;
+      vpts += (i ? ' ' : '') + (cx + rr * Math.cos(a)) + ',' + (cy + rr * Math.sin(a));
+    }
+    s.appendChild(el('polygon', { points: vpts, fill: 'rgba(43,142,240,0.25)', stroke: '#2b8ef0', 'stroke-width': 1.5 }));
+    return s;
+  }
+
+  function heatmap(rows, cols, mat) {
+    const cw = 56, rh = 28, padL = 140, padT = 60;
+    const W = padL + cols.length * cw + 16;
+    const H = padT + rows.length * rh + 8;
+    const s = svg(W, H);
+    cols.forEach((c, j) => {
+      s.appendChild(el('text', {
+        x: padL + j * cw + cw / 2, y: padT - 8,
+        'text-anchor': 'end', 'font-size': 10, fill: 'currentColor',
+        transform: `rotate(-40 ${padL + j * cw + cw / 2} ${padT - 8})`
+      }, c));
+    });
+    rows.forEach((r, i) => {
+      s.appendChild(el('text', { x: padL - 8, y: padT + i * rh + rh / 2 + 4, 'text-anchor': 'end', 'font-size': 11, fill: 'currentColor' }, r));
+      cols.forEach((c, j) => {
+        const v = mat[i][j];
+        const alpha = 0.10 + v * 0.85;
+        s.appendChild(el('rect', { x: padL + j * cw, y: padT + i * rh, width: cw - 2, height: rh - 2,
+          fill: `rgba(220,38,38,${alpha})`, stroke: 'rgba(127,127,127,0.2)' }));
+        s.appendChild(el('text', { x: padL + j * cw + (cw - 2) / 2, y: padT + i * rh + rh / 2 + 4,
+          'text-anchor': 'middle', 'font-size': 10, fill: v > 0.5 ? '#fff' : 'currentColor' },
+          (v * 100).toFixed(0)));
+      });
+    });
+    return s;
+  }
+
+  function stackedBar(buckets) {
+    // buckets = [{label, easy, moderate, difficult}]
+    const W = 360, padL = 100, padR = 16, rowH = 28, padT = 10;
+    const H = padT + buckets.length * rowH + 8;
+    const s = svg(W, H);
+    const colors = { easy: '#16a34a', moderate: '#f59e0b', difficult: '#dc2626' };
+    buckets.forEach((b, i) => {
+      const y = padT + i * rowH + 4;
+      const total = b.easy + b.moderate + b.difficult || 1;
+      s.appendChild(el('text', { x: padL - 8, y: y + 13, 'text-anchor': 'end', 'font-size': 11, fill: 'currentColor' }, b.label));
+      let x = padL;
+      ['easy', 'moderate', 'difficult'].forEach(k => {
+        const w = ((W - padL - padR) * b[k]) / total;
+        if (w > 0) {
+          s.appendChild(el('rect', { x, y, width: w, height: 16, fill: colors[k] }));
+          if (w > 22) s.appendChild(el('text', { x: x + w / 2, y: y + 13, 'text-anchor': 'middle', 'font-size': 10, fill: '#fff' }, b[k]));
+        }
+        x += w;
+      });
+    });
+    // legend
+    s.appendChild(el('text', { x: padL, y: H - 0, 'font-size': 10, fill: 'currentColor', opacity: .6 }, ''));
+    return s;
+  }
+
+  // ---------- main ----------------------------------------------------------
+  runBtn.addEventListener('click', async () => {
+    const target = document.querySelector('input[name="rt-target"]:checked').value;
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (TX.txStatusRunningLabel || 'escaneando…');
+    statusEl.textContent = (TX.txStatusRunning || 'Executando scan adversarial…');
+    try {
+      const res = await fetch('/sections/ato2_red_teaming/api/run', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target }),
+      });
+      const data = await res.json();
+      render(data);
+      dash.style.display = 'block';
+      const _srcTitle = data.source === 'real' ? (TX.txSourceRealTitle || 'Real') : (TX.txSourceMockTitle || 'Simulação local');
+      const badge = '<span class="source-badge source-badge--' + data.source + '" title="' + _srcTitle + '"><i class="fa-solid ' + (data.source === 'real' ? 'fa-bolt' : 'fa-flask') + '"></i></span>';
+      const _done = (TX.txStatusDone || 'Scan completo · {n} ataques · {duration}ms').replace('{n}', data.items.length).replace('{duration}', data.duration_ms);
+      statusEl.innerHTML = badge + ' · ' + _done;
+    } catch (e) {
+      statusEl.textContent = (TX.txErrorPrefix || 'Erro: ') + e.message;
+    } finally {
+      runBtn.disabled = false;
+      runBtn.innerHTML = '<i class="fa-solid fa-virus"></i> ' + (TX.txRunButton || 'Executar red team scan');
+    }
+  });
+
+  function render(data) {
+    const items = data.items;
+    const total = items.length;
+    const passed = items.filter(i => i.passed).length;
+    const failed = total - passed;
+    const asr = items.filter(i => i.properties.attack_success).length / total;
+    const meanScore = items.reduce((a, i) => a + i.score, 0) / total;
+
+    document.getElementById('kpi-total').textContent = total;
+    document.getElementById('kpi-pass').textContent = (passed / total * 100).toFixed(0) + '%';
+    document.getElementById('kpi-asr').textContent = (asr * 100).toFixed(0) + '%';
+    document.getElementById('kpi-mean').textContent = meanScore.toFixed(2);
+    document.getElementById('kpi-thr').textContent = data.threshold.toFixed(1);
+
+    // Donut
+    const donutEl = document.getElementById('chart-donut'); donutEl.innerHTML = ''; donutEl.appendChild(donut(passed, failed));
+
+    // Group by metric
+    const byMetric = {};
+    items.forEach(i => {
+      const m = i.metric; (byMetric[m] = byMetric[m] || []).push(i);
+    });
+    const metrics = Object.keys(byMetric);
+    const passByMetric = metrics.map(m => ({ label: m, value: byMetric[m].filter(x => x.passed).length / byMetric[m].length }));
+    const meanScoreByMetric = metrics.map(m => byMetric[m].reduce((a, x) => a + x.score, 0) / byMetric[m].length);
+
+    // Group by attack technique
+    const byAttack = {};
+    items.forEach(i => {
+      const a = i.properties.attack_technique;
+      (byAttack[a] = byAttack[a] || []).push(i);
+    });
+    const attacks = Object.keys(byAttack);
+    const passByAttack = attacks.map(a => ({ label: a, value: byAttack[a].filter(x => x.passed).length / byAttack[a].length }));
+
+    // Bars
+    const bm = document.getElementById('chart-bymetric'); bm.innerHTML = ''; bm.appendChild(hbar(passByMetric));
+    const ba = document.getElementById('chart-byattack'); ba.innerHTML = ''; ba.appendChild(hbar(passByAttack));
+
+    // Radar (severity = mean score, scale 0..7)
+    const rd = document.getElementById('chart-radar'); rd.innerHTML = '';
+    rd.appendChild(radar(metrics, meanScoreByMetric, data.threshold, 7));
+
+    // Heatmap (attack_success rate per metric × attack)
+    const mat = metrics.map(m => attacks.map(a => {
+      const cell = items.filter(i => i.metric === m && i.properties.attack_technique === a);
+      if (!cell.length) return 0;
+      return cell.filter(i => i.properties.attack_success).length / cell.length;
+    }));
+    const hm = document.getElementById('chart-heatmap'); hm.innerHTML = '';
+    hm.appendChild(heatmap(metrics, attacks, mat));
+
+    // Complexity stacked
+    const buckets = ['easy', 'moderate', 'difficult'].map(level => {
+      const cell = items.filter(i => i.properties.attack_complexity === level);
+      return {
+        label: level,
+        easy: cell.filter(i => i.passed).length,        // reuse: green = passed
+        moderate: 0,
+        difficult: cell.filter(i => !i.passed).length,  // red = failed
+      };
+    });
+    const cx = document.getElementById('chart-complexity'); cx.innerHTML = ''; cx.appendChild(stackedBar(buckets));
+
+    // Table — metrics
+    const tm = document.getElementById('tbl-metrics'); tm.innerHTML = '';
+    metrics.forEach(m => {
+      const cell = byMetric[m];
+      const pr = cell.filter(x => x.passed).length / cell.length;
+      const ar = cell.filter(x => x.properties.attack_success).length / cell.length;
+      const ms = cell.reduce((a, x) => a + x.score, 0) / cell.length;
+      const mx = Math.max(...cell.map(x => x.score));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${m}</td><td>${cell.length}</td>
+        <td class="mono">${(pr * 100).toFixed(0)}%</td>
+        <td class="mono">${(ar * 100).toFixed(0)}%</td>
+        <td class="mono">${ms.toFixed(2)}</td>
+        <td class="mono">${mx.toFixed(2)}</td>`;
+      tm.appendChild(tr);
+    });
+
+    // Table — failed (top-N by score)
+    const fails = items.filter(i => !i.passed).sort((a, b) => b.score - a.score).slice(0, 8);
+    const tf = document.getElementById('tbl-failed'); tf.innerHTML = '';
+    fails.forEach(f => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${f.metric}</td>
+        <td>${f.properties.attack_technique}</td>
+        <td><span class="rt-pill rt-pill--${f.properties.attack_complexity}">${f.properties.attack_complexity}</span></td>
+        <td class="mono">${f.score.toFixed(2)}</td>
+        <td class="mono">${(f.sample.input || '').replace(/</g, '&lt;').slice(0, 60)}…</td>
+        <td>${f.reason}</td>`;
+      tf.appendChild(tr);
+    });
+  }
+})();
+</script>
+{% endblock %}

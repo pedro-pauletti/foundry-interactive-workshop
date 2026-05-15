@@ -1,0 +1,37 @@
+section:
+  title: LLM Arena & Comparação de Modelos
+  description: Comparar modelos lado a lado e escolher pelo trade-off custo × qualidade × latência.
+  eyebrow: Construir
+  eyebrow_icon: fa-solid fa-screwdriver-wrench
+body:
+  pillars:
+  - Modelagem
+  - Performance
+  requisitos:
+  - id: 1.1.5
+    titulo: Comparação A/B/C de modelos no mesmo prompt
+  - id: '1.4'
+    titulo: Catálogo de modelos + fine-tuning
+  resumo: Contoso necesita decidir entre decenas de modelos sin rehacer el agente. <strong>Foundry Models</strong> expone
+    un catálogo unificado (OpenAI, Microsoft, Meta, Mistral, etc.) y el <strong>LLM Arena / Model Leaderboard</strong> permite
+    ejecutar el mismo prompt en varios modelos con métricas comparables.
+  bullets:
+  - 'Catálogo único: GPT-4.x, GPT-5, o-series, Phi, Llama, Mistral, modelos especializados.'
+  - Comparación <em>side-by-side</em> con los mismos inputs y evaluadores.
+  - 'Trade-off explícito: costo / latencia / calidad / riesgo regulatorio.'
+  - Fine-tune, destilación y RLHF/DPO en el mismo Foundry para casos donde el agente necesita un modelo dedicado.
+  passos_titulo: Demostrar en Foundry
+  passos:
+  - titulo: Abrir Foundry → Models → Leaderboard
+    html: Mostrar comparativa de calidad vs costo de los modelos elegibles para el agente Contoso.
+  - titulo: Ejecutar el prompt del Curador en 3 modelos simultáneamente
+    html: Misma entrada, 3 columnas; mostrar scores de evaluadores por modelo.
+  - titulo: Cambiar el modelo del agente sin alterar el prompt
+    html: Editar <code>agent.yaml</code> cambiando el campo <code>model</code> — el deploy reutiliza los evaluadores.
+  mensagem_chave: <strong>Decisión por dato, no por hype.</strong> La elección del modelo se convierte en un trade-off explícito
+    y auditable — y cambiar de modelo es una línea de YAML.
+  extra_html: '<figure class="section-figure" style="margin-top: 22px;"><img src="/static/images/compare-model-overview.png"
+    alt="Foundry Model Leaderboard / Compare Models — comparación lado a lado de calidad, costo y latencia"><figcaption>Foundry
+    &middot; <em>Compare Models</em> &mdash; el mismo prompt ejecutándose en varios modelos, con calidad, costo y latencia
+    lado a lado. Es la pantalla que materializa la decisión por dato.</figcaption></figure>'
+  body_localized: true

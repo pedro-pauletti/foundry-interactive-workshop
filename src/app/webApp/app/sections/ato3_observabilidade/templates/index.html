@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Performance", "Governança"] %}
+{% set requisitos = [
+  {"id": "1.2.4", "titulo": "Monitoramento por produto"},
+  {"id": "1.2.7", "titulo": "Observabilidade (drift, anomalias, dashboards)"},
+  {"id": "1.3.8", "titulo": "Transparência e explicabilidade"},
+  {"id": "1.3.10-11", "titulo": "Documentação de ciclo de vida + Dashboard de governança"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title_html', '<img class="product-logo" src="/static/apim-logo.png" alt="APIM"> APIM AI Gateway → Log Analytics → Dashboard') | safe }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+  <figure class="section-figure">
+    <img src="/static/images/observability-app-insights-architecture.png" alt="{{ _tx.get('fig_arch_alt', 'Arquitetura de observabilidade com Application Insights') }}">
+    <figcaption>{{ _tx.get('fig_arch_cap', '') }}</figcaption>
+  </figure>
+  <div class="section-figure section-figure--row">
+    <figure>
+      <img src="/static/images/foundry-metrics-dashboard-monitor-agents.png" alt="{{ _tx.get('fig_metrics_alt', 'Dashboard de métricas dos agentes') }}">
+      <figcaption>{{ _tx.get('fig_metrics_cap', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/inventory-traces-view.png" alt="{{ _tx.get('fig_traces_alt', 'Visão de traces no inventário') }}">
+      <figcaption>{{ _tx.get('fig_traces_cap', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/monitor-dashboard-summary-ask-ai.png" alt="{{ _tx.get('fig_summary_alt', 'Sumário do monitor com Ask AI') }}">
+      <figcaption>{{ _tx.get('fig_summary_cap', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/monitor-settings-panel-continuos-evaluation.png" alt="{{ _tx.get('fig_continuous_alt', 'Painel de continuous evaluation') }}">
+      <figcaption>{{ _tx.get('fig_continuous_cap', '') }}</figcaption>
+    </figure>
+  </div>
+  <div class="section-figure section-figure--row" style="margin-top: 16px;">
+    <figure>
+      <img src="/static/images/ai-gateway-architecture-diagram.png" alt="{{ _tx.get('fig_gateway_alt', 'Diagrama de arquitetura do Azure APIM AI Gateway') }}">
+      <figcaption>{{ _tx.get('fig_gateway_cap', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/conversation-tracing.png" alt="{{ _tx.get('fig_tracing_alt', 'Tracing de conversa') }}">
+      <figcaption>{{ _tx.get('fig_tracing_cap', '') }}</figcaption>
+    </figure>
+    <figure>
+      <img src="/static/images/control-plane-overview.gif" alt="{{ _tx.get('fig_control_alt', 'Foundry Control Plane') }}">
+      <figcaption>{{ _tx.get('fig_control_cap', '') }}</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <h2 class="page-summary__title">{{ _tx.get('kql_title', 'Exemplo de KQL agregando uso por agente') }}</h2>
+<pre class="code-block"><code class="language-kusto">AGCRequests
+| where TimeGenerated > ago(24h)
+| summarize
+    requests = count(),
+    p95_latency_ms = percentile(DurationMs, 95),
+    prompt_tokens = sum(PromptTokens),
+    completion_tokens = sum(CompletionTokens),
+    cache_hits = countif(IsCacheHit == true)
+  by AgentName, ModelName
+| extend cost_usd = (prompt_tokens + completion_tokens) / 1000.0 * ModelPricePer1k
+| order by cost_usd desc
+</code></pre>
+</section>
+
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Dashboard de operação dos agentes Contoso') }}</h2>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+  <div class="ob-controls"
+       data-tx-querying="{{ _tx.get('status_querying', 'consultando KQL…') }}"
+       data-tx-updated="{{ _tx.get('status_updated', 'Última atualização: {at} · janela {h}h') }}"
+       data-tx-error="{{ _tx.get('error_prefix', 'Erro: ') }}"
+       data-tx-real="{{ _tx.get('src_real_title', 'Real') }}"
+       data-tx-mock="{{ _tx.get('src_mock_title', 'Simulação local') }}">
+    <label class="eval-group__label" style="margin:0;">{{ _tx.get('window_label', 'Janela:') }}</label>
+    <div class="eval-radios">
+      <label class="eval-radio"><input type="radio" name="ob-window" value="6"> 6h</label>
+      <label class="eval-radio"><input type="radio" name="ob-window" value="24" checked> 24h</label>
+      <label class="eval-radio"><input type="radio" name="ob-window" value="72"> 72h</label>
+    </div>
+    <button id="ob-refresh" class="btn btn--primary"><i class="fa-solid fa-rotate-right"></i> {{ _tx.get('refresh_button', 'Atualizar') }}</button>
+    <span id="ob-source-badge" class="muted" style="font-size:12px;"></span>
+    <span id="ob-status" class="muted" style="font-size:12px;">—</span>
+  </div>
+
+  <div id="ob-notes" style="display:none; margin-top:8px;"></div>
+
+  <div id="ob-dashboard" style="display:none;">
+    <!-- KPIs -->
+    <div class="ob-kpis">
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_cost', 'Custo (USD)') }}</div><div class="ob-kpi__val" id="ob-cost">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_requests', 'Requests') }}</div><div class="ob-kpi__val" id="ob-req">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_tokens', 'Tokens') }}</div><div class="ob-kpi__val" id="ob-tok">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_p95', 'p95 latency') }}</div><div class="ob-kpi__val" id="ob-p95">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_cache', 'Cache hit') }}</div><div class="ob-kpi__val" id="ob-cache">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_error', 'Error rate') }}</div><div class="ob-kpi__val" id="ob-err">–</div></div>
+      <div class="ob-kpi"><div class="ob-kpi__lab">{{ _tx.get('kpi_throttled', 'Throttled') }}</div><div class="ob-kpi__val" id="ob-thr">–</div></div>
+    </div>
+
+    <!-- Time series -->
+    <div class="ob-row">
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_tokens', 'Tokens / hora') }}</h4>
+        <div id="ob-ts-tokens"></div>
+      </div>
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_p95', 'p95 latency / hora') }}</h4>
+        <div id="ob-ts-p95"></div>
+      </div>
+    </div>
+
+    <!-- Histogram + cache hit -->
+    <div class="ob-row">
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_hist', 'Distribuição de latência') }}</h4>
+        <div id="ob-hist"></div>
+      </div>
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_cache', 'Cache hit rate / hora') }}</h4>
+        <div id="ob-ts-cache"></div>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="ob-row">
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_top_agents', 'Top agentes por custo') }}</h4>
+        <div style="overflow-x:auto;">
+          <table class="ob-table">
+            <thead><tr><th>{{ _tx.get('th_agent', 'Agente') }}</th><th>{{ _tx.get('th_model', 'Modelo') }}</th><th>{{ _tx.get('th_req', 'Req') }}</th><th>{{ _tx.get('th_tokens', 'Tokens') }}</th><th>{{ _tx.get('th_p95', 'p95') }}</th><th>{{ _tx.get('th_error', 'Erro') }}</th><th>{{ _tx.get('th_cache', 'Cache') }}</th><th>{{ _tx.get('th_cost', 'Custo') }}</th></tr></thead>
+            <tbody id="tbl-agents"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ob-chart">
+        <h4 class="ob-chart__title">{{ _tx.get('chart_cost_model', 'Custo por modelo') }}</h4>
+        <div style="overflow-x:auto;">
+          <table class="ob-table">
+            <thead><tr><th>{{ _tx.get('th_model', 'Modelo') }}</th><th>{{ _tx.get('th_req', 'Req') }}</th><th>{{ _tx.get('th_tokens', 'Tokens') }}</th><th>{{ _tx.get('th_cost', 'Custo') }}</th><th>{{ _tx.get('th_share', '%') }}</th></tr></thead>
+            <tbody id="tbl-models"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <h4 style="margin: 18px 0 8px;">{{ _tx.get('alerts_title', 'Alertas ativos (Ask AI sugere root cause)') }}</h4>
+    <div id="ob-alerts"></div>
+  </div>
+</section>
+
+<style>
+  .ob-controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding-bottom:14px; }
+  .ob-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:16px; }
+  .ob-kpi { background: var(--background-light); border:1px solid var(--border-color); border-top:3px solid var(--accent-color); border-radius:8px; padding:12px; text-align:center; }
+  .ob-kpi__lab { font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .ob-kpi__val { font-size:22px; font-weight:700; color:var(--accent-color); font-family:'JetBrains Mono', monospace; }
+  .ob-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .ob-chart { background: var(--background-light); border:1px solid var(--border-color); border-radius:8px; padding:14px; }
+  .ob-chart__title { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); }
+  .ob-chart svg { width:100%; height:auto; display:block; }
+  .ob-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .ob-table th, .ob-table td { padding:6px 8px; border-bottom:1px solid var(--border-color); text-align:left; }
+  .ob-table th { font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); }
+  .ob-table td.mono { font-family:'JetBrains Mono', monospace; }
+  .ob-alert { display:grid; grid-template-columns:80px 1fr 110px; gap:10px; align-items:center;
+              background: var(--background-light); border:1px solid var(--border-color); border-left-width:4px;
+              border-radius:6px; padding:10px 12px; margin-bottom:8px; }
+  .ob-alert--info { border-left-color: #2b8ef0; }
+  .ob-alert--warn { border-left-color: #f59e0b; }
+  .ob-alert--crit { border-left-color: #dc2626; }
+  .ob-alert__sev { font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; text-align:center; }
+  .ob-alert__sev--info { background: rgba(43,142,240,.18); color:#2b8ef0; }
+  .ob-alert__sev--warn { background: rgba(245,158,11,.18); color:#d97706; }
+  .ob-alert__sev--crit { background: rgba(239,68,68,.18); color:#dc2626; }
+  .ob-alert__title { font-weight:600; }
+  .ob-alert__sub { font-size:11px; color:var(--text-secondary); margin-top:2px; font-family:'JetBrains Mono', monospace; }
+  .ob-alert__val { font-family:'JetBrains Mono', monospace; font-weight:700; text-align:right; color: var(--text-secondary); }
+  .ob-note { background: var(--background-light); border:1px solid var(--border-color); border-left:3px solid #2b8ef0;
+             padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:6px; color: var(--text-secondary); }
+  .ob-note i { margin-right:6px; color:#2b8ef0; }
+</style>
+
+<script>
+(function () {
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function el(t, a, txt) { const n = document.createElementNS(SVG_NS, t); for (const k in a) n.setAttribute(k, a[k]); if (txt!=null) n.textContent = txt; return n; }
+  function svg(w, h) { const s = document.createElementNS(SVG_NS, 'svg'); s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('width','100%'); return s; }
+
+  function lineChart(values, color, fmt) {
+    const W = 380, H = 140, padL = 38, padR = 10, padT = 10, padB = 22;
+    const s = svg(W, H);
+    const max = Math.max(...values) * 1.1, min = 0;
+    const stepX = (W - padL - padR) / Math.max(1, values.length - 1);
+    // grid
+    for (let g = 0; g <= 3; g++) {
+      const y = padT + ((H - padT - padB) * g) / 3;
+      const v = max - ((max - min) * g) / 3;
+      s.appendChild(el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'currentColor', opacity: .12 }));
+      s.appendChild(el('text', { x: padL - 4, y: y + 3, 'text-anchor': 'end', 'font-size': 9, fill: 'currentColor', opacity: .55 }, fmt(v)));
+    }
+    // path
+    let d = '', area = '';
+    values.forEach((v, i) => {
+      const x = padL + i * stepX;
+      const y = padT + (H - padT - padB) * (1 - (v - min) / (max - min || 1));
+      d += (i ? 'L' : 'M') + x + ',' + y + ' ';
+      area += (i ? 'L' : 'M') + x + ',' + y + ' ';
+    });
+    area += `L ${padL + (values.length - 1) * stepX} ${H - padB} L ${padL} ${H - padB} Z`;
+    s.appendChild(el('path', { d: area, fill: color, opacity: .15 }));
+    s.appendChild(el('path', { d, stroke: color, fill: 'none', 'stroke-width': 2 }));
+    return s;
+  }
+
+  function barChart(labels, values) {
+    const W = 380, H = 160, padL = 32, padR = 10, padT = 10, padB = 32;
+    const s = svg(W, H);
+    const max = Math.max(...values) * 1.1;
+    const bw = (W - padL - padR) / values.length - 6;
+    values.forEach((v, i) => {
+      const x = padL + i * ((W - padL - padR) / values.length) + 3;
+      const h = (H - padT - padB) * (v / max);
+      const y = H - padB - h;
+      s.appendChild(el('rect', { x, y, width: bw, height: h, fill: '#2b8ef0', rx: 2 }));
+      s.appendChild(el('text', { x: x + bw / 2, y: H - padB + 12, 'text-anchor': 'middle', 'font-size': 9, fill: 'currentColor', opacity: .7 }, labels[i]));
+      s.appendChild(el('text', { x: x + bw / 2, y: y - 3, 'text-anchor': 'middle', 'font-size': 9, fill: 'currentColor' }, v.toLocaleString()));
+    });
+    return s;
+  }
+
+  function fmtNum(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+    return Math.round(n).toString();
+  }
+
+  async function refresh() {
+    const w = parseInt(document.querySelector('input[name="ob-window"]:checked').value, 10);
+    const btn = document.getElementById('ob-refresh');
+    const status = document.getElementById('ob-status');
+    const TX = document.querySelector('.ob-controls').dataset;
+    btn.disabled = true; status.textContent = TX.txQuerying || 'consultando KQL…';
+    try {
+      const res = await fetch('/sections/ato3_observabilidade/api/metrics', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ window_hours: w }),
+      });
+      const d = await res.json();
+      render(d);
+      document.getElementById('ob-dashboard').style.display = 'block';
+      status.textContent = (TX.txUpdated || 'Última atualização: {at} · janela {h}h').replace('{at}', d.generated_at).replace('{h}', d.window_hours);
+    } catch (e) {
+      status.textContent = (TX.txError || 'Erro: ') + e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderNotes(d) {
+    const box = document.getElementById('ob-notes');
+    if (!box) return;
+    if (!d.notes || !d.notes.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.style.display = 'block';
+    box.innerHTML = d.notes.map(n =>
+      `<div class="ob-note"><i class="fa-solid fa-circle-info"></i> ${n}</div>`
+    ).join('');
+  }
+
+  function render(d) {
+    renderNotes(d);
+    const badge = document.getElementById('ob-source-badge');
+    if (badge) {
+      const TX = document.querySelector('.ob-controls').dataset;
+      const src = d.source || 'mock';
+      const icon = src === 'real' ? 'fa-bolt' : 'fa-flask';
+      const ws = d.workspace ? ` · ${d.workspace}` : '';
+      const title = src === 'real' ? (TX.txReal || 'Real') : (TX.txMock || 'Simulação local');
+      badge.innerHTML = `<span class="source-badge source-badge--${src}" title="${title}"><i class="fa-solid ${icon}"></i></span>${ws}`;
+    }
+    document.getElementById('ob-cost').textContent  = '$ ' + d.kpis.total_cost_usd.toLocaleString();
+    document.getElementById('ob-req').textContent   = fmtNum(d.kpis.total_requests);
+    document.getElementById('ob-tok').textContent   = fmtNum(d.kpis.total_tokens);
+    document.getElementById('ob-p95').textContent   = d.kpis.p95_latency_ms + 'ms';
+    document.getElementById('ob-cache').textContent = (d.kpis.cache_hit_rate * 100).toFixed(0) + '%';
+    document.getElementById('ob-err').textContent   = (d.kpis.error_rate * 100).toFixed(2) + '%';
+    document.getElementById('ob-thr').textContent   = fmtNum(d.kpis.throttled);
+
+    // Time series
+    const xs = d.timeseries.map(b => b.t);
+    const tsTok = document.getElementById('ob-ts-tokens'); tsTok.innerHTML = '';
+    tsTok.appendChild(lineChart(d.timeseries.map(b => b.tokens), '#2b8ef0', fmtNum));
+    const tsP95 = document.getElementById('ob-ts-p95'); tsP95.innerHTML = '';
+    tsP95.appendChild(lineChart(d.timeseries.map(b => b.p95_latency_ms), '#f59e0b', v => Math.round(v) + 'ms'));
+    const tsCh = document.getElementById('ob-ts-cache'); tsCh.innerHTML = '';
+    tsCh.appendChild(lineChart(d.timeseries.map(b => b.cache_hit_rate), '#16a34a', v => (v * 100).toFixed(0) + '%'));
+
+    // Histogram
+    const hist = document.getElementById('ob-hist'); hist.innerHTML = '';
+    hist.appendChild(barChart(d.latency_hist.buckets, d.latency_hist.counts));
+
+    // Tables
+    const ta = document.getElementById('tbl-agents'); ta.innerHTML = '';
+    d.by_agent.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><strong>${r.agent}</strong></td>
+        <td>${r.model}</td>
+        <td class="mono">${fmtNum(r.requests)}</td>
+        <td class="mono">${fmtNum(r.prompt_tokens + r.completion_tokens)}</td>
+        <td class="mono">${r.p95_latency_ms}ms</td>
+        <td class="mono">${(r.error_rate * 100).toFixed(2)}%</td>
+        <td class="mono">${(r.cache_hit_rate * 100).toFixed(0)}%</td>
+        <td class="mono">$${r.cost_usd.toFixed(2)}</td>`;
+      ta.appendChild(tr);
+    });
+    const tm = document.getElementById('tbl-models'); tm.innerHTML = '';
+    d.by_model.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><strong>${r.model}</strong></td>
+        <td class="mono">${fmtNum(r.requests)}</td>
+        <td class="mono">${fmtNum(r.tokens)}</td>
+        <td class="mono">$${r.cost_usd.toFixed(2)}</td>
+        <td class="mono">${(r.share * 100).toFixed(0)}%</td>`;
+      tm.appendChild(tr);
+    });
+
+    // Alerts
+    const al = document.getElementById('ob-alerts'); al.innerHTML = '';
+    d.top_alerts.forEach(a => {
+      const div = document.createElement('div');
+      div.className = `ob-alert ob-alert--${a.severity}`;
+      div.innerHTML =
+        `<div class="ob-alert__sev ob-alert__sev--${a.severity}">${a.severity.toUpperCase()}</div>
+         <div>
+           <div class="ob-alert__title">${a.title} <span class="muted" style="font-weight:400;">· ${a.agent}</span></div>
+           <div class="ob-alert__sub">${a.kql}</div>
+         </div>
+         <div class="ob-alert__val">${a.value}</div>`;
+      al.appendChild(div);
+    });
+  }
+
+  document.getElementById('ob-refresh').addEventListener('click', refresh);
+  document.querySelectorAll('input[name="ob-window"]').forEach(r => r.addEventListener('change', refresh));
+  refresh();  // auto-load on first render
+})();
+</script>
+{% endblock %}

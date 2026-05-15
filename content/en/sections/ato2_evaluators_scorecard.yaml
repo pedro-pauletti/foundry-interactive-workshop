@@ -1,0 +1,61 @@
+texts:
+  intro_title: What are Evaluations in Foundry
+  intro_lede: >-
+    <strong>Evaluations</strong> are automated tests for generative AI systems: you define a
+    <em>dataset</em> (questions + optional <em>ground truth</em>), pick <em>evaluators</em>
+    (built-in or custom) and Foundry returns a <strong>scorecard</strong> with aggregated metrics
+    + per-example drilldown — like unit tests, but for model quality/safety.
+  intro_quality: "<strong>Quality</strong> · <code>groundedness</code>, <code>relevance</code>, <code>coherence</code>, <code>fluency</code>, <code>similarity</code>."
+  intro_safety: "<strong>Safety</strong> · <code>hate/unfairness</code>, <code>violence</code>, <code>sexual</code>, <code>self-harm</code>, <code>protected material</code>."
+  intro_agent: "<strong>Agent</strong> · <code>intent_resolution</code>, <code>tool_call_accuracy</code>, <code>task_adherence</code>."
+  intro_rag: "<strong>RAG</strong> · <code>retrieval</code>, <code>response_completeness</code>, <code>document_retrieval</code>."
+  intro_custom: "<strong>Custom</strong> · any Python function decorated with <code>@evaluator</code> — KPIs from your domain."
+  figure_alt: Agent evaluation results in Foundry
+  figure_caption: Aggregated scorecard + per-example drilldown in the Foundry portal — same format this demo reproduces locally.
+  portal_title: How to run from the Foundry portal
+  portal_lede: >-
+    In <em>Foundry Project → Evaluations → New evaluation</em>: (1) select the <em>dataset</em> (JSONL),
+    (2) check built-in evaluators or point to a custom one registered in the project,
+    (3) pick the <em>target</em> (prompt, deployment or agent), (4) run. The result becomes a
+    report comparable across runs and prompt/model versions — with a permanent link and CI/CD export.
+  sdk_title: Run via SDK (azure-ai-evaluation)
+  sdk_note: >-
+    The same code runs locally (dev), in PR (CI/CD) and in Foundry (continuous evaluation).
+    When you pass <code>azure_ai_project</code>, the result also flows to the portal
+    — visible to product, quality and governance teams.
+  custom_title: Anatomy of a Custom Evaluator
+  custom_lede: >-
+    A Custom Evaluator is simply a Python function that receives dataset fields
+    (<code>response</code>, <code>query</code>, <code>context</code>, <code>ground_truth</code>…) and returns
+    a <code>dict</code> with metrics. Great for business rules (brand tone, compliance,
+    output format etc.) that generic evaluators don't cover. Example — <code>tom_contoso</code> evaluator:
+  custom_note: >-
+    This evaluator can be registered in the <em>Foundry Evaluator Catalog</em> and reused by other BUs
+    — evaluators become corporate governance assets, not loose notebook code.
+  demo_eyebrow: Interactive demo
+  demo_title: Run batch evaluation
+  mock_badge_title: Local simulation
+  demo_lede: >-
+    In <strong>real</strong> mode, registers the <code>contoso_tom_de_voz</code> (code-based)
+    and <code>contoso_friendliness</code> (prompt-based) evaluators in the Foundry project,
+    creates an <code>eval</code> + <code>run</code> with inline dataset (JSONL) and polls
+    until completion — just like the official SDK. In offline mode, same structure but local heuristics.
+  evaluators_label: Evaluators in the scorecard
+  builtin_tag: (built-in)
+  custom_code_tag: (custom code-based)
+  custom_prompt_tag: (custom prompt-based)
+  target_label: Target
+  target_a: Model A (gpt-4o + RAG)
+  target_b: Model B (gpt-4o-mini no RAG)
+  run_button: Run evaluation
+  scorecard_title: Aggregated scorecard
+  pass_rate_label: "Pass rate:"
+  examples_title: Per-example results
+  prompt_select: Pick evaluators + target and run.
+  no_evaluators: Select at least one evaluator.
+  running_template: "Running batch against {target}…"
+  examples_word: examples
+  open_report: "open report in Foundry ↗"
+  done_template: "Done · {ms}ms"
+  real_title: Real
+  error_prefix: "Error: "

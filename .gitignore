@@ -1,0 +1,31 @@
+# ---- Secrets / environment files ----
+# Never commit local environment files; use *example.env* as the template.
+.env
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- Node ----
+node_modules/
+
+# ---- Build / dist ----
+dist/
+build/
+*.log
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/*.log

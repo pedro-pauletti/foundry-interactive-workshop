@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="{{ request.state.lang or 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ request.state.app_title }}{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="alternate icon" href="/static/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/styles.css?v={{ request.state.static_version }}">
+  <script>
+    // Apply saved theme + sidebar state before paint to avoid flicker
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "white") document.documentElement.setAttribute("data-theme", "white");
+        var s = localStorage.getItem("sidebar");
+        if (s === "collapsed") document.documentElement.setAttribute("data-sidebar", "collapsed");
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-header__title">{{ request.state.app_title }}</span>
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle"
+                aria-label="{{ request.state.t('chrome.toggle_menu') }}" aria-expanded="true" title="{{ request.state.t('chrome.collapse_menu') }}">
+          <i class="fa-solid fa-angles-left"></i>
+        </button>
+      </div>
+
+      <div class="industry-select" title="{{ request.state.t('chrome.industry_tooltip') }}">
+        <label class="industry-select__label" for="industry-select">
+          <i class="fa-solid fa-industry"></i>
+          <span>{{ request.state.t('chrome.industry') }}</span>
+        </label>
+        <select class="industry-select__input" id="industry-select"
+                data-current="{{ request.state.industry }}">
+          {% for ind in request.state.industries %}
+            <option value="{{ ind.slug }}"
+                    {% if ind.slug == request.state.industry %}selected{% endif %}>
+              {{ ind.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="industry-select" title="{{ request.state.t('chrome.language_tooltip') }}">
+        <label class="industry-select__label" for="language-select">
+          <i class="fa-solid fa-language"></i>
+          <span>{{ request.state.t('chrome.language') }}</span>
+        </label>
+        <select class="industry-select__input" id="language-select"
+                data-current="{{ request.state.lang }}">
+          {% for lng in request.state.languages %}
+            <option value="{{ lng.code }}"
+                    {% if lng.code == request.state.lang %}selected{% endif %}>
+              {{ lng.flag }} {{ lng.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <a class="menu-item" href="/">
+        <i class="fa-solid fa-house"></i>
+        <span>{{ request.state.t('chrome.home') }}</span>
+      </a>
+
+      <div class="sidebar-section-label">{{ request.state.t('chrome.workshop') }}</div>
+      <nav class="sidebar-menu">
+        {% for group in request.state.menu_groups %}
+          <details class="menu-group" open>
+            <summary class="menu-group__head">
+              <i class="{{ group.icon }}"></i>
+              <span>{{ group.label }}</span>
+              <i class="fa-solid fa-chevron-down menu-group__chev"></i>
+            </summary>
+            <div class="menu-group__items">
+              {% for item in group["items"] %}
+                <a class="menu-item menu-item--sub" href="{{ item.url }}" title="{{ item.description }}">
+                  <i class="{{ item.icon }}"></i>
+                  <span>{{ item.title }}</span>
+                </a>
+              {% endfor %}
+            </div>
+          </details>
+        {% endfor %}
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="az-status" id="az-status" data-state="loading">
+          <div class="az-status__bar">
+            <span class="az-status__pill" data-field="azure-pill" title="Azure">
+              <i class="fa-brands fa-microsoft"></i>
+              <span class="az-status__dot" data-field="azure-dot" aria-hidden="true"></span>
+            </span>
+            <span class="az-status__pill" data-field="foundry-pill" title="Foundry">
+              <i class="fa-solid fa-layer-group"></i>
+              <span class="az-status__dot" data-field="foundry-dot" aria-hidden="true"></span>
+            </span>
+            <span class="az-status__user" data-field="azure" title=""></span>
+            <button type="button" class="az-status__btn" id="az-login-btn"
+                    title="{{ request.state.t('chrome.azure_signin') }}" aria-label="{{ request.state.t('chrome.azure_signin') }}" hidden>
+              <i class="fa-solid fa-right-to-bracket"></i>
+            </button>
+            <button type="button" class="az-status__btn az-status__btn--logout" id="az-logout-btn"
+                    title="{{ request.state.t('chrome.azure_signout') }}" aria-label="{{ request.state.t('chrome.azure_signout') }}" hidden>
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+          <div class="az-status__device" id="az-device" hidden>
+            <div class="az-status__device-text">
+              {{ request.state.t('chrome.azure_device_open') }} <a id="az-device-url" target="_blank" rel="noopener">login.microsoft.com/device</a>
+              {{ request.state.t('chrome.azure_device_then') }}
+            </div>
+            <code class="az-status__code" id="az-device-code">—</code>
+          </div>
+        </div>
+        {% if request.state.real_mode_disabled %}
+        <div class="demo-toggle demo-toggle--locked" data-mode="mock" title="{{ request.state.t('chrome.demo_locked_tooltip') }}">
+          <div class="demo-toggle__switch" role="group" aria-label="{{ request.state.t('chrome.demo_toggle_aria') }}">
+            <span class="demo-toggle__thumb" aria-hidden="true"></span>
+            <button type="button" class="demo-toggle__btn" data-set="real" disabled aria-disabled="true"
+                    title="{{ request.state.t('chrome.demo_locked_tooltip') }}">
+              <i class="fa-solid fa-lock"></i>
+            </button>
+            <button type="button" class="demo-toggle__btn" data-set="mock"
+                    title="{{ request.state.t('chrome.demo_mock_tooltip') }}">
+              <i class="fa-solid fa-flask"></i>
+            </button>
+          </div>
+        </div>
+        {% else %}
+        <div class="demo-toggle" data-mode="{{ request.state.demo_mode or 'mock' }}">
+          <div class="demo-toggle__switch" role="group" aria-label="{{ request.state.t('chrome.demo_toggle_aria') }}">
+            <span class="demo-toggle__thumb" aria-hidden="true"></span>
+            <button type="button" class="demo-toggle__btn" data-set="real"
+                    title="{{ request.state.t('chrome.demo_real_tooltip') }}">
+              <i class="fa-solid fa-bolt"></i>
+            </button>
+            <button type="button" class="demo-toggle__btn" data-set="mock"
+                    title="{{ request.state.t('chrome.demo_mock_tooltip') }}">
+              <i class="fa-solid fa-flask"></i>
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </aside>
+
+    <main class="main-area">
+      {% if request.state.real_mode_disabled %}
+      <div class="public-demo-banner" role="note">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>{{ request.state.t('chrome.public_demo_banner') | safe }}</span>
+      </div>
+      {% endif %}
+      <div class="main-logos" aria-hidden="true">
+        <img src="/static/microsoft-logo.png" alt="Microsoft" class="main-logo main-logo--ms">
+        <span class="main-logos__sep">×</span>
+        <img src="/static/contoso-logo.svg" alt="Contoso" class="main-logo main-logo--contoso">
+      </div>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script src="/static/js/app.js?v={{ request.state.static_version }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</body>
+</html>

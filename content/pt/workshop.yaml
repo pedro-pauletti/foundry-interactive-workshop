@@ -1,0 +1,39 @@
+# Workshop UI strings — Portuguese (source of truth)
+# Editorial copy for sidebar chrome, navigation groups, home page, and
+# shared section-page chrome. Keys mirror the dotted paths used by the
+# i18n.t() function so templates can keep calling t("chrome.toggle_menu")
+# etc. without changes. Missing keys fall back to the legacy in-code
+# TRANSLATIONS dict in app/i18n.py.
+
+chrome:
+  toggle_menu: Alternar menu
+  collapse_menu: Recolher menu
+  industry: Indústria
+  industry_tooltip: Indústria dos exemplos e demos
+  language: Idioma
+  language_tooltip: Idioma da interface
+  home: Início
+  workshop: Workshop
+  azure_signin: Entrar no Azure
+  azure_signout: Sair do Azure
+  azure_device_open: Abra
+  azure_device_then: "e digite:"
+  demo_toggle_aria: Alternar modo de demo
+  demo_real_tooltip: "Modo Real — chama Foundry, Search, Content Safety. Cai pra simulação local se faltar credencial."
+  demo_mock_tooltip: "Modo offline — tudo gerado localmente, sem custo."
+  demo_locked_tooltip: "Modo Real está desabilitado nesta versão pública. Clone e execute localmente com suas credenciais Azure para habilitá-lo."
+  public_demo_banner: "<strong>Demo público</strong> — rodando apenas em <strong>modo mock</strong>. Para acionar agentes Foundry, Azure AI Search e Content Safety reais, clone o repositório e execute localmente com sua própria assinatura Azure."
+
+groups:
+  overview: Visão Geral
+  build: Construir
+  validate: Validar
+  operate: Operar & Governar
+
+section_page:
+  pillars_label: "Pilar(es) Contoso atendido(s)"
+  requirements_label: "Requisitos cobertos:"
+  tutorial: Tutorial
+  howto_default: Como usar esta funcionalidade
+  key_message: Mensagem-chave
+  body_lang_notice: ""

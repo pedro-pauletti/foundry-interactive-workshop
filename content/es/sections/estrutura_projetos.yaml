@@ -1,0 +1,61 @@
+section:
+  title: Estructura de Proyectos de Foundry
+  description: Cómo organizar proyectos Foundry para tener paridad dev/prod, trazabilidad, RBAC granular y auditoría de extremo
+    a extremo.
+  eyebrow: Visión General · Microsoft × Contoso
+  eyebrow_icon: fa-solid fa-layer-group
+body:
+  pillars:
+  - Governança
+  - Performance
+  - Transversal
+  requisitos:
+  - id: 1.1.5
+    titulo: Ambiente de teste com paridade de produção
+  - id: 1.3.1
+    titulo: Inventário e rastreabilidade
+  - id: 1.3.5
+    titulo: RBAC, auditoria e segregação de ambientes
+  blocks:
+  - titulo: Por qué separar en proyectos
+    html: <p>En Foundry, un <strong>Project</strong> es la unidad lógica que agrupa <em>agents</em>, <em>model deployments</em>,
+      <em>knowledge sources</em>, <em>evaluators</em>, <em>connections</em>, <em>traces</em> y <em>RBAC</em>. Estructurar
+      bien este árbol es lo que permite escalar sin perder el control.</p><figure class="section-figure"><img src="/static/images/projects-multi-setup.png"
+      alt="Setup multi-proyectos en Foundry"><figcaption>Setup multi-proyectos en Foundry — un proyecto por dominio/pilar,
+      con entornos aislados (dev/staging/prod) y gobernanza heredada del tenant.</figcaption></figure>
+  - titulo: Entorno de pruebas con paridad de producción
+    html: <p>Cada proyecto puede duplicarse en <strong>dev</strong>, <strong>staging</strong> y <strong>prod</strong> manteniendo
+      el <em>mismo modelo</em>, <em>mismas tools</em>, <em>mismos guardrails</em> — solo cambian <em>connections</em> (BD,
+      índice, APIs) y <em>secrets</em>. Esto elimina el clásico <em>“funcionó en dev, falló en prod”</em>.</p><ul><li><strong>Same-shape
+      projects:</strong> definición en IaC (Bicep/Terraform) garantiza que dev/staging/prod nazcan idénticos.</li><li><strong>Promover
+      por pipeline:</strong> aprobar una versión de agente en staging promueve la misma <em>image</em> (agent.yaml + prompt)
+      a prod.</li><li><strong>Datasets de regresión</strong> corren contra dev y staging antes de cada promote — bloqueando
+      degradación.</li></ul>
+  - titulo: Inventario y trazabilidad
+    html: <p>Todo dentro de un proyecto se <strong>indexa y versiona automáticamente</strong>:</p><ul><li><strong>Model catalog</strong>
+      &mdash; qué modelos están en uso, con qué deployment, en qué región, cuánto cuestan.</li><li><strong>Agent registry</strong>
+      &mdash; cada agente tiene versión, owner, fecha de creación, historial de cambios y enlace al repo Git.</li><li><strong>Knowledge
+      sources</strong> &mdash; índices Foundry IQ con procedencia (cuándo se indexó el doc, de qué fuente vino).</li><li><strong>Evaluations
+      &amp; traces</strong> &mdash; cada ejecución queda registrada con input/output/tools/latency, consultable vía OpenTelemetry
+      y Application Insights.</li></ul><p>Combinado con <strong>Agent 365</strong> este inventario sube a la visión corporativa
+      &mdash; CISO y Compliance ven <em>todos</em> los agentes de la empresa sin tener que entrar en cada proyecto.</p>
+  - titulo: RBAC y segregación de funciones
+    html: <p>Foundry hereda <strong>Microsoft Entra ID</strong> &mdash; mismas identidades, mismos grupos, mismo Conditional
+      Access de la empresa. RBAC por proyecto evita que el equipo A lea o modifique recursos del equipo B.</p><ul><li><strong>Roles
+      built-in:</strong> <code>AzureAI Developer</code>, <code>AzureAI Inference Deployer</code>, <code>AzureAI User</code>,
+      <code>Reader</code>.</li><li><strong>Custom roles:</strong> p. ej., <em>Prompt Reviewer</em> (read-only en agents +
+      write en evaluations) para el equipo de calidad.</li><li><strong>Workload Identity:</strong> agentes en runtime usan
+      <em>managed identity</em> &mdash; nada de claves hard-coded.</li><li><strong>Just-in-time access</strong> vía PIM (Privileged
+      Identity Management) para operaciones sensibles en prod.</li></ul>
+  - titulo: Auditoría y segregación de entornos
+    html: '<p>Cada acción de plano de control (crear agente, cambiar prompt, deploy, alterar guardrail) genera un evento auditable:</p><ul><li><strong>Azure
+      Activity Log</strong> &mdash; quién hizo qué, cuándo, en qué recurso.</li><li><strong>Diagnostic Settings → Log Analytics
+      / Sentinel</strong> &mdash; retención larga, consultas KQL, alertas personalizadas.</li><li><strong>Microsoft Purview</strong>
+      &mdash; clasificación de datos que entran/salen de los agentes, DLP corporativo, compliance GDPR/AI Act.</li><li><strong>Defender
+      for Cloud</strong> &mdash; security posture del proyecto, recomendaciones y runtime threats sobre los agentes.</li></ul><p>Segregación
+      física: subscriptions/resource groups distintos por entorno, networking aislado (private endpoints), políticas Azure
+      Policy bloqueando deploys fuera de los templates aprobados.</p>'
+  mensagem_chave: Un <strong>proyecto Foundry bien estructurado</strong> es el equivalente de un <em>repositorio Git bien
+    organizado</em> para agentes &mdash; sin él, RBAC, auditoría y promoción entre entornos se vuelven procesos manuales y
+    frágiles.
+  body_localized: true

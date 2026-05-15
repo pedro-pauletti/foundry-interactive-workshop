@@ -1,0 +1,30 @@
+{# Partial: pillars + requisitos covered.
+   Expects vars (passed via include):
+     - pillars: list[str]
+     - requisitos: list[{id, titulo}]
+   Render only if at least one is provided.
+#}
+{% if pillars or requisitos %}
+<section class="page-summary">
+  {% if pillars %}
+    <span class="page-eyebrow"><i class="fa-solid fa-bullseye"></i> {{ request.state.t('section_page.pillars_label') }}</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px;">
+      {% for p in pillars %}
+        <span class="badge" style="background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 999px; font-size: 13px;">{{ request.state.t_label('pillar', p) }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if requisitos %}
+    <p class="muted" style="font-size: 13px; margin-bottom: 6px;">{{ request.state.t('section_page.requirements_label') }}</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+      {% for r in requisitos %}
+        <a href="/sections/mapeamento#req-{{ r.id | replace('.', '-') }}" class="badge"
+           style="background: var(--background-light); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 8px; font-size: 12px; text-decoration: none;">
+          <code>{{ r.id }}</code> · {{ request.state.t_label('requisito', r.titulo) }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+<hr class="section-separator" aria-hidden="true">
+{% endif %}

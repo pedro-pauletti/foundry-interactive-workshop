@@ -1,0 +1,37 @@
+section:
+  title: LLM Arena & Comparação de Modelos
+  description: Comparar modelos lado a lado e escolher pelo trade-off custo × qualidade × latência.
+  eyebrow: Construir
+  eyebrow_icon: fa-solid fa-screwdriver-wrench
+body:
+  pillars:
+  - Modelagem
+  - Performance
+  requisitos:
+  - id: 1.1.5
+    titulo: Comparação A/B/C de modelos no mesmo prompt
+  - id: '1.4'
+    titulo: Catálogo de modelos + fine-tuning
+  resumo: Contoso needs to choose between dozens of models without rebuilding the agent. <strong>Foundry Models</strong> exposes
+    a unified catalog (OpenAI, Microsoft, Meta, Mistral, etc.) and the <strong>LLM Arena / Model Leaderboard</strong> lets
+    you run the same prompt across many models with comparable metrics.
+  bullets:
+  - 'Single catalog: GPT-4.x, GPT-5, o-series, Phi, Llama, Mistral, specialized models.'
+  - <em>Side-by-side</em> comparison with the same inputs and evaluators.
+  - 'Explicit trade-off: cost / latency / quality / regulatory risk.'
+  - Fine-tune, distillation and RLHF/DPO in the same Foundry for agents that need a dedicated model.
+  passos_titulo: Live demo in Foundry
+  passos:
+  - titulo: Open Foundry → Models → Leaderboard
+    html: Show quality vs cost comparison of eligible models for the Contoso agent.
+  - titulo: Run the Curator prompt on 3 models simultaneously
+    html: Same input, 3 columns; show evaluator scores per model.
+  - titulo: Switch the agent's model without changing the prompt
+    html: Edit <code>agent.yaml</code> changing the <code>model</code> field — deploy reuses evaluators.
+  mensagem_chave: <strong>Decisions based on data, not hype.</strong> Model choice becomes an explicit, auditable trade-off
+    — and switching models is one YAML line.
+  extra_html: '<figure class="section-figure" style="margin-top: 22px;"><img src="/static/images/compare-model-overview.png"
+    alt="Foundry Model Leaderboard / Compare Models — side-by-side comparison of quality, cost and latency"><figcaption>Foundry
+    &middot; <em>Compare Models</em> &mdash; the same prompt running across several models, with quality, cost and latency
+    side by side. This is the screen that materializes data-driven decisions.</figcaption></figure>'
+  body_localized: true

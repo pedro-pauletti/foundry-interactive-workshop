@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Performance"] %}
+{% set requisitos = [
+  {"id": "1.2.1", "titulo": "Métricas RAG (qualidade da pergunta, assertividade, qualidade do documento)"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title', 'RAG corporativo com Foundry IQ') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+</section>
+
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Curador Contoso — alterne entre estratégias de retrieval') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+
+  <div class="rag-modes" role="tablist" aria-label="{{ _tx.get('modes_aria', 'Estratégia de retrieval') }}"
+       data-tx-status-ready="{{ _tx.get('status_ready', 'Pronto.') }}"
+       data-tx-status-reset="{{ _tx.get('status_reset', 'Conversa reiniciada.') }}"
+       data-tx-status-base-prefix="{{ _tx.get('status_base_prefix', 'Base: ') }}"
+       data-tx-status-mode-prefix="{{ _tx.get('status_mode_prefix', 'Modo: ') }}"
+       data-tx-status-retrieving="{{ _tx.get('status_retrieving', 'Recuperando ({mode})…') }}"
+       data-tx-status-failure="{{ _tx.get('status_failure', 'Falha.') }}"
+       data-tx-status-network-failure="{{ _tx.get('status_network_failure', 'Falha de rede.') }}"
+       data-tx-error-prefix="{{ _tx.get('error_prefix', 'Erro: ') }}"
+       data-tx-network-error-prefix="{{ _tx.get('network_error_prefix', 'Erro de rede: ') }}"
+       data-tx-source-real-title="{{ _tx.get('source_real_title', 'Real') }}"
+       data-tx-source-mock-title="{{ _tx.get('source_mock_title', 'Simulação local') }}"
+       data-tx-docs-suffix="{{ _tx.get('docs_suffix', 'docs') }}">
+    <button type="button" class="rag-mode" data-mode="simple">
+      <div class="rag-mode__name"><i class="fa-solid fa-magnifying-glass"></i> {{ _tx.get('mode_simple_name', 'Simple Search') }}</div>
+      <div class="rag-mode__desc">{{ _tx.get('mode_simple_desc', 'keyword (BM25) puro · top-2 · ~150ms') }}</div>
+    </button>
+    <button type="button" class="rag-mode" data-mode="semantic">
+      <div class="rag-mode__name"><i class="fa-solid fa-brain"></i> {{ _tx.get('mode_semantic_name', 'Semantic + Rerank') }}</div>
+      <div class="rag-mode__desc">{{ _tx.get('mode_semantic_desc', 'vetor + reranker · top-3 · ~350ms') }}</div>
+    </button>
+    <button type="button" class="rag-mode is-active" data-mode="agentic">
+      <div class="rag-mode__name"><i class="fa-solid fa-diagram-project"></i> {{ _tx.get('mode_agentic_name', 'Agentic Retrieval') }}</div>
+      <div class="rag-mode__desc">{{ _tx.get('mode_agentic_desc', 'query planning + fusion · top-3 · ~650ms') }}</div>
+    </button>
+  </div>
+
+  <div class="rag-dataset" role="tablist" aria-label="{{ _tx.get('dataset_aria', 'Base de conhecimento') }}">
+    <span class="rag-dataset__label"><i class="fa-solid fa-database"></i> {{ _tx.get('dataset_label', 'Base:') }}</span>
+    <button type="button" class="rag-ds is-active" data-ds="auto" title="{{ _tx.get('dataset_auto_title', 'Consulta as duas bases e mistura os melhores resultados') }}">{{ _tx.get('dataset_auto', 'Auto (ambas)') }}</button>
+    <button type="button" class="rag-ds" data-ds="telecom" title="{{ _tx.get('dataset_products_title', 'Índice de produtos') }}">{{ rag_bases.products }}</button>
+    <button type="button" class="rag-ds" data-ds="regulations" title="{{ _tx.get('dataset_regulations_title', 'Índice de regulamentos internos') }}">{{ rag_bases.regulations }}</button>
+  </div>
+
+  <div class="rag-suggested">
+    <span class="muted" style="font-size: 12px;">{{ _tx.get('try_label', 'Tente:') }}</span>
+    {% for c in chips %}
+    <button type="button" class="rag-chip" data-q="{{ c.prompt }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div id="chat-messages" class="agent-chat__messages"></div>
+
+  <form id="chat-form" class="agent-chat__form">
+    <input id="chat-input" type="text" autocomplete="off"
+           placeholder="{{ request.state.industry_pack.get('placeholders', {}).get('rag_chat', 'Pergunte ao Curador Contoso (ex.: como faço portabilidade?)') }}">
+    <button type="submit" class="btn btn--primary"><i class="fa-solid fa-paper-plane"></i> {{ _tx.get('send_button', 'Enviar') }}</button>
+    <button type="button" id="chat-reset" class="btn btn--ghost" title="{{ _tx.get('new_chat_title', 'Nova conversa') }}">
+      <i class="fa-solid fa-rotate-left"></i>
+    </button>
+  </form>
+
+  <div class="rag-status">
+    <span id="chat-status">{{ _tx.get('status_ready', 'Pronto.') }}</span>
+    <span id="chat-meta" class="muted"></span>
+  </div>
+</section>
+
+<style>
+  .rag-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .rag-mode {
+    background: var(--background-light); border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); padding: 12px 14px; text-align: left; cursor: pointer;
+    color: var(--text-secondary); transition: all var(--transition-fast);
+  }
+  .rag-mode:hover { border-color: var(--primary-color); color: var(--text-primary); }
+  .rag-mode.is-active {
+    background: var(--primary-light); border-color: var(--primary-color);
+    color: var(--text-primary); box-shadow: 0 0 0 1px var(--primary-color) inset;
+  }
+  .rag-mode__name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .rag-mode__name i { color: var(--accent-color); margin-right: 6px; }
+  .rag-mode__desc { font-size: 12px; opacity: 0.8; font-family: 'JetBrains Mono', monospace; }
+
+  .rag-suggested { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+  .rag-dataset { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; }
+  .rag-dataset__label { font-size:12px; color:var(--text-secondary); }
+  .rag-ds { background: var(--background-lighter); border:1px solid var(--border-color); color:var(--text-secondary); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; }
+  .rag-ds:hover { background:var(--primary-light); color:var(--text-primary); border-color:var(--primary-color); }
+  .rag-ds.is-active { background:var(--primary-color); color:#fff; border-color:var(--primary-color); }
+  .rag-chip {
+    background: var(--background-lighter); border: 1px solid var(--border-color);
+    color: var(--text-secondary); border-radius: 999px; padding: 4px 12px;
+    font-size: 12px; cursor: pointer;
+  }
+  .rag-chip:hover { background: var(--primary-light); color: var(--text-primary); border-color: var(--primary-color); }
+
+  .agent-chat__messages {
+    min-height: 240px; max-height: 480px; overflow-y: auto;
+    padding: 12px; display: flex; flex-direction: column; gap: 12px;
+    background: var(--background-dark); border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+  .agent-chat__form { display: flex; gap: 8px; margin-top: 12px; }
+  .agent-chat__form input {
+    flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--border-color); background: var(--background-light);
+    color: var(--text-primary); font-size: 14px;
+  }
+  .agent-chat__form input:focus { outline: none; border-color: var(--primary-color); }
+
+  .agent-chat__msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.6; font-size: 14px; white-space: pre-wrap; }
+  .agent-chat__msg--user { align-self: flex-end; background: var(--user-message-bg); color: #fff; border: none; }
+  .agent-chat__msg--bot { align-self: flex-start; background: var(--assistant-message-bg); border: 1px solid var(--border-color); color: var(--text-primary); }
+  .agent-chat__msg--err { align-self: flex-start; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+
+  .citations { align-self: flex-start; max-width: 95%; display: flex; flex-direction: column; gap: 6px; margin-top: -4px; }
+  .citation {
+    background: var(--background-light); border-left: 3px solid var(--accent-color);
+    padding: 8px 12px; border-radius: 6px; font-size: 12px;
+  }
+  .citation__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .citation__id { font-family: 'JetBrains Mono', monospace; color: var(--accent-color); font-size: 11px; }
+  .citation__score { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 11px; }
+  .citation__title { font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .citation__snippet { color: var(--text-secondary); line-height: 1.5; }
+
+  .btn { border: 1px solid var(--border-color); background: var(--background-light); color: var(--text-primary); border-radius: 10px; cursor: pointer; font-size: 14px; padding: 10px 18px; }
+  .btn--primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+  .btn--primary:hover { background: var(--primary-hover); }
+  .btn--ghost { background: transparent; padding: 10px 14px; }
+
+  .rag-status { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; color: var(--text-muted); }
+</style>
+
+<script>
+(function () {
+  const messagesEl = document.getElementById('chat-messages');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+  const status = document.getElementById('chat-status');
+  const meta = document.getElementById('chat-meta');
+  const resetBtn = document.getElementById('chat-reset');
+  const modeButtons = document.querySelectorAll('.rag-mode');
+  const chips = document.querySelectorAll('.rag-chip');
+  const TX = document.querySelector('.rag-modes') ? document.querySelector('.rag-modes').dataset : {};
+  let previousResponseId = null;
+  let currentMode = 'agentic';
+  let currentDataset = 'auto';
+
+  const dsButtons = document.querySelectorAll('.rag-ds');
+  dsButtons.forEach(btn => btn.addEventListener('click', () => {
+    dsButtons.forEach(b => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    currentDataset = btn.dataset.ds;
+    status.textContent = (TX.txStatusBasePrefix || 'Base: ') + currentDataset;
+  }));
+
+  modeButtons.forEach(btn => btn.addEventListener('click', () => {
+    modeButtons.forEach(b => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    currentMode = btn.dataset.mode;
+    status.textContent = (TX.txStatusModePrefix || 'Modo: ') + currentMode;
+  }));
+
+  chips.forEach(chip => chip.addEventListener('click', () => {
+    input.value = chip.dataset.q;
+    input.focus();
+  }));
+
+  function appendUser(text) {
+    const div = document.createElement('div');
+    div.className = 'agent-chat__msg agent-chat__msg--user';
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function appendBot(text, citations) {
+    const div = document.createElement('div');
+    div.className = 'agent-chat__msg agent-chat__msg--bot';
+    div.textContent = text;
+    messagesEl.appendChild(div);
+
+    if (citations && citations.length) {
+      const wrap = document.createElement('div');
+      wrap.className = 'citations';
+      citations.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'citation';
+        card.innerHTML =
+          '<div class="citation__head">' +
+            '<span class="citation__title"></span>' +
+            '<span class="citation__score">score ' + c.score + '</span>' +
+          '</div>' +
+          '<div class="citation__meta"><span class="citation__id"></span><span class="citation__method"></span></div>' +
+          '<div class="citation__snippet"></div>';
+        card.querySelector('.citation__title').textContent = c.titulo;
+        card.querySelector('.citation__id').textContent = c.id;
+        card.querySelector('.citation__method').textContent = c.method ? ' • ' + c.method : '';
+        card.querySelector('.citation__snippet').textContent = c.trecho;
+        wrap.appendChild(card);
+      });
+      messagesEl.appendChild(wrap);
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function appendErr(text) {
+    const div = document.createElement('div');
+    div.className = 'agent-chat__msg agent-chat__msg--err';
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  resetBtn.addEventListener('click', () => {
+    previousResponseId = null;
+    messagesEl.innerHTML = '';
+    status.textContent = (TX.txStatusReset || 'Conversa reiniciada.');
+    meta.textContent = '';
+  });
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    appendUser(text);
+    input.value = '';
+    status.textContent = (TX.txStatusRetrieving || 'Recuperando ({mode})…').replace('{mode}', currentMode);
+    meta.textContent = '';
+    try {
+      const res = await fetch('/sections/ato1_rag_chat/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, mode: currentMode, dataset: currentDataset, previous_response_id: previousResponseId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        appendErr((TX.txErrorPrefix || 'Erro: ') + (err.detail || res.statusText));
+        status.textContent = (TX.txStatusFailure || 'Falha.');
+        return;
+      }
+      const data = await res.json();
+      previousResponseId = data.response_id || previousResponseId;
+      appendBot(data.content, data.citations);
+      status.textContent = (TX.txStatusReady || 'Pronto.');
+      const _srcTitle = data.source === 'real' ? (TX.txSourceRealTitle || 'Real') : (TX.txSourceMockTitle || 'Simulação local');
+      meta.innerHTML = '<span class="source-badge source-badge--' + data.source + '" title="' + _srcTitle + '"><i class="fa-solid ' + (data.source === 'real' ? 'fa-bolt' : 'fa-flask') + '"></i></span> · ' + data.latency_ms + 'ms · ' + (data.citations.length) + ' ' + (TX.txDocsSuffix || 'docs');
+    } catch (e) {
+      appendErr((TX.txNetworkErrorPrefix || 'Erro de rede: ') + e.message);
+      status.textContent = (TX.txStatusNetworkFailure || 'Falha de rede.');
+    }
+  });
+})();
+</script>
+
+<!-- ====================================================================== -->
+<!--  RAG Evaluation panel                                                  -->
+<!-- ====================================================================== -->
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-clipboard-check"></i> {{ _tx.get('eval_eyebrow', 'Avaliação automática') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('eval_title', 'Rodar evaluation com métricas de RAG') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('eval_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+  <div class="row" style="gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;"
+       data-tx-run-button="{{ _tx.get('eval_run_button', 'Run RAG evaluation (modo atual)') }}"
+       data-tx-run-loading="{{ _tx.get('eval_run_loading', 'avaliando…') }}"
+       data-tx-status-running="{{ _tx.get('eval_status_running', 'Modo: {mode} · base: {dataset} · executando dataset…') }}"
+       data-tx-status-done="{{ _tx.get('eval_status_done', 'Modo: {mode} · {n} perguntas · {duration}ms · threshold {threshold}') }}"
+       data-tx-error-prefix="{{ _tx.get('eval_error_prefix', 'Erro: ') }}"
+       data-tx-retrieved-label="{{ _tx.get('retrieved_label', 'retrieved: ') }}"
+       data-tx-pass-label="{{ _tx.get('pass_label', 'PASS') }}"
+       data-tx-fail-label="{{ _tx.get('fail_label', 'FAIL') }}">
+    <button id="eval-run" class="btn btn--primary">
+      <i class="fa-solid fa-play"></i> {{ _tx.get('eval_run_button', 'Run RAG evaluation (modo atual)') }}
+    </button>
+    <span id="eval-status" class="muted" style="font-size: 12px;">{{ _tx.get('eval_status_initial', 'Use o seletor de modo acima.') }}</span>
+  </div>
+
+  <div id="eval-results" style="display: none;">
+    <!-- Headline KPIs -->
+    <div class="eval-kpi-grid">
+      <div class="eval-kpi"><div class="eval-kpi__label">{{ _tx.get('kpi_pass_rate', 'Pass rate') }}</div><div class="eval-kpi__value" id="eval-pass-rate">–</div></div>
+      <div class="eval-kpi"><div class="eval-kpi__label">{{ _tx.get('kpi_grnd', 'Groundedness') }}</div><div class="eval-kpi__value" id="eval-m-grnd">–</div></div>
+      <div class="eval-kpi"><div class="eval-kpi__label">{{ _tx.get('kpi_rel', 'Relevance') }}</div><div class="eval-kpi__value" id="eval-m-rel">–</div></div>
+      <div class="eval-kpi"><div class="eval-kpi__label">{{ _tx.get('kpi_ret', 'Retrieval') }}</div><div class="eval-kpi__value" id="eval-m-ret">–</div></div>
+      <div class="eval-kpi"><div class="eval-kpi__label">{{ _tx.get('kpi_comp', 'Completeness') }}</div><div class="eval-kpi__value" id="eval-m-comp">–</div></div>
+    </div>
+
+    <h4 style="margin: 18px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary);">
+      {{ _tx.get('per_question_title', 'Resultados por pergunta') }}
+    </h4>
+    <div style="overflow-x: auto;">
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th style="width:32%;">{{ _tx.get('th_question', 'Pergunta') }}</th>
+            <th>Grnd</th><th>Rel</th><th>Retr</th><th>Comp</th>
+            <th>{{ _tx.get('th_status', 'Status') }}</th>
+          </tr>
+        </thead>
+        <tbody id="eval-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .eval-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .eval-kpi {
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .eval-kpi__label {
+    font-size: 11px; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;
+  }
+  .eval-kpi__value {
+    font-size: 24px; font-weight: 700; color: var(--primary-color);
+  }
+  .eval-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .eval-table th, .eval-table td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-color);
+  }
+  .eval-table th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--text-secondary); background: var(--background-light);
+  }
+  .eval-table td { vertical-align: top; }
+  .eval-score--good { color: #16a34a; font-weight: 600; }
+  .eval-score--warn { color: #f59e0b; font-weight: 600; }
+  .eval-score--bad  { color: #dc2626; font-weight: 600; }
+  .eval-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .eval-pill--pass { background: rgba(34,197,94,0.18); color: #16a34a; border: 1px solid rgba(34,197,94,0.4); }
+  .eval-pill--fail { background: rgba(239,68,68,0.18); color: #dc2626; border: 1px solid rgba(239,68,68,0.4); }
+</style>
+
+<script>
+(function () {
+  const btn = document.getElementById('eval-run');
+  const statusEl = document.getElementById('eval-status');
+  const resultsEl = document.getElementById('eval-results');
+  const tbody = document.getElementById('eval-tbody');
+  const HOST = btn ? btn.parentElement : null;
+  const TX = HOST ? HOST.dataset : {};
+
+  function getCurrentMode() {
+    const active = document.querySelector('.rag-mode.is-active');
+    return active ? active.dataset.mode : 'agentic';
+  }
+  function getCurrentDataset() {
+    const a = document.querySelector('.rag-ds.is-active');
+    return a ? a.dataset.ds : 'auto';
+  }
+
+  function scoreClass(s) { return s >= 0.8 ? 'eval-score--good' : (s >= 0.6 ? 'eval-score--warn' : 'eval-score--bad'); }
+  function fmt(s) { return (s * 100).toFixed(0) + '%'; }
+
+  btn.addEventListener('click', async () => {
+    const mode = getCurrentMode();
+    const dataset = getCurrentDataset();
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (TX.txRunLoading || 'avaliando…');
+    statusEl.textContent = (TX.txStatusRunning || 'Modo: {mode} · base: {dataset} · executando dataset…').replace('{mode}', mode).replace('{dataset}', dataset);
+    try {
+      const res = await fetch('/sections/ato1_rag_chat/api/evaluate', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ mode, dataset }),
+      });
+      const data = await res.json();
+      document.getElementById('eval-pass-rate').textContent = fmt(data.pass_rate);
+      document.getElementById('eval-m-grnd').textContent = fmt(data.metrics_avg.groundedness);
+      document.getElementById('eval-m-rel').textContent  = fmt(data.metrics_avg.relevance);
+      document.getElementById('eval-m-ret').textContent  = fmt(data.metrics_avg.retrieval);
+      document.getElementById('eval-m-comp').textContent = fmt(data.metrics_avg.response_completeness);
+
+      tbody.innerHTML = '';
+      data.per_question.forEach(p => {
+        const tr = document.createElement('tr');
+        const td = (val, cls) => '<td class="' + (cls||'') + '">' + val + '</td>';
+        tr.innerHTML =
+          td('<strong>' + p.question + '</strong><div style="font-size:11px;color:var(--text-muted);margin-top:3px;">' + (TX.txRetrievedLabel || 'retrieved: ') + (p.retrieved_doc_ids.join(', ') || '∅') + '</div>') +
+          td(fmt(p.groundedness), scoreClass(p.groundedness)) +
+          td(fmt(p.relevance), scoreClass(p.relevance)) +
+          td(fmt(p.retrieval), scoreClass(p.retrieval)) +
+          td(fmt(p.response_completeness), scoreClass(p.response_completeness)) +
+          td('<span class="eval-pill ' + (p.passed ? 'eval-pill--pass' : 'eval-pill--fail') + '">' + (p.passed ? (TX.txPassLabel || 'PASS') : (TX.txFailLabel || 'FAIL')) + '</span>');
+        tbody.appendChild(tr);
+      });
+      resultsEl.style.display = 'block';
+      statusEl.textContent = (TX.txStatusDone || 'Modo: {mode} · {n} perguntas · {duration}ms · threshold {threshold}').replace('{mode}', mode).replace('{n}', data.n).replace('{duration}', data.duration_ms).replace('{threshold}', data.threshold);
+    } catch (e) {
+      statusEl.textContent = (TX.txErrorPrefix || 'Erro: ') + e.message;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-play"></i> ' + (TX.txRunButton || 'Run RAG evaluation (modo atual)');
+    }
+  });
+})();
+</script>
+
+{% endblock %}

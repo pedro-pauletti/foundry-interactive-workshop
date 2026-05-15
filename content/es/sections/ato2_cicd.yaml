@@ -1,0 +1,214 @@
+section:
+  title: CI/CD de Avaliações com Evidência Auditável
+  description: GitHub Actions + Foundry Evaluations + scorecard como gate de promote.
+  eyebrow: Validar
+  eyebrow_icon: fa-solid fa-vial-circle-check
+body:
+  pillars:
+  - Performance
+  - Governança
+  requisitos:
+  - id: 1.2.7
+    titulo: Continuous evaluation
+  - id: 1.3.6
+    titulo: Trilha de auditoria por agente / versão
+  - id: 1.3.9
+    titulo: Evidências para regulador / AI Act
+  resumo: Cada Pull Request en el repo del agente dispara la GitHub Action <code>microsoft/ai-agent-evals</code>, que llama
+    a la <strong>Microsoft Foundry Evaluations API</strong> con un <em>dataset</em> de queries curado, ejecuta el agente sobre
+    todas y devuelve un <strong>scorecard estadístico</strong> (con intervalos de confianza y test de significancia) directamente
+    en el <em>summary</em> del workflow y como <em>check</em> del PR. La misma run queda registrada en el Foundry Project
+    — es decir, la <strong>trazabilidad por agente × versión × dataset</strong> se genera automáticamente, sin planilla manual,
+    cumpliendo gobernanza regulatoria (AI Act, BACEN, ANPD).
+  bullets:
+  - Workflow oficial <code>microsoft/ai-agent-evals@v3-beta</code> — agent evaluation offline en pre-producción como parte
+    del CI.
+  - Autenticación vía <strong>Azure Login con OIDC / Federated Credentials</strong> (sin secreto de larga duración en GitHub).
+  - 'Dataset versionado en JSON: <code>name</code>, lista de <code>evaluators</code> (builtin.groundedness, builtin.task_adherence,
+    builtin.fluency, risk &amp; safety, custom) y <code>data</code> con queries.'
+  - 'Comparación <strong>baseline vs candidato</strong>: con 2+ <code>agent-ids</code> (ej. <code>contoso-care:7,contoso-care:8</code>),
+    la Action ejecuta <em>pairwise statistical test</em> — solo falla el PR si la diferencia es estadísticamente significativa.'
+  - 'Gate de promoción por política: ej. Groundedness ≥ 0,85 <em>y</em> sin regresión significativa vs baseline → <em>check</em>
+    verde libera el merge.'
+  - 'Paquete de evidencias por run: dataset, prompt/instrucciones, modelo, queries, respuestas, métricas y CI — todo linkado
+    en el PR y archivado en el Foundry Project.'
+  - El mismo pipeline corre en Azure DevOps Pipelines vía la task equivalente — útil para clientes que aún están en ADO.
+  - 'Continuous evaluation en producción reutiliza los mismos evaluators del CI: lo que bloquea el merge es lo que dispara
+    la alerta del monitor.'
+  passos_titulo: Cómo implementarlo
+  passos:
+  - titulo: 1) Preparar el repo del agente
+    html: Layout mínimo:<br><code>agent/agent.yaml</code> (instrucciones + tools versionados)<br><code>evals/dataset.json</code>
+      (queries de regresión + evaluators)<br><code>.github/workflows/eval.yml</code> (pipeline de esta sección)<br>Cada PR
+      que altere <code>agent/**</code> o <code>evals/**</code> dispara la Action.
+  - titulo: 2) Configurar Federated Credentials (OIDC) en Entra ID
+    html: 'Crear App Registration → Federated Credential apuntando a <code>repo:&lt;org&gt;/&lt;repo&gt;:ref:refs/heads/main</code>
+      y a PRs. Asignar RBAC <em>Azure AI User</em> en el Foundry Project. En GitHub, registrar solo variables (no secretos):
+      <code>AZURE_CLIENT_ID</code>, <code>AZURE_TENANT_ID</code>, <code>AZURE_SUBSCRIPTION_ID</code>.'
+  - titulo: 3) Definir el dataset de evaluación (versionado en Git)
+    html: JSON con <code>name</code>, <code>evaluators</code> (lista — ej. <code>builtin.groundedness</code>, <code>builtin.task_adherence</code>,
+      <code>builtin.violence</code>, custom evaluators), <code>data</code> (queries + opcionalmente <code>ground_truth</code>/<code>context</code>)
+      y <code>evaluator_parameters</code> (thresholds, modelo grader). Mantener ≥ 30 queries por categoría de riesgo para
+      que el intervalo de confianza cierre.
+  - titulo: 4) Agregar el workflow .github/workflows/eval.yml
+    html: 'Disparado por <code>pull_request</code> y <code>push</code> a <code>main</code>. Steps: <code>actions/checkout</code>
+      → <code>azure/login@v2</code> (OIDC) → <code>microsoft/ai-agent-evals@v3-beta</code> con <code>azure-ai-project-endpoint</code>,
+      <code>deployment-name</code>, <code>agent-ids</code> (<em>candidato,baseline</em>) y <code>data-path</code>.'
+  - titulo: 5) Definir gate de merge (branch protection)
+    html: En <em>Settings → Branches → Protection rules</em>, marcar el <em>check</em> <code>AI Agent Evaluation</code> como
+      obligatorio. Sin verde, el merge queda bloqueado — compliance pasa a ser <em>required status check</em>, no acuerdo
+      verbal.
+  - titulo: 6) Auditoría y archivado
+    html: 'Cada run vive en dos lados: <strong>GitHub Actions summary</strong> (scorecard + IC + comparación pareada, adjunto
+      al PR para siempre) y <strong>Foundry Project → Evaluations</strong> (run con dataset, modelo, ejemplos que fallaron
+      y prompt). Ese par es lo que recibe el regulador cuando pide evidencia.'
+  mensagem_chave: <strong>El compliance se vuelve artefacto de software.</strong> La trazabilidad no es Excel — es el historial
+    inmutable del pipeline (PR + Action + Foundry run), generado en cada commit, con test estadístico de regresión y gate
+    automático de merge.
+  extra_html: "<div class=\"page-summary\" style=\"margin-top: 22px;\"><h2 class=\"page-summary__title\">Anatomia do pipeline</h2><p\
+    \ class=\"page-summary__lede\">O fluxo de <em>Agentic DevOps</em> tem duas esteiras conectadas: <strong>código do agente</strong>\
+    \ (instruções, tools, modelo) e <strong>dataset de avaliação</strong>. Ambas vivem no mesmo repo e compartilham o mesmo\
+    \ PR — qualquer mudança em uma é validada pela outra antes do merge.</p><ol class=\"page-summary__list\"><li><strong>PR\
+    \ aberto</strong> alterando <code>agent/**</code> ou <code>evals/**</code> → trigger do workflow.</li><li><strong>Azure\
+    \ Login (OIDC)</strong> troca o token efêmero do GitHub por credencial Entra ID — zero segredo persistente.</li><li><strong>ai-agent-evals\
+    \ action</strong> invoca o agente (versão candidata <em>e</em> baseline) contra todas as queries do dataset.</li><li><strong>Foundry\
+    \ Evaluations API</strong> roda os evaluators (builtin + risk &amp; safety + custom) e calcula IC e p-value.</li><li><strong>Scorecard</strong>\
+    \ volta como <em>summary</em> do Action e <em>check</em> do PR; regressão estatisticamente significativa → check vermelho.</li><li><strong>Branch\
+    \ protection</strong> impede merge sem o check verde. Após merge, mesmo dataset alimenta o monitor contínuo.</li></ol></div><div\
+    \ class=\"page-summary\" id=\"cicd-demo\" style=\"margin-top: 22px;\"><h2 class=\"page-summary__title\">Demo interativa\
+    \ &mdash; rode o pipeline</h2><p class=\"page-summary__lede\">Simule um Pull Request abrindo no repositório do agente.\
+    \ Os mesmos 6 estágios reais da GitHub Action <code>microsoft/ai-agent-evals</code> rodam abaixo, com tempos típicos.\
+    \ Tente as duas variantes para ver o gate aprovar ou bloquear o merge.</p><div class=\"cicd-demo__controls\" style=\"\
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 18px;\"><button type=\"button\" class=\"btn btn--primary\" data-cicd-run=\"\
+    pass\"><i class=\"fa-solid fa-play\"></i>&nbsp;Rodar PR &mdash; versão aprovada</button><button type=\"button\" class=\"\
+    btn btn--ghost\" data-cicd-run=\"fail\"><i class=\"fa-solid fa-bug\"></i>&nbsp;Rodar PR &mdash; regressão detectada</button><button\
+    \ type=\"button\" class=\"btn btn--ghost\" data-cicd-reset=\"1\"><i class=\"fa-solid fa-rotate-left\"></i>&nbsp;Resetar</button></div><ol\
+    \ id=\"cicd-pipeline\" class=\"cicd-pipeline\" style=\"list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr;gap:10px;\"\
+    ><li class=\"cicd-step\" data-step=\"1\" style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px\
+    \ 16px;border:1px solid var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"\
+    ><div class=\"cicd-step__icon\" style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-solid fa-code-pull-request\"></i></div><div><strong>PR #1287 aberto</strong> &mdash; <code>agent/agent.yaml</code>\
+    \ + <code>evals/dataset.json</code><div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\"\
+    >Trigger: <code>pull_request</code> em <code>main</code></div></div><span class=\"cicd-step__status\" style=\"font-size:12px;font-weight:600;color:#64748b;\"\
+    >aguardando</span></li><li class=\"cicd-step\" data-step=\"2\" style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px\
+    \ 16px;border:1px solid var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"\
+    ><div class=\"cicd-step__icon\" style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-brands fa-microsoft\"></i></div><div><strong>Azure Login (OIDC)</strong> &mdash; Federated Credentials,\
+    \ sem segredo persistente<div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\">tenant:\
+    \ <code>contoso.onmicrosoft.com</code> &middot; subscription: <code>contoso-ai-prod</code></div></div><span class=\"cicd-step__status\"\
+    \ style=\"font-size:12px;font-weight:600;color:#64748b;\">aguardando</span></li><li class=\"cicd-step\" data-step=\"3\"\
+    \ style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px 16px;border:1px solid\
+    \ var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"><div class=\"cicd-step__icon\"\
+    \ style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-solid fa-robot\"></i></div><div><strong>Invocando agentes</strong> &mdash; <code>contoso-care:1287</code>\
+    \ (candidato) vs <code>contoso-care:prod</code> (baseline)<div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\"\
+    ><span data-cicd-queries>0</span> / 120 queries do dataset <code>contoso-care-regression-v12</code></div></div><span class=\"\
+    cicd-step__status\" style=\"font-size:12px;font-weight:600;color:#64748b;\">aguardando</span></li><li class=\"cicd-step\"\
+    \ data-step=\"4\" style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px 16px;border:1px\
+    \ solid var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"><div class=\"cicd-step__icon\"\
+    \ style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-solid fa-flask-vial\"></i></div><div><strong>Foundry Evaluations API</strong> &mdash; groundedness, task_adherence,\
+    \ fluency, violence, sensitive_data_leakage<div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\"\
+    >grader model: <code>gpt-4o-mini</code> &middot; threshold groundedness: <code>0.85</code></div></div><span class=\"cicd-step__status\"\
+    \ style=\"font-size:12px;font-weight:600;color:#64748b;\">aguardando</span></li><li class=\"cicd-step\" data-step=\"5\"\
+    \ style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px 16px;border:1px solid\
+    \ var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"><div class=\"cicd-step__icon\"\
+    \ style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-solid fa-chart-column\"></i></div><div><strong>Pairwise statistical test</strong> &mdash; candidato vs\
+    \ baseline, IC 95%<div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\" data-cicd-stats>aguardando\
+    \ resultados&hellip;</div></div><span class=\"cicd-step__status\" style=\"font-size:12px;font-weight:600;color:#64748b;\"\
+    >aguardando</span></li><li class=\"cicd-step\" data-step=\"6\" style=\"display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px\
+    \ 16px;border:1px solid var(--border-color);border-radius:10px;background:rgba(124,58,237,0.04);transition:all .25s;\"\
+    ><div class=\"cicd-step__icon\" style=\"width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#475569;\"\
+    ><i class=\"fa-solid fa-shield-halved\"></i></div><div><strong>Branch protection gate</strong> &mdash; required check\
+    \ <code>AI Agent Evaluation</code><div class=\"cicd-step__detail\" style=\"font-size:12px;opacity:0.75;margin-top:2px;\"\
+    \ data-cicd-gate>merge button disabled &mdash; aguardando check</div></div><span class=\"cicd-step__status\" style=\"\
+    font-size:12px;font-weight:600;color:#64748b;\">aguardando</span></li></ol><div id=\"cicd-scorecard\" style=\"display:none;margin-top:18px;padding:14px\
+    \ 16px;border-radius:10px;border:1px solid var(--border-color);background:rgba(124,58,237,0.04);\"><strong style=\"display:block;margin-bottom:8px;\"\
+    >Scorecard final (resumo do Action)</strong><div id=\"cicd-scorecard-body\" style=\"font-size:13px;line-height:1.7;\"\
+    ></div></div><style>.cicd-step--running{background:rgba(59,130,246,0.10) !important;border-color:rgba(59,130,246,0.45)\
+    \ !important;}.cicd-step--running .cicd-step__icon{background:#3b82f6 !important;color:#fff !important;animation:cicdPulse\
+    \ 1.1s ease-in-out infinite;}.cicd-step--running .cicd-step__status{color:#2563eb !important;}.cicd-step--ok{background:rgba(16,185,129,0.08)\
+    \ !important;border-color:rgba(16,185,129,0.45) !important;}.cicd-step--ok .cicd-step__icon{background:#10b981 !important;color:#fff\
+    \ !important;}.cicd-step--ok .cicd-step__status{color:#059669 !important;}.cicd-step--fail{background:rgba(239,68,68,0.08)\
+    \ !important;border-color:rgba(239,68,68,0.5) !important;}.cicd-step--fail .cicd-step__icon{background:#ef4444 !important;color:#fff\
+    \ !important;}.cicd-step--fail .cicd-step__status{color:#dc2626 !important;}@keyframes cicdPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}</style><script>(function(){const\
+    \ steps = document.querySelectorAll(\"#cicd-pipeline .cicd-step\");const queriesEl = document.querySelector(\"[data-cicd-queries]\"\
+    );const statsEl = document.querySelector(\"[data-cicd-stats]\");const gateEl = document.querySelector(\"[data-cicd-gate]\"\
+    );const scorecard = document.getElementById(\"cicd-scorecard\");const scorecardBody = document.getElementById(\"cicd-scorecard-body\"\
+    );let running = false;function setStatus(step, klass, label){step.classList.remove(\"cicd-step--running\",\"cicd-step--ok\"\
+    ,\"cicd-step--fail\");if(klass) step.classList.add(klass);const s = step.querySelector(\".cicd-step__status\");if(s) s.textContent\
+    \ = label;}function sleep(ms){return new Promise(r=>setTimeout(r,ms));}function resetAll(){steps.forEach(s=>setStatus(s,null,\"\
+    aguardando\"));if(queriesEl) queriesEl.textContent = \"0\";if(statsEl) statsEl.textContent = \"aguardando resultados\\\
+    u2026\";if(gateEl) gateEl.innerHTML = \"merge button disabled &mdash; aguardando check\";scorecard.style.display=\"none\"\
+    ;scorecardBody.innerHTML=\"\";}async function run(mode){if(running) return; running = true; resetAll();setStatus(steps[0],\"\
+    cicd-step--running\",\"em andamento\"); await sleep(700);setStatus(steps[0],\"cicd-step--ok\",\"ok\");setStatus(steps[1],\"\
+    cicd-step--running\",\"trocando token\"); await sleep(900);setStatus(steps[1],\"cicd-step--ok\",\"autenticado\");setStatus(steps[2],\"\
+    cicd-step--running\",\"executando agentes\");for(let i=0;i<=120;i+=10){ if(queriesEl) queriesEl.textContent = i; await\
+    \ sleep(120);} setStatus(steps[2],\"cicd-step--ok\",\"240 invocações\");setStatus(steps[3],\"cicd-step--running\",\"avaliando\"\
+    ); await sleep(1400);setStatus(steps[3],\"cicd-step--ok\",\"5 evaluators ok\");setStatus(steps[4],\"cicd-step--running\"\
+    ,\"comparando\"); await sleep(900);if(mode===\"pass\"){statsEl.innerHTML = \"groundedness: <strong>0.91</strong> vs baseline\
+    \ <strong>0.88</strong> &middot; \\u0394=+0.03 &middot; p=0.04 &middot; <em>melhora significativa</em>\";setStatus(steps[4],\"\
+    cicd-step--ok\",\"sem regressão\");setStatus(steps[5],\"cicd-step--running\",\"validando gate\"); await sleep(500);setStatus(steps[5],\"\
+    cicd-step--ok\",\"check verde\");gateEl.innerHTML = \"<strong style=\\\"color:#059669\\\">\\u2705 Merge liberado</strong>\
+    \ &mdash; required check passed\";scorecard.style.display=\"block\";scorecardBody.innerHTML = \"<div><strong style=\\\"\
+    color:#059669\\\">\\u2705 AI Agent Evaluation &mdash; PASSED</strong></div>\"+\"<div>groundedness: 0.91 (IC95% 0.88\\\
+    u20130.94) &middot; threshold 0.85 \\u2705</div>\"+\"<div>task_adherence: 0.93 &middot; fluency: 0.95 &middot; violence:\
+    \ 0.00 &middot; sensitive_data_leakage: 0.00</div>\"+\"<div>pairwise vs baseline: melhora estatisticamente significativa\
+    \ (p=0.04)</div>\"+\"<div style=\\\"margin-top:6px;font-size:12px;opacity:0.7;\\\">run \\u2192 Foundry Project / Evaluations\
+    \ / <code>contoso-care-regression-v12 #482</code></div>\";} else {statsEl.innerHTML = \"groundedness: <strong>0.79</strong>\
+    \ vs baseline <strong>0.88</strong> &middot; \\u0394=\\u22120.09 &middot; p=0.003 &middot; <em>regressão significativa</em>\"\
+    ;setStatus(steps[4],\"cicd-step--fail\",\"regressão detectada\");setStatus(steps[5],\"cicd-step--running\",\"validando\
+    \ gate\"); await sleep(500);setStatus(steps[5],\"cicd-step--fail\",\"check vermelho\");gateEl.innerHTML = \"<strong style=\\\
+    \"color:#dc2626\\\">\\u274C Merge bloqueado</strong> &mdash; required status check failed\";scorecard.style.display=\"\
+    block\";scorecardBody.innerHTML = \"<div><strong style=\\\"color:#dc2626\\\">\\u274C AI Agent Evaluation &mdash; FAILED</strong></div>\"\
+    +\"<div>groundedness: 0.79 (IC95% 0.74\\u20130.83) &middot; threshold 0.85 \\u274C</div>\"+\"<div>task_adherence: 0.81\
+    \ &middot; fluency: 0.94 &middot; violence: 0.00 &middot; sensitive_data_leakage: 0.01</div>\"+\"<div>pairwise vs baseline:\
+    \ queda estatisticamente significativa (p=0.003) em 23/120 queries</div>\"+\"<div style=\\\"margin-top:6px;font-size:12px;opacity:0.7;\\\
+    \">run \\u2192 Foundry Project / Evaluations / <code>contoso-care-regression-v12 #483</code> (com exemplos que falharam)</div>\"\
+    ;}running = false;}document.querySelectorAll(\"[data-cicd-run]\").forEach(btn=>{btn.addEventListener(\"click\", ()=>run(btn.getAttribute(\"\
+    data-cicd-run\")));});document.querySelectorAll(\"[data-cicd-reset]\").forEach(btn=>{btn.addEventListener(\"click\", ()=>{\
+    \ if(!running) resetAll(); });});})();</script></div><div class=\"page-summary\" style=\"margin-top: 22px;\"><h2 class=\"\
+    page-summary__title\">Workflow YAML — exemplo de referência</h2><p class=\"page-summary__lede\">Arquivo <code>.github/workflows/eval.yml</code>\
+    \ baseado na <a href=\"https://learn.microsoft.com/en-us/azure/foundry/how-to/evaluation-github-action\" target=\"_blank\"\
+    \ rel=\"noopener\">documentação oficial Microsoft Foundry</a> e na <a href=\"https://github.com/microsoft/ai-agent-evals\"\
+    \ target=\"_blank\" rel=\"noopener\">action <code>microsoft/ai-agent-evals</code></a>.</p><pre style=\"background:#0b1020;color:#e6edf3;padding:16px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.55;\"\
+    ><code style=\"color:#e6edf3;background:transparent;font-family:'JetBrains Mono','Consolas',monospace;\">name: AI Agent\
+    \ Evaluation\n\non:\n  pull_request:\n    paths: [&quot;agent/**&quot;, &quot;evals/**&quot;]\n  push:\n    branches:\
+    \ [main]\n\npermissions:\n  id-token: write   # OIDC para Azure Login\n  contents: read\n  pull-requests: write  # publicar\
+    \ comentário no PR\n\njobs:\n  evaluate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n\
+    \      - name: Azure login (Federated Credentials)\n        uses: azure/login@v2\n        with:\n          client-id:\
+    \ ${{ vars.AZURE_CLIENT_ID }}\n          tenant-id: ${{ vars.AZURE_TENANT_ID }}\n          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID\
+    \ }}\n\n      - name: Run Foundry Agent Evaluation\n        uses: microsoft/ai-agent-evals@v3-beta\n        with:\n  \
+    \        azure-ai-project-endpoint: ${{ vars.FOUNDRY_PROJECT_ENDPOINT }}\n          deployment-name: gpt-4o-mini   # modelo\
+    \ grader\n          # candidato,baseline → pairwise statistical test\n          agent-ids: contoso-care:${{ github.event.number\
+    \ }},contoso-care:prod\n          data-path: ${{ github.workspace }}/evals/dataset.json\n</code></pre></div><div class=\"\
+    page-summary\" style=\"margin-top: 22px;\"><h2 class=\"page-summary__title\">Dataset de avaliação — <code>evals/dataset.json</code></h2><pre\
+    \ style=\"background:#0b1020;color:#e6edf3;padding:16px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.55;\"\
+    ><code style=\"color:#e6edf3;background:transparent;font-family:'JetBrains Mono','Consolas',monospace;\">{\n  &quot;name&quot;:\
+    \ &quot;contoso-care-regression-v12&quot;,\n  &quot;evaluators&quot;: [\n    &quot;builtin.groundedness&quot;,\n    &quot;builtin.task_adherence&quot;,\n\
+    \    &quot;builtin.fluency&quot;,\n    &quot;builtin.violence&quot;,\n    &quot;builtin.sensitive_data_leakage&quot;\n\
+    \  ],\n  &quot;evaluator_parameters&quot;: {\n    &quot;builtin.groundedness&quot;: { &quot;threshold&quot;: 0.85 }\n\
+    \  },\n  &quot;data&quot;: [\n    { &quot;query&quot;: &quot;Como cancelar fibra?&quot;,\n      &quot;context&quot;: &quot;Política\
+    \ Contoso §4.2 — cancelamento online em 1 clique&quot; },\n    { &quot;query&quot;: &quot;Tem multa se eu cancelar antes\
+    \ de 12 meses?&quot; }\n    /* … ≥ 30 queries por categoria de risco para IC fechar … */\n  ]\n}\n</code></pre></div><div\
+    \ class=\"page-summary\" style=\"margin-top: 22px;\"><h2 class=\"page-summary__title\">Mapa de evidências — o que vai\
+    \ para o regulador</h2><table class=\"cover-table\"><thead><tr><th>Pergunta do regulador</th><th>Onde está a evidência</th></tr></thead><tbody><tr><td>Quais\
+    \ critérios você usa para liberar uma versão do agente?</td><td>O arquivo <code>evals/dataset.json</code> versionado no\
+    \ Git + thresholds do gate</td></tr><tr><td>Como você testou a versão X?</td><td>Run da Action no PR #N + run no Foundry\
+    \ → Evaluations (dataset, modelo, queries, respostas)</td></tr><tr><td>Quem aprovou o merge?</td><td>Histórico imutável\
+    \ do PR no GitHub (revisor + status checks)</td></tr><tr><td>Quanto a métrica caiu entre versões?</td><td>Pairwise statistical\
+    \ test no <em>summary</em> da Action — diferença + IC + p-value</td></tr><tr><td>O agente foi testado contra ataques?</td><td>Mesmo\
+    \ pipeline executa risk &amp; safety evaluators + integração com AI Red Teaming Agent (seção dedicada)</td></tr></tbody></table></div><figure\
+    \ class=\"section-figure\" style=\"margin-top: 22px;\"><img src=\"/static/images/github-action-agent-output-evaluations-ci-cd.png\"\
+    \ alt=\"GitHub Action publicando o scorecard de evaluations do agente como check de PR\"><figcaption>GitHub Action &mdash;\
+    \ o scorecard das Foundry Evaluations vira um <em>check</em> do PR com link para o run no Foundry; regressão de métrica\
+    \ bloqueia o merge automaticamente.</figcaption></figure><div class=\"page-summary\" style=\"margin-top: 22px;\"><h2 class=\"\
+    page-summary__title\">Referências</h2><ul class=\"page-summary__list\"><li><a href=\"https://learn.microsoft.com/en-us/azure/foundry/how-to/evaluation-github-action\"\
+    \ target=\"_blank\" rel=\"noopener\">Microsoft Learn — How to run an evaluation in GitHub Action (Foundry)</a></li><li><a\
+    \ href=\"https://github.com/microsoft/ai-agent-evals\" target=\"_blank\" rel=\"noopener\">GitHub — microsoft/ai-agent-evals\
+    \ action</a></li><li><a href=\"https://learn.microsoft.com/en-us/azure/foundry/how-to/evaluation-azure-devops\" target=\"\
+    _blank\" rel=\"noopener\">Microsoft Learn — Evaluation em Azure DevOps Pipelines</a></li><li><a href=\"https://microsoft.github.io/TechWorkshop-L300-AI-Apps-and-agents/docs/05_agentic_devops/05_01.html\"\
+    \ target=\"_blank\" rel=\"noopener\">TechWorkshop L300 — Agentic DevOps (Exercise 05)</a></li><li><a href=\"https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/agent-evaluators\"\
+    \ target=\"_blank\" rel=\"noopener\">Catálogo de evaluators do Foundry</a></li></ul></div>"
+  body_localized: true

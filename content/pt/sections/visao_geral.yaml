@@ -1,0 +1,148 @@
+section:
+  title: Visão Geral da Stack & Arquitetura Integrada
+  description: Pilares Contoso, ciclo dev/operações e componentes da stack Microsoft.
+  eyebrow: Visão Geral · Microsoft × Contoso
+  eyebrow_icon: fa-solid fa-layer-group
+body:
+  pillars:
+  - Engenharia de Prompt
+  - Performance
+  - Governança
+  - Modelagem
+  - Transversal
+  requisitos:
+  - id: 1.1.1
+    titulo: Fluxo de criação simplificado
+  - id: 1.1.2
+    titulo: Versionamento de prompt
+  - id: 1.1.3
+    titulo: LLM Arena
+  - id: 1.1.6
+    titulo: Criação e testes de multiagentes
+  - id: 1.2.1
+    titulo: Métricas RAG
+  - id: 1.2.3
+    titulo: Framework Avaliativo de Agentes
+  - id: 1.2.7
+    titulo: Observabilidade
+  - id: 1.3.1
+    titulo: Inventário e rastreabilidade
+  - id: 1.3.3
+    titulo: Guardrail padrão (corporativo)
+  - id: 1.3.5
+    titulo: RBAC, auditoria e segregação de ambientes
+  - id: '1.4'
+    titulo: Modelagem (catalog, fine-tune, DPO)
+  - id: 1.5.1
+    titulo: Custo / consumo de tokens
+  - id: 1.5.2
+    titulo: Integração com agentes externos
+  resumo: A Microsoft trabalha com <strong>plataforma unificada</strong> centrada no <strong>Microsoft Foundry</strong>, com
+    camadas adjacentes de governança (<strong>Entra</strong>, <strong>Purview</strong>, <strong>Agent 365</strong>) e tráfego
+    (<strong>APIM AI Gateway</strong>). Governança e dev/operação não são partes separadas, mas o mesmo ciclo que se retroalimenta
+    — <em>from code to runtime</em>.
+  bullets:
+  - <img class="product-logo" src="/static/foundry-logo.png" alt="Microsoft Foundry"> <strong>Microsoft Foundry</strong> —
+    Modelos, Agentes, Evaluators, Guardrails, Observabilidade.
+  - <img class="product-logo" src="/static/agent365-logo.png" alt="Microsoft Agent 365"> <strong>Microsoft Agent 365</strong>
+    — Gestão e governança de agentes em escala corporativa.
+  - <img class="product-logo" src="/static/apim-logo.png" alt="Azure API Management"> <strong>APIM AI Gateway</strong> — Token
+    rate limiting, semantic caching, load balancing.
+  - <img class="product-logo" src="/static/entra-logo.png" alt="Microsoft Entra"> <strong>Microsoft Entra</strong> — Identidade,
+    RBAC, segregação de funções, identidade de agente.
+  - <img class="product-logo" src="/static/purview-logo.png" alt="Microsoft Purview"> <strong>Microsoft Purview</strong> —
+    DLP, classificação, auditoria, compliance regulatório (LGPD, PL 2338, AI Act).
+  passos_titulo: Ciclo Definição → Desenvolvimento → Deploy → Operação
+  passos_lede: O fluxo abaixo mapeia <em>quem</em> faz <em>o quê</em> em cada etapa, e qual produto da Microsoft suporta a
+    atividade.
+  passos:
+  - titulo: Definição (Segurança define políticas corporativas)
+    html: <strong>Quem:</strong> times de Segurança e Compliance.<br><strong>Onde:</strong> Microsoft Purview, Entra, Defender
+      + Foundry Guardrails policies globais.<br><em>Define/Apply enterprise policies</em> que se propagam para todos os agentes.
+  - titulo: Desenvolvimento (Engenheiros constroem o agente)
+    html: <strong>Quem:</strong> Engenheiros de IA / áreas de negócio.<br><strong>Onde:</strong> Foundry Playgrounds, VS Code
+      extension, Foundry Projects.<br><em>Development guardrails</em> (XPIA / Spotlighting / AI Red Teaming) são aplicados
+      durante a construção.
+  - titulo: Deploy (Publicação governada)
+    html: <strong>Quem:</strong> Engenharia + IT.<br><strong>Onde:</strong> Foundry Control Plane → Agent 365 (Microsoft Admin
+      Center) onboard.<br>Identidades de agente registradas no <strong>Entra</strong>; políticas de Guardrail por escopo aplicadas.
+  - titulo: Operação + Gerenciamento
+    html: <strong>Quem:</strong> IT Operacional + Segurança + Engenharia (debug).<br><strong>Onde:</strong> Foundry Observability
+      + Optimization Dashboard + Agent 365 (Admin Center) + APIM AI Gateway.<br>Monitoramento de uso, performance, risco;
+      gestão de políticas de acesso, data security e defesa contra ameaças.
+  mensagem_chave: <em>“Governança é peça fundamental da rotina dos profissionais, não um produto externo.”</em> — Toda a stack
+    é projetada para que segurança, qualidade e auditoria estejam embutidas no ciclo, não anexadas depois.
+  extra_html: '<hr class="section-separator" aria-hidden="true"><section class="page-summary" style="margin-top: 16px;"><span
+    class="page-eyebrow"><i class="fa-solid fa-route"></i> Aprofundamento · Cloud Adoption Framework for AI Agents</span><h2
+    class="page-summary__title">Ciclo de desenvolvimento de aplicações de IA &amp; agentes</h2><p class="page-summary__lede">O
+    <strong>Microsoft Cloud Adoption Framework for AI Agents</strong> formaliza o ciclo em três blocos que se sobrepõem em
+    vez de seguir em cascata: <strong>Build</strong> (construir com segurança embutida), <strong>Govern &amp; Secure</strong>
+    (governar e proteger em escala organizacional) e <strong>Integrate, Manage &amp; Operate</strong> (integrar ao negócio
+    e operar continuamente). Cada bloco abaixo aterrissa um capítulo do CAF nos produtos da stack que você já viu nas seções
+    anteriores.</p></section><section class="card card--active" style="margin-top: 16px;"><div class="row" style="gap: 10px;
+    margin-bottom: 14px;"><span class="card-icon" style="margin: 0;"><i class="fa-solid fa-hammer"></i></span><div><h3 class="card-title"
+    style="margin: 0;">1. Build · Processo padronizado para construir agentes</h3><p class="muted" style="margin: 4px 0 0;
+    font-size: 13px;">Referência: <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ai-agents/build-secure-process"
+    target="_blank" rel="noopener">CAF · Process to build agents</a></p></div></div><div style="font-size: 14px; line-height:
+    1.7;"><p>O CAF define <strong>cinco frentes</strong> que toda equipe deve cobrir antes de promover um agente para produção.
+    Não é um pipeline linear &mdash; são preocupações que andam juntas durante o desenvolvimento, com <em>guardrails</em>
+    aplicados em múltiplos pontos de intervenção (input, tool-call, tool-response, output).</p><ol><li><strong>Agent orchestration</strong>
+    &mdash; charter do agente, escolha entre <em>managed orchestration</em> (Foundry Agent Service) e <em>code-first</em>
+    (Microsoft Agent Framework), workflows determinísticos para lógica crítica e <em>system message</em> versionado como código.</li><li><strong>Model
+    selection</strong> &mdash; casar capacidade do modelo à complexidade da tarefa, usar Model Router e leaderboards do Foundry,
+    validar custo × latência × qualidade antes do deploy.</li><li><strong>Knowledge &amp; tools</strong> &mdash; segmentar
+    conhecimento por papel, conectar a repositórios governados (Foundry IQ), expor sistemas via APIs estritamente escopadas,
+    exigir <em>human-in-the-loop</em> para ações de alto impacto.</li><li><strong>Observability</strong> &mdash; tracing OpenTelemetry,
+    evaluators compartilhados num catálogo central, avaliações no CI/CD (GitHub Actions / Azure DevOps) e AI Red Teaming Agent
+    contra prompt injection.</li><li><strong>Security</strong> &mdash; guardrails em camadas (Foundry Guardrails + Content
+    Safety + Prompt Shields), blocklists centralizadas, AI Gateway (APIM) à frente de todo modelo, Defender for Cloud para
+    AI threat protection.</li></ol><figure class="section-figure" style="margin-top: 18px;"><img src="/static/images/observability-security-build-agents.svg"
+    alt="Diagrama mostrando observabilidade e segurança durante a construção de agentes — traces, métricas, evaluations e
+    guardrails sobre input, tool calls, responses e outputs."><figcaption>Observabilidade e guardrails ao longo do <em>build</em>
+    &mdash; a mesma linha cobre traces, métricas e evaluations (parte de cima) e validação de input, tool-call, tool-response
+    e output (parte de baixo). Fonte: Microsoft Learn · CAF for AI Agents.</figcaption></figure></div></section><section class="card
+    card--active" style="margin-top: 16px;"><div class="row" style="gap: 10px; margin-bottom: 14px;"><span class="card-icon"
+    style="margin: 0;"><i class="fa-solid fa-shield-halved"></i></span><div><h3 class="card-title" style="margin: 0;">2. Govern
+    &amp; Secure · Stack organizacional de governança</h3><p class="muted" style="margin: 4px 0 0; font-size: 13px;">Referência:
+    <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ai-agents/governance-security-across-organization"
+    target="_blank" rel="noopener">CAF · Governance and security for AI agents across the organization</a></p></div></div><div
+    style="font-size: 14px; line-height: 1.7;"><p>Todo agente deve ser <strong>observável, governado e seguro</strong>. Para
+    isso o CAF prescreve um <strong>control plane único</strong> &mdash; identidade, inventário, política e visibilidade comportamental
+    consolidados, independente de plataforma. A stack se organiza em quatro camadas verticais que se reforçam:</p><ul><li><strong>Data
+    governance &amp; compliance</strong> &mdash; Microsoft Purview Compliance Manager, Purview APIs, classificação, DLP, residência
+    de dados e políticas de retenção.</li><li><strong>Agent observability</strong> &mdash; Microsoft Agent 365 (Agent Registry
+    + Agent Map + hero metrics), Defender for Cloud, Log Analytics, Application Insights e Cost Management.</li><li><strong>Agent
+    security</strong> &mdash; Defender for Cloud AI threat protection, Content Safety embutido no Foundry Control Plane, AI
+    Red Teaming Agent, Azure RBAC e Microsoft Sentinel.</li><li><strong>Agent development</strong> &mdash; Microsoft Agent
+    Framework, Foundry SDK, MCP (tools) e A2A (agente-a-agente) como padrões obrigatórios para qualquer integração.</li></ul><p>Em
+    conjunto, essas camadas atendem aos cinco mandatos organizacionais do CAF: <em>identificar quais agentes existem · saber
+    quem os possui · limitar o que acessam · observar o que fazem · parar o que não devem fazer.</em></p><figure class="section-figure"
+    style="margin-top: 18px;"><img src="/static/images/governance-security-stack.svg" alt="Stack de governança e segurança
+    em quatro camadas: Data governance &amp; compliance, Agent observability, Agent security e Agent development, com os produtos
+    Microsoft listados em cada camada."><figcaption>Stack de governança e segurança recomendada pelo CAF &mdash; cada camada
+    mapeia diretamente para produtos da stack Microsoft (Purview, Agent 365, Defender, Foundry Control Plane, Agent Framework,
+    MCP/A2A). Fonte: Microsoft Learn · CAF for AI Agents.</figcaption></figure></div></section><section class="card card--active"
+    style="margin-top: 16px;"><div class="row" style="gap: 10px; margin-bottom: 14px;"><span class="card-icon" style="margin:
+    0;"><i class="fa-solid fa-gears"></i></span><div><h3 class="card-title" style="margin: 0;">3. Integrate, Manage &amp;
+    Operate · Levar para produção e manter</h3><p class="muted" style="margin: 4px 0 0; font-size: 13px;">Referência: <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ai-agents/integrate-manage-operate"
+    target="_blank" rel="noopener">CAF · Manage AI agents across your organization</a></p></div></div><div style="font-size:
+    14px; line-height: 1.7;"><p>Construir é só o começo. O CAF separa a fase pós-deploy em <strong>integração ao negócio</strong>
+    e <strong>operação contínua</strong>:</p><p style="margin-top: 12px;"><strong>Integrate</strong> &mdash; embutir o agente
+    onde o trabalho já acontece (Teams, portais internos), conduzir <em>change management</em> com treinamento e expandir
+    por valor comprovado, não por prontidão técnica. Padronizar arquiteturas reutilizáveis (Bicep / Terraform / templates
+    do Agent Builder) para que cada novo agente herde controles de segurança, logging e monitoramento.</p><p style="margin-top:
+    12px;"><strong>Manage &amp; Operate</strong> cobre quatro disciplinas operacionais:</p><ul><li><strong>Asset lifecycle</strong>
+    &mdash; auditorias trimestrais do estate, aposentadoria de agentes ociosos, administração centralizada via Foundry Control
+    Plane.</li><li><strong>Compliance &amp; security contínuas</strong> &mdash; Azure Policy enforçando padrões, alertas roteados
+    para o SOC (Sentinel), red teaming periódico após mudanças relevantes.</li><li><strong>Quota optimization</strong> &mdash;
+    revisão mensal de consumo, ajuste dinâmico de quotas por criticidade do workload, escolha de modelo otimizada por tarefa.</li><li><strong>Administration</strong>
+    &mdash; inventário sempre vivo, AI Gateway (APIM) como ponto único de enforcement de token caps, throttling e logging,
+    com capacidade de pausar agentes/tools em incidente.</li></ul><figure class="section-figure" style="margin-top: 18px;"><img
+    src="/static/images/observe-governe-segure-agentes.png" alt="Visão consolidada do ciclo Observar · Governar · Segurar
+    agentes ao longo da operação contínua."><figcaption>Visão consolidada &mdash; <em>observar</em>, <em>governar</em> e <em>segurar</em>
+    formam o tripé da operação contínua, retroalimentando as decisões de build e governança. Fonte: Microsoft Learn · CAF
+    for AI Agents.</figcaption></figure><p style="margin-top: 16px;" class="muted"><i class="fa-solid fa-circle-info"></i>
+    Os três artigos do CAF formam um ciclo: <strong>Build</strong> alimenta <strong>Govern</strong> com evidência de evaluators
+    e red teaming; <strong>Govern</strong> entrega ao <strong>Operate</strong> políticas e identidades; e <strong>Operate</strong>
+    devolve sinais de uso, custo e drift que reabrem novos ciclos de Build.</p></div></section>'
+  body_localized: true

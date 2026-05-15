@@ -1,0 +1,33 @@
+# Workshop UI strings — Español
+chrome:
+  toggle_menu: Alternar menú
+  collapse_menu: Contraer menú
+  industry: Industria
+  industry_tooltip: Industria usada en ejemplos y demos
+  language: Idioma
+  language_tooltip: Idioma de la interfaz
+  home: Inicio
+  workshop: Taller
+  azure_signin: Iniciar sesión en Azure
+  azure_signout: Cerrar sesión de Azure
+  azure_device_open: Abre
+  azure_device_then: "e ingresa:"
+  demo_toggle_aria: Alternar modo demo
+  demo_real_tooltip: "Modo Real — llama a Foundry, Search, Content Safety. Cae a simulación local si faltan credenciales."
+  demo_mock_tooltip: "Modo offline — todo generado localmente, sin costo."
+  demo_locked_tooltip: "Modo Real está deshabilitado en esta versión pública. Clona y ejecuta localmente con tus credenciales de Azure para habilitarlo."
+  public_demo_banner: "<strong>Demo público</strong> — ejecutando solo en <strong>modo mock</strong>. Para invocar agentes Foundry, Azure AI Search y Content Safety reales, clona el repositorio y ejecútalo localmente con tu propia suscripción de Azure."
+
+groups:
+  overview: Visión General
+  build: Construir
+  validate: Validar
+  operate: Operar y Gobernar
+
+section_page:
+  pillars_label: "Pilar(es) Contoso cubierto(s)"
+  requirements_label: "Requisitos cubiertos:"
+  tutorial: Tutorial
+  howto_default: Cómo usar esta funcionalidad
+  key_message: Mensaje clave
+  body_lang_notice: "<strong>Aviso:</strong> el contenido detallado a continuación aún está en portugués mientras se completa la traducción. La navegación y los encabezados de sección sí están localizados."

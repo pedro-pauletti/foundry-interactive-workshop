@@ -1,0 +1,69 @@
+texts:
+  intro_title: "A2A — Agent-to-Agent + APIM AI Gateway"
+  intro_lede: >-
+    The <strong>A2A protocol</strong> (Agent-to-Agent, open standard) lets local agents
+    talk to agents hosted on Foundry — or from any other provider.
+    The <strong>APIM AI Gateway</strong> sits in front with a layer of
+    <em>quotas, semantic caching, token budgeting and audit logs</em>.
+  fig1_alt: "APIM AI Gateway architecture"
+  fig1_caption: "APIM AI Gateway centralizing quotas, semantic cache and auditing between clients and model/agent back-ends."
+  fig2_alt: "A2A architecture between agents"
+  fig2_caption: "A2A topology: local and hosted agents talk via an open protocol, orthogonal to the framework."
+  demo_eyebrow: "Interactive demo"
+  demo_title: "Orchestrate agents via A2A — real-time execution"
+  demo_lede: >-
+    Send a question. The <strong>diagram on the left</strong> highlights, in real time,
+    the path taken by the orchestrator — each node pulses when invoked. On the
+    <strong>right</strong>, the chat shows each agent's input/output as
+    <em>SSE streaming</em> events arrive from the server.
+  diagram_aria: "A2A diagram"
+  legend_local: "Local · MAF"
+  legend_foundry: "Foundry · prompt-based"
+  legend_hosted: "Foundry Hosted · container"
+  trace_title: "Streaming trace"
+  try_label: "Try:"
+  chip_produtos: "→ products (local MAF)"
+  chip_vendas: "→ sales (Foundry prompt)"
+  chip_suporte: "→ support (Foundry prompt)"
+  chip_regulamentos: "→ regulations (local MAF)"
+  chip_langgraph: "→ langgraph (Hosted container)"
+  chip_multi: "→ multi-agent (sales + regulations)"
+  cache_toggle_label: "Enable semantic caching (APIM)"
+  send_button: "Send"
+  reset_title: "Clear"
+  status_ready: "Ready."
+  status_routing: "Routing…"
+  status_connecting: "Connecting to stream…"
+  status_running: "⏱ running…"
+  error_prefix: "Error: "
+  mcp_eyebrow: "MCP Tools · governance via APIM AI Gateway"
+  mcp_title: "External tools passing through auth, rate-limit, content-safety and audit"
+  mcp_tooltip: "Local simulation — deterministic trace and rate-limit"
+  mcp_lede: >-
+    Every MCP tool call (Salesforce, ServiceNow, etc.) is intercepted by the
+    APIM AI Gateway. Compare the execution trace <strong>with</strong> and
+    <strong>without</strong> the gateway:
+  mcp_toggle_label: "Tools via APIM AI Gateway"
+  mcp_trace_header: "Execution trace"
+  mcp_select_tool: "Select a tool to invoke…"
+  mcp_token_header: "Token preview & rate limit"
+  mcp_auth_label: "Authorization header (mock)"
+  mcp_rate_label: "Rate limit"
+  mcp_audit_header: "Audit log (Azure Log Analytics)"
+  mcp_result_header: "Tool response"
+  mcp_no_calls: "No calls yet."
+  audit_th_timestamp: "Timestamp"
+  audit_th_tool: "Tool"
+  audit_th_gateway: "Gateway"
+  audit_th_status: "Status"
+  mcp_total_template: "Total: {ms} ms · {n} step(s)"
+  mcp_no_token: "(no token — gateway bypass)"
+  http_error: "HTTP {code}"
+  final_label_template: "Consolidated response · {ms}ms"
+  source_real_title: "Real"
+  source_mock_title: "Local simulation"
+  meta_template: "· {ms}ms · {n} call(s)"
+  trace_start: "▶ start"
+  trace_end: "✓ end  "
+  trace_done: "⚑ done "
+  trace_error: "✗ error"

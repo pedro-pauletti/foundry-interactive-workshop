@@ -1,0 +1,18 @@
+name: framework-ia-contoso
+
+services:
+  langgraph-agent:
+    image: framework-ia-contoso/langgraph-agent:latest
+    container_name: framework-ia-contoso-langgraph-agent
+    build:
+      context: ../../../
+      dockerfile: src/app/langgraphAgent/Dockerfile
+    ports:
+      - "8090:8090"
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - langgraph_azure_cli:/root/.azure
+
+volumes:
+  langgraph_azure_cli: {}

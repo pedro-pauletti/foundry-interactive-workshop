@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Modelagem"] %}
+{% set requisitos = [
+  {"id": "1.4", "titulo": "Modelagem (Leaderboard, SLMs, Destilação, Fine-tune, RLHF, DPO)"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-feather"></i> {{ _tx.get('starting_eyebrow', 'Ponto de partida · escolha de tamanho') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('starting_title', 'Antes das técnicas: SLM ou LLM?') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('starting_p1', '') | safe }}</p>
+  <p class="page-summary__lede" style="margin-top:8px;">{{ _tx.get('starting_p2', '') | safe }}</p>
+</section>
+
+<section class="page-summary" style="margin-top:24px;">
+  <h2 class="page-summary__title">{{ _tx.get('techniques_title', 'As 4 técnicas de especialização disponíveis no Foundry') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('techniques_lede', '') | safe }}</p>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <div class="ft-techniques">
+    {% for t in techniques %}
+    <article class="ft-tech">
+      <header class="ft-tech__head"><i class="{{ t.icon }}"></i><span>{{ t.name }}</span></header>
+      <p class="ft-tech__summary">{{ t.summary }}</p>
+      <div class="ft-tech__row"><strong>{{ _tx.get('when_use_label', 'Quando usar:') }}</strong> {{ t.when }}</div>
+      <div class="ft-tech__row ft-tech__row--contoso"><i class="fa-solid fa-star"></i> <strong>{{ _tx.get('contoso_case_label', 'Caso Contoso:') }}</strong> {{ t.contoso }}</div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="page-summary" style="margin-top:24px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Mesmo input · dois modelos · mesmo segundo') }}
+    <span id="modelagem-source-badge" class="source-badge source-badge--mock" title="{{ _tx.get('mock_badge_title', 'Simulação local') }}"><i class="fa-solid fa-flask"></i></span>
+  </h2>
+  <p class="page-summary__lede">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top:16px;">
+  <form id="ft-form" class="ft-form">
+    <input id="ft-input" type="text" autocomplete="off" placeholder="{{ request.state.industry_pack.get('placeholders', {}).get('modelagem', 'Pergunte algo (ex: Quero contratar fibra de 500Mbps)…') }}">
+    <button type="submit" class="btn btn--primary"><i class="fa-solid fa-bolt"></i> {{ _tx.get('compare_button', 'Comparar') }}</button>
+    <button type="button" id="ft-reset" class="btn btn--ghost"><i class="fa-solid fa-rotate-left"></i></button>
+  </form>
+
+  <div class="ft-chips" data-tx-error="{{ _tx.get('error_prefix', 'Erro: ') }}" data-tx-http-error="{{ _tx.get('http_error_prefix', 'Erro HTTP ') }}" data-tx-no-response="{{ _tx.get('no_response', '(sem resposta)') }}" data-tx-status-ready="{{ _tx.get('status_ready', 'Pronto.') }}" data-tx-completed="{{ _tx.get('completed_template', 'Concluído em {ms}ms.') }}" data-tx-base-placeholder="{{ _tx.get('base_body_placeholder', 'Envie uma pergunta para comparar.') }}" data-tx-ft-placeholder="{{ _tx.get('ft_body_placeholder', 'A resposta fine-tuned aparece aqui.') }}" data-tx-stage-1="{{ _tx.get('stage_tokenizing', 'Tokenizando prompt…') }}" data-tx-stage-2="{{ _tx.get('stage_loading_base', 'Carregando pesos do modelo base (gpt-4o-mini)…') }}" data-tx-stage-3="{{ _tx.get('stage_loading_adapter', 'Carregando adapter LoRA (SFT + DPO) do checkpoint Contoso…') }}" data-tx-stage-4="{{ _tx.get('stage_inferring', 'Inferindo nos 2 modelos em paralelo…') }}" data-tx-stage-5="{{ _tx.get('stage_evaluating', 'Calculando groundedness e brand alignment…') }}" data-tx-kpi-model="{{ _tx.get('kpi_model', 'modelo') }}" data-tx-kpi-latency="{{ _tx.get('kpi_latency', 'latência') }}" data-tx-kpi-tokens-in="{{ _tx.get('kpi_tokens_in', 'tokens in') }}" data-tx-kpi-tokens-out="{{ _tx.get('kpi_tokens_out', 'tokens out') }}" data-tx-kpi-cost="{{ _tx.get('kpi_cost', 'custo') }}" data-tx-kpi-groundedness="{{ _tx.get('kpi_groundedness', 'groundedness') }}" data-tx-kpi-brand="{{ _tx.get('kpi_brand_alignment', 'brand alignment') }}" data-tx-real="{{ _tx.get('source_real_title', 'Resposta do LLM real') }}" data-tx-mock="{{ _tx.get('source_mock_title', 'Simulação local') }}">
+    <span class="muted" style="font-size:12px;">{{ _tx.get('try_label', 'Tente:') }}</span>
+    {% for c in chips %}
+    <button class="rag-chip" data-q="{{ c.prompt }}">{{ c.label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="ft-grid">
+    <article class="ft-pane ft-pane--base">
+      <header class="ft-pane__head">
+        <span class="ft-pane__title"><i class="fa-solid fa-cube"></i> {{ _tx.get('base_model_label', 'Modelo base') }}</span>
+        <span class="ft-pane__tag" id="ft-base-model">gpt-4o-mini</span>
+      </header>
+      <div class="ft-pane__body" id="ft-base-body">
+        <p class="muted" style="margin:0;font-size:13px;">{{ _tx.get('base_body_placeholder', 'Envie uma pergunta para comparar.') }}</p>
+      </div>
+      <footer class="ft-pane__kpis" id="ft-base-kpis"></footer>
+    </article>
+
+    <article class="ft-pane ft-pane--ft">
+      <header class="ft-pane__head">
+        <span class="ft-pane__title"><i class="fa-solid fa-star"></i> {{ _tx.get('ft_model_label', 'Modelo especializado (Contoso)') }}</span>
+        <span class="ft-pane__tag" id="ft-ft-model">SFT + DPO</span>
+      </header>
+      <div class="ft-pane__body" id="ft-ft-body">
+        <p class="muted" style="margin:0;font-size:13px;">{{ _tx.get('ft_body_placeholder', 'A resposta fine-tuned aparece aqui.') }}</p>
+      </div>
+      <footer class="ft-pane__kpis" id="ft-ft-kpis"></footer>
+    </article>
+  </div>
+
+  <div class="rag-status">
+    <span id="ft-status">{{ _tx.get('status_ready', 'Pronto.') }}</span>
+    <span id="ft-meta" class="muted"></span>
+  </div>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-route"></i> {{ _tx.get('pipeline_eyebrow', 'Pipeline de fine-tuning no Foundry') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('pipeline_title', 'Como sair do baseline para o modelo Contoso') }}</h2>
+  <ol class="ft-pipeline">
+    <li>{{ _tx.get('pipeline_step_1', '') | safe }}</li>
+    <li>{{ _tx.get('pipeline_step_2', '') | safe }}</li>
+    <li>{{ _tx.get('pipeline_step_3', '') | safe }}</li>
+    <li>{{ _tx.get('pipeline_step_4', '') | safe }}</li>
+    <li>{{ _tx.get('pipeline_step_5', '') | safe }}</li>
+    <li>{{ _tx.get('pipeline_step_6', '') | safe }}</li>
+  </ol>
+</section>
+
+<style>
+  .ft-techniques { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .ft-tech { padding: 14px 16px; border-radius: var(--radius-sm); background: var(--background-light); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+  .ft-tech__head { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text-primary); font-size: 14.5px; }
+  .ft-tech__head i { color: var(--accent-color); font-size: 18px; }
+  .ft-tech__summary { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .ft-tech__row { font-size: 12.5px; color: var(--text-secondary); }
+  .ft-tech__row--contoso { background: var(--primary-light); border-left: 3px solid var(--accent-color); padding: 6px 10px; border-radius: 6px; }
+  .ft-tech__row--contoso i { color: var(--accent-color); margin-right: 4px; }
+
+  .ft-form { display: flex; gap: 8px; margin-bottom: 10px; }
+  .ft-form input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--background-light); color: var(--text-primary); font-size: 14px; }
+  .ft-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 16px; }
+  .rag-chip { background: var(--background-lighter); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .rag-chip:hover { background: var(--primary-light); color: var(--text-primary); border-color: var(--primary-color); }
+
+  .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .ft-grid { grid-template-columns: 1fr; } }
+  .ft-pane { background: var(--background-dark); border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; }
+  .ft-pane--base { border-top: 3px solid var(--text-muted); }
+  .ft-pane--ft   { border-top: 3px solid var(--accent-color); }
+  .ft-pane__head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--background-light); border-bottom: 1px solid var(--border-color); }
+  .ft-pane__title { font-weight: 700; font-size: 13.5px; color: var(--text-primary); }
+  .ft-pane__title i { margin-right: 6px; color: var(--accent-color); }
+  .ft-pane__tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); background: var(--background-lighter); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border-color); }
+  .ft-pane__body { padding: 14px; min-height: 140px; line-height: 1.55; font-size: 14px; color: var(--text-primary); white-space: pre-wrap; flex: 1; }
+  .ft-pane__kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; padding: 10px 14px; background: var(--background-light); border-top: 1px solid var(--border-color); font-size: 11.5px; }
+  .ft-kpi { display: flex; flex-direction: column; gap: 2px; }
+  .ft-kpi__label { color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
+  .ft-kpi__value { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; }
+  .ft-kpi__value--good { color: #4ade80; }
+  .ft-kpi__value--bad { color: #ff8b4a; }
+
+  .ft-pipeline { padding-left: 20px; line-height: 1.85; font-size: 14px; color: var(--text-secondary); }
+  .ft-pipeline li strong { color: var(--text-primary); }
+
+  .rag-status { display: flex; justify-content: space-between; font-size: 12px; margin-top: 12px; color: var(--text-muted); }
+  .btn { border: 1px solid var(--border-color); background: var(--background-light); color: var(--text-primary); border-radius: 10px; cursor: pointer; font-size: 14px; padding: 10px 18px; }
+  .btn--primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+  .btn--ghost { background: transparent; padding: 10px 14px; }
+</style>
+
+<script>
+(function () {
+  const chipsHost = document.querySelector('.ft-chips');
+  const TX = chipsHost ? chipsHost.dataset : {};
+  const form = document.getElementById('ft-form');
+  const input = document.getElementById('ft-input');
+  const resetBtn = document.getElementById('ft-reset');
+  const status = document.getElementById('ft-status');
+  const meta = document.getElementById('ft-meta');
+  const chips = document.querySelectorAll('.rag-chip');
+  const baseBody = document.getElementById('ft-base-body');
+  const ftBody = document.getElementById('ft-ft-body');
+  const baseKpis = document.getElementById('ft-base-kpis');
+  const ftKpis = document.getElementById('ft-ft-kpis');
+  const baseModel = document.getElementById('ft-base-model');
+  const ftModel = document.getElementById('ft-ft-model');
+
+  chips.forEach(c => c.addEventListener('click', () => { input.value = c.dataset.q; input.focus(); }));
+  resetBtn.addEventListener('click', () => {
+    baseBody.innerHTML = '<p class="muted" style="margin:0;font-size:13px;">' + (TX.txBasePlaceholder || 'Envie uma pergunta para comparar.') + '</p>';
+    ftBody.innerHTML   = '<p class="muted" style="margin:0;font-size:13px;">' + (TX.txFtPlaceholder || 'A resposta fine-tuned aparece aqui.') + '</p>';
+    baseKpis.innerHTML = ''; ftKpis.innerHTML = '';
+    status.textContent = TX.txStatusReady || 'Pronto.'; meta.textContent = '';
+  });
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function fmt(v, suffix) { if (v == null) return '—'; return (typeof v === 'number' ? v.toLocaleString('pt-BR', { maximumFractionDigits: 4 }) : v) + (suffix || ''); }
+
+  function renderKpis(el, m, kind) {
+    if (!m) { el.innerHTML = ''; return; }
+    const items = [
+      { l: TX.txKpiModel || 'modelo',    v: m.model || '—' },
+      { l: TX.txKpiLatency || 'latência',  v: m.latency_ms != null ? m.latency_ms + ' ms' : '—' },
+      { l: TX.txKpiTokensIn || 'tokens in',  v: m.tokens_in  != null ? m.tokens_in  : '—' },
+      { l: TX.txKpiTokensOut || 'tokens out', v: m.tokens_out != null ? m.tokens_out : '—' },
+      { l: TX.txKpiCost || 'custo',     v: m.cost_usd   != null ? '$' + m.cost_usd.toFixed(6) : '—' },
+      { l: TX.txKpiGroundedness || 'groundedness',    v: m.groundedness    != null ? (m.groundedness * 100).toFixed(0) + '%' : '—', cls: kpiClass(m.groundedness) },
+      { l: TX.txKpiBrand || 'brand alignment', v: m.brand_alignment != null ? (m.brand_alignment * 100).toFixed(0) + '%' : '—', cls: kpiClass(m.brand_alignment) },
+    ];
+    el.innerHTML = items.map(it =>
+      '<div class="ft-kpi">' +
+        '<span class="ft-kpi__label">' + esc(it.l) + '</span>' +
+        '<span class="ft-kpi__value ' + (it.cls || '') + '">' + esc(it.v) + '</span>' +
+      '</div>'
+    ).join('');
+  }
+  function kpiClass(v) {
+    if (v == null) return '';
+    if (v >= 0.8) return 'ft-kpi__value--good';
+    if (v <= 0.5) return 'ft-kpi__value--bad';
+    return '';
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const q = (input.value || '').trim();
+    if (!q) return;
+    baseBody.textContent = '…'; ftBody.textContent = '…';
+    baseKpis.innerHTML = ''; ftKpis.innerHTML = ''; meta.textContent = '';
+
+    // Progressive status to make the demo feel more realistic
+    const stages = [
+      TX.txStage1 || 'Tokenizando prompt…',
+      TX.txStage2 || 'Carregando pesos do modelo base (gpt-4o-mini)…',
+      TX.txStage3 || 'Carregando adapter LoRA (SFT + DPO) do checkpoint Contoso…',
+      TX.txStage4 || 'Inferindo nos 2 modelos em paralelo…',
+      TX.txStage5 || 'Calculando groundedness e brand alignment…',
+    ];
+    let stageIdx = 0;
+    status.textContent = stages[0];
+    const stageTimer = setInterval(() => {
+      stageIdx = Math.min(stageIdx + 1, stages.length - 1);
+      status.textContent = stages[stageIdx];
+    }, 650);
+
+    const minDelay = new Promise(r => setTimeout(r, 3200));
+    let resp;
+    try {
+      const fetchPromise = fetch('/sections/ato1_modelagem/api/compare', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: q })
+      });
+      const [r] = await Promise.all([fetchPromise, minDelay]);
+      resp = r;
+    } catch (e) {
+      clearInterval(stageTimer);
+      status.textContent = (TX.txError || 'Erro: ') + e.message;
+      return;
+    }
+    clearInterval(stageTimer);
+    if (!resp.ok) { status.textContent = (TX.txHttpError || 'Erro HTTP ') + resp.status; return; }
+    const data = await resp.json();
+    baseBody.textContent = data.base?.answer || (TX.txNoResponse || '(sem resposta)');
+    ftBody.textContent   = data.finetuned?.answer || (TX.txNoResponse || '(sem resposta)');
+    baseModel.textContent = data.base?.metrics?.model || 'base';
+    ftModel.textContent   = data.finetuned?.metrics?.model || 'fine-tuned';
+    renderKpis(baseKpis, data.base?.metrics, 'base');
+    renderKpis(ftKpis,   data.finetuned?.metrics, 'ft');
+    status.textContent = (TX.txCompleted || 'Concluído em {ms}ms.').replace('{ms}', data.duration_ms || 0);
+    const badge = document.getElementById('modelagem-source-badge');
+    if (badge) {
+      const real = data.source === 'real';
+      badge.className = 'source-badge ' + (real ? 'source-badge--real' : 'source-badge--mock');
+      badge.title = real ? (TX.txReal || 'Resposta do LLM real') : (TX.txMock || 'Simulação local');
+      badge.innerHTML = '<i class="fa-solid ' + (real ? 'fa-bolt' : 'fa-flask') + '"></i>';
+    }
+  });
+})();
+</script>
+{% endblock %}

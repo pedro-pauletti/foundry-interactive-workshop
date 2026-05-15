@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Governança"] %}
+{% set requisitos = [
+  {"id": "1.3.2", "titulo": "Classificação de risco"},
+  {"id": "1.3.6", "titulo": "Workflow de aprovação por nível de risco"},
+  {"id": "1.3.9", "titulo": "Visão por requisito do PL/norma interna"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title', 'Por que classificar risco antes do deploy?') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-scale-balanced"></i> {{ _tx.get('marco_eyebrow', 'Marco regulatório · PL 2338/2023') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('marco_title', '5 pilares aplicáveis a sistemas Contoso') }}</h2>
+  <ol class="risk-pillars">
+    {% for name, desc in pl2338 %}
+    <li><strong>{{ name }}</strong> — {{ desc }}</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-ruler"></i> {{ _tx.get('dims_eyebrow', 'Dimensões de risco · critérios parametrizáveis') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('dims_title', 'As 4 perguntas que toda Custom Policy precisa responder') }}</h2>
+  <div class="risk-dims">
+    {% for d in dimensions %}
+    <article class="risk-dim">
+      <header><i class="{{ d.icon }}"></i><span>{{ d.name }}</span></header>
+      <p>{{ d.summary }}</p>
+      <small class="muted">{{ _tx.get('dims_options_label', 'opções') }}: {{ d.options | join(' · ') }}</small>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="page-summary" style="margin-top:24px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa · Custom Azure Policy') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Simule a avaliação de risco em runtime') }}
+    <span class="source-badge source-badge--mock" title="{{ _tx.get('demo_badge_title', 'Simulação local — lógica equivalente à Custom Policy real') }}"><i class="fa-solid fa-flask"></i></span>
+  </h2>
+  <p class="page-summary__lede">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top:16px;">
+  <form id="risk-form" class="risk-form"
+        data-tx-risk-prefix="{{ _tx.get('result_risk_prefix', 'Risco ') }}"
+        data-tx-score-prefix="{{ _tx.get('result_score_prefix', 'score: ') }}"
+        data-tx-http-error="{{ _tx.get('http_error_prefix', 'Erro HTTP ') }}">
+    <label>{{ _tx.get('form_finalidade', 'Finalidade') }}
+      <select name="finalidade">
+        <option value="informacional">informacional</option>
+        <option value="atendimento" selected>atendimento</option>
+        <option value="recomendacao">recomendacao</option>
+        <option value="credito">credito</option>
+        <option value="biometria">biometria</option>
+      </select>
+    </label>
+    <label>{{ _tx.get('form_publico', 'Público impactado') }}
+      <select name="publico">
+        <option value="interno">interno</option>
+        <option value="cliente_optin" selected>cliente_optin</option>
+        <option value="externo">externo</option>
+      </select>
+    </label>
+    <label>{{ _tx.get('form_dados', 'Sensibilidade dos dados') }}
+      <select name="dados">
+        <option value="anonimo">anonimo</option>
+        <option value="pii" selected>pii</option>
+        <option value="sensivel_lgpd">sensivel_lgpd</option>
+      </select>
+    </label>
+    <label>{{ _tx.get('form_reversibilidade', 'Reversibilidade') }}
+      <select name="criticidade">
+        <option value="reversivel" selected>reversivel</option>
+        <option value="parcial">parcial</option>
+        <option value="irreversivel">irreversivel</option>
+      </select>
+    </label>
+    <label class="risk-form__check">
+      <input type="checkbox" name="impact_assessment"> {{ _tx.get('form_aia', 'Avaliação de Impacto Algorítmico (AIA) anexada') }}
+    </label>
+    <button type="submit" class="btn btn--primary"><i class="fa-solid fa-gavel"></i> {{ _tx.get('form_submit', 'Avaliar contra a Policy') }}</button>
+  </form>
+
+  <div class="risk-presets">
+    <span class="muted" style="font-size:12px;">{{ _tx.get('presets_label', 'Presets:') }}</span>
+    <button class="rag-chip" data-preset='{"finalidade":"biometria","publico":"externo","dados":"sensivel_lgpd","criticidade":"irreversivel","impact_assessment":false}'>{{ _tx.get('preset_alto_sem_aia', '→ alto risco sem AIA') }}</button>
+    <button class="rag-chip" data-preset='{"finalidade":"biometria","publico":"externo","dados":"sensivel_lgpd","criticidade":"irreversivel","impact_assessment":true}'>{{ _tx.get('preset_alto_com_aia', '→ alto risco COM AIA') }}</button>
+    <button class="rag-chip" data-preset='{"finalidade":"atendimento","publico":"cliente_optin","dados":"pii","criticidade":"reversivel","impact_assessment":false}'>{{ _tx.get('preset_medio', '→ risco médio típico') }}</button>
+    <button class="rag-chip" data-preset='{"finalidade":"informacional","publico":"interno","dados":"anonimo","criticidade":"reversivel","impact_assessment":false}'>{{ _tx.get('preset_baixo', '→ risco baixo') }}</button>
+  </div>
+
+  <div id="risk-result" class="risk-result" hidden>
+    <div class="risk-result__head">
+      <span class="risk-badge" id="risk-class">—</span>
+      <span class="risk-effect" id="risk-effect">—</span>
+      <span class="risk-score muted" id="risk-score">{{ _tx.get('result_score_placeholder', 'score: —') }}</span>
+    </div>
+    <p class="risk-message" id="risk-message"></p>
+    <div class="risk-triggers" id="risk-triggers" hidden>
+      <strong>{{ _tx.get('result_triggers_label', 'Triggers regulatórios:') }}</strong>
+      <ul id="risk-triggers-list"></ul>
+    </div>
+    <div class="risk-path" id="risk-path"></div>
+  </div>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-file-code"></i> {{ _tx.get('policy_eyebrow', 'Custom Azure Policy · JSON real') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('policy_title', 'É exatamente este o ARM/Bicep que vai pro Control Plane') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('policy_lede', '') | safe }}</p>
+  <details>
+    <summary class="muted" style="cursor:pointer;font-size:13px;">{{ _tx.get('policy_details_summary', 'Ver JSON completo') }}</summary>
+    <pre class="code-block"><code>{{ policy_json }}</code></pre>
+  </details>
+</section>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-screwdriver-wrench"></i> {{ _tx.get('impl_eyebrow', 'Implementação prática · passo a passo') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('impl_title', 'Como essa Custom Policy é criada e aplicada de verdade') }}</h2>
+  <p class="page-summary__lede">
+    Baseado em
+    <a href="https://learn.microsoft.com/en-us/azure/foundry/how-to/custom-policy-definition" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Foundry · Custom policy definition</a>
+    e
+    <a href="https://learn.microsoft.com/en-us/azure/governance/policy/tutorials/create-custom-policy-definition" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Azure Policy · Tutorial</a>.
+  </p>
+
+  <div class="policy-impl-grid">
+    <article class="policy-impl-step">
+      <header><span class="policy-impl-step__num">1</span><h3>Anatomia da <code>policyRule</code></h3></header>
+      <p>Toda Custom Policy tem três blocos obrigatórios:</p>
+      <ul>
+        <li><code>mode</code> — <strong>All</strong> (avalia qualquer resource type, inclusive RG/subscription) ou <strong>Indexed</strong> (só resources que suportam tags/location).</li>
+        <li><code>parameters</code> — variáveis injetadas no <em>assignment</em>. No nosso caso, <code>effect</code> com valores <code>Deny | Audit | Disabled</code>, permitindo soft-launch.</li>
+        <li><code>policyRule</code> — condição <code>if</code> (lógica boolean: <code>allOf</code>, <code>anyOf</code>, <code>not</code>, <code>field</code>, <code>count</code>) + ação <code>then</code> (<code>effect</code>).</li>
+      </ul>
+      <p class="muted" style="font-size:12px;margin:6px 0 0 0;">Aliases relevantes pro Foundry: <code>Microsoft.CognitiveServices/accounts/projects/agents</code>, <code>Microsoft.MachineLearningServices/workspaces/onlineEndpoints</code>.</p>
+    </article>
+
+    <article class="policy-impl-step">
+      <header><span class="policy-impl-step__num">2</span><h3>Effects disponíveis</h3></header>
+      <ul class="policy-effects">
+        <li><strong>Deny</strong> — bloqueia <code>PUT</code>/<code>PATCH</code> em pre-flight. Recurso nunca é criado. <span class="badge badge--danger">Usado p/ alto risco</span></li>
+        <li><strong>Audit</strong> — permite criar mas registra <em>non-compliant</em> no Compliance dashboard. <span class="badge badge--warning">Médio risco</span></li>
+        <li><strong>Modify</strong> — adiciona/altera tags ou campos automaticamente (ex: forçar <code>tags['costCenter']</code>).</li>
+        <li><strong>DeployIfNotExists</strong> — remediation: dispara um ARM template (ex: criar Defender alert) quando o recurso não compliant é detectado.</li>
+        <li><strong>AuditIfNotExists</strong> — flag se um recurso relacionado não existe (ex: agent sem Content Safety associado).</li>
+        <li><strong>Disabled</strong> — desliga a regra sem deletar (útil em troubleshooting).</li>
+      </ul>
+    </article>
+
+    <article class="policy-impl-step">
+      <header><span class="policy-impl-step__num">3</span><h3>Lifecycle da implantação</h3></header>
+      <ol class="policy-lifecycle">
+        <li><strong>Authoring</strong> — JSON salvo em repo Git (<code>governance/policies/agent-high-risk.json</code>), revisado por PR.</li>
+        <li><strong>Definition</strong> — registrar no tenant/MG: <code>az policy definition create --management-group <em>contoso-root</em></code>.</li>
+        <li><strong>Assignment</strong> — vincular a um escopo (MG, subscription, RG): <code>az policy assignment create --scope <em>/providers/Microsoft.Management/managementGroups/contoso-prod</em></code>.</li>
+        <li><strong>Initiative</strong> (opcional) — agrupar várias definitions em um <em>policySetDefinition</em> para baseline corporativo Contoso.</li>
+        <li><strong>Compliance scan</strong> — Azure Policy reavalia continuamente (24h) e em todo deployment.</li>
+        <li><strong>Exemptions</strong> — caso de negócio justificado: <code>az policy exemption create</code> com expiração obrigatória.</li>
+      </ol>
+    </article>
+
+    <article class="policy-impl-step">
+      <header><span class="policy-impl-step__num">4</span><h3>Hierarquia de escopo</h3></header>
+      <pre class="policy-scope-tree"><code>Tenant Root MG (contoso)
+  └─ MG: contoso-prod        ◄── assignment recomendado (cobre toda prod)
+       ├─ Sub: data-platform
+       │    └─ RG: rg-foundry-agents
+       │         └─ <strong>Microsoft.CognitiveServices/.../agents/*</strong>
+       └─ Sub: customer-experience
+            └─ RG: rg-chatbot-contoso</code></pre>
+      <p class="muted" style="font-size:12px;">Quanto mais alto o escopo, mais agentes cobertos. A regra herda para baixo; <em>exclusions</em> podem isolar um RG de sandbox.</p>
+    </article>
+  </div>
+
+  <h3 style="margin:18px 0 6px 0;">Comandos reais para deploy</h3>
+  <pre class="code-block"><code class="language-bash"># 1. Cria a Custom Policy Definition no Management Group corporativo
+az policy definition create \
+  --name "contoso-foundry-agent-high-risk" \
+  --display-name "Contoso · Foundry Agent — Deny high-risk without Impact Assessment" \
+  --description "Bloqueia agentes com finalidade=biometria OU publico=externo sem impactAssessment=approved" \
+  --rules    @agent-high-risk.policyRule.json \
+  --params   @agent-high-risk.parameters.json \
+  --mode All \
+  --management-group "contoso-root"
+
+# 2. Atribui a policy ao escopo de produção, em modo Deny
+az policy assignment create \
+  --name        "deny-high-risk-agents-prod" \
+  --display-name "Deny high-risk Foundry agents (prod)" \
+  --policy      "contoso-foundry-agent-high-risk" \
+  --scope       "/providers/Microsoft.Management/managementGroups/contoso-prod" \
+  --params      '{"effect":{"value":"Deny"}}' \
+  --identity-scope "/providers/Microsoft.Management/managementGroups/contoso-prod" \
+  --mi-system-assigned \
+  --location    "brazilsouth"
+
+# 3. (Opcional) Soft-launch primeiro em Audit por 2 semanas
+az policy assignment update \
+  --name "deny-high-risk-agents-prod" \
+  --params '{"effect":{"value":"Audit"}}'
+
+# 4. Validar compliance state
+az policy state list \
+  --management-group "contoso-prod" \
+  --filter "PolicyDefinitionName eq 'contoso-foundry-agent-high-risk' and ComplianceState eq 'NonCompliant'"</code></pre>
+
+  <h3 style="margin:18px 0 6px 0;">Resultado quando um dev tenta criar um agente bloqueado</h3>
+  <pre class="code-block"><code class="language-bash">$ az cognitiveservices account project agent create \
+    --name "agente-biometria-externo" \
+    --tags purpose=biometria audience=externo
+
+ERROR: (RequestDisallowedByPolicy) Resource 'agente-biometria-externo' was disallowed by policy.
+  Policy identifiers: [{
+    "policyAssignment": "deny-high-risk-agents-prod",
+    "policyDefinition": "contoso-foundry-agent-high-risk",
+    "policyDefinitionDisplayName": "Contoso · Foundry Agent — Deny high-risk without Impact Assessment",
+    "policyDefinitionEffect": "deny"
+  }]
+  → Para liberar: anexar tag impactAssessment=approved (via processo GRC) OU solicitar exemption.</code></pre>
+
+  <p class="muted" style="font-size:12px;margin-top:10px;">
+    <i class="fa-solid fa-circle-info"></i>
+    Foundry-specific: a categoria <code>AI Foundry</code> em <code>metadata.category</code> é o que faz a policy aparecer no
+    <strong>AI Governance dashboard</strong> do Foundry, agrupada junto com as built-in (Responsible AI, Content Safety etc.).
+  </p>
+</section>
+
+<style>
+.policy-impl-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px; }
+@media (max-width: 900px) { .policy-impl-grid { grid-template-columns:1fr; } }
+.policy-impl-step { background:var(--background-light); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:14px 16px; }
+.policy-impl-step header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.policy-impl-step header h3 { margin:0; font-size:15px; }
+.policy-impl-step__num { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:999px; background:var(--primary-color,#2b8ef0); color:#fff; font-weight:700; font-size:12px; }
+.policy-impl-step ul, .policy-impl-step ol { margin:6px 0 0 18px; padding:0; font-size:13px; line-height:1.55; }
+.policy-impl-step li { margin-bottom:4px; }
+.policy-effects .badge { font-size:10px; padding:1px 6px; border-radius:4px; margin-left:4px; }
+.policy-effects .badge--danger { background:rgba(255,107,107,0.18); color:#ff6b6b; border:1px solid #ff6b6b; }
+.policy-effects .badge--warning { background:rgba(255,142,60,0.18); color:#ff8e3c; border:1px solid #ff8e3c; }
+.policy-scope-tree { font-size:12px; background:var(--background-main); border:1px solid var(--border-color); padding:10px 12px; border-radius:var(--radius-sm); overflow-x:auto; }
+.policy-scope-tree code { background:none; color:var(--text-secondary); font-family:'JetBrains Mono', monospace; }
+.policy-lifecycle li { margin-bottom:5px; }
+</style>
+
+<section class="card" style="margin-top:16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-plug"></i> {{ _tx.get('integrations_eyebrow', 'Integrações para fechar o ciclo') }}</span>
+  <h2 class="page-summary__title" style="margin-bottom:6px;">{{ _tx.get('integrations_title', 'A policy sozinha não basta — o que precisa estar conectado') }}</h2>
+  <ul class="risk-integrations">
+    {% for name, desc in integrations %}
+    <li><strong>{{ name }}</strong> — {{ desc }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<style>
+  .risk-pillars { padding-left: 22px; line-height: 1.85; font-size: 14px; color: var(--text-secondary); }
+  .risk-pillars li strong { color: var(--text-primary); }
+
+  .risk-dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .risk-dim { padding: 12px 14px; background: var(--background-light); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+  .risk-dim header { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+  .risk-dim header i { color: var(--accent-color); }
+  .risk-dim p { margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .risk-dim small { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  .risk-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+  .risk-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+  .risk-form select { padding: 8px 10px; background: var(--background-light); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; }
+  .risk-form__check { flex-direction: row !important; align-items: center; gap: 8px; grid-column: 1 / -1; font-size: 13px; }
+  .risk-form button { grid-column: 1 / -1; justify-self: start; }
+
+  .risk-presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 14px; }
+  .rag-chip { background: var(--background-lighter); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .rag-chip:hover { background: var(--primary-light); color: var(--text-primary); border-color: var(--primary-color); }
+
+  .risk-result { margin-top: 18px; padding: 16px; background: var(--background-dark); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+  .risk-result__head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .risk-badge { padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .05em; }
+  .risk-badge--alto  { background: rgba(255, 107, 107, .18); color: #ff6b6b; border: 1px solid #ff6b6b; }
+  .risk-badge--medio { background: rgba(255, 142, 60, .18); color: #ff8e3c; border: 1px solid #ff8e3c; }
+  .risk-badge--baixo { background: rgba(74, 222, 128, .18); color: #4ade80; border: 1px solid #4ade80; }
+  .risk-effect { padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+  .risk-effect--deny  { background: #ff6b6b; color: #fff; }
+  .risk-effect--audit { background: #ff8e3c; color: #fff; }
+  .risk-effect--allow { background: #4ade80; color: #051; }
+  .risk-message { margin: 10px 0; line-height: 1.55; font-size: 14px; color: var(--text-primary); }
+  .risk-triggers { padding: 10px 12px; background: var(--background-light); border-left: 3px solid var(--accent-color); border-radius: 6px; margin-top: 10px; font-size: 13px; }
+  .risk-triggers ul { margin: 6px 0 0 18px; padding: 0; color: var(--text-secondary); }
+  .risk-path { margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted); }
+
+  .risk-integrations { padding-left: 22px; line-height: 1.85; font-size: 14px; color: var(--text-secondary); }
+  .risk-integrations li strong { color: var(--text-primary); }
+
+  .btn { border: 1px solid var(--border-color); background: var(--background-light); color: var(--text-primary); border-radius: 10px; cursor: pointer; font-size: 14px; padding: 10px 18px; }
+  .btn--primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+</style>
+
+<script>
+(function () {
+  const form = document.getElementById('risk-form');
+  const result = document.getElementById('risk-result');
+  const klass = document.getElementById('risk-class');
+  const effect = document.getElementById('risk-effect');
+  const score = document.getElementById('risk-score');
+  const message = document.getElementById('risk-message');
+  const triggers = document.getElementById('risk-triggers');
+  const triggersList = document.getElementById('risk-triggers-list');
+  const path = document.getElementById('risk-path');
+  const presets = document.querySelectorAll('.rag-chip');
+
+  function applyPreset(p) {
+    for (const k of Object.keys(p)) {
+      const el = form.elements[k];
+      if (!el) continue;
+      if (el.type === 'checkbox') el.checked = !!p[k]; else el.value = p[k];
+    }
+  }
+
+  presets.forEach(b => b.addEventListener('click', () => {
+    try { applyPreset(JSON.parse(b.dataset.preset)); form.requestSubmit(); } catch (e) {}
+  }));
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(form);
+    const body = {
+      finalidade: fd.get('finalidade'),
+      publico: fd.get('publico'),
+      dados: fd.get('dados'),
+      criticidade: fd.get('criticidade'),
+      impact_assessment: form.elements['impact_assessment'].checked,
+    };
+    const resp = await fetch('/sections/ato3_classificacao_risco/api/policy/evaluate', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) { alert((form.dataset.txHttpError || 'Erro HTTP ') + resp.status); return; }
+    const data = await resp.json();
+    klass.textContent = (form.dataset.txRiskPrefix || 'Risco ') + data.classification;
+    klass.className = 'risk-badge risk-badge--' + data.classification;
+    effect.textContent = data.effect.toUpperCase();
+    effect.className = 'risk-effect risk-effect--' + data.effect;
+    score.textContent = (form.dataset.txScorePrefix || 'score: ') + data.score + '/20';
+    message.textContent = data.message;
+    if (data.triggers && data.triggers.length) {
+      triggersList.innerHTML = data.triggers.map(t => '<li>' + t.replace(/[<>]/g,'') + '</li>').join('');
+      triggers.hidden = false;
+    } else {
+      triggers.hidden = true;
+    }
+    path.textContent = data.policy_path || '';
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+})();
+</script>
+{% endblock %}

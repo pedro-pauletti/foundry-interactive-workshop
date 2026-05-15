@@ -1,0 +1,21 @@
+# MAFW orchestrator — Foundry Hosted Agent variant.
+# Difference from ./Dockerfile (local docker-compose):
+#  - Adds `azure-ai-agentserver-responses` to the image.
+#  - Requires linux/amd64 (use `docker build --platform linux/amd64 ...`).
+#  - Entrypoint is the Responses-protocol server on port 8088, not uvicorn /chat.
+FROM --platform=linux/amd64 python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY src/app/mafwAgent/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+ && pip install --no-cache-dir "azure-ai-agentserver-responses>=1.0.0b5"
+
+COPY src/app/mafwAgent/app ./
+
+EXPOSE 8088
+CMD ["python", "-m", "responses_app"]

@@ -1,0 +1,231 @@
+{
+  "slug": "energy",
+  "label": "Energia & Utilities",
+  "company_name": "Contoso Energy",
+  "app_title": "Framework IA Contoso Energy",
+  "app_tagline": "Os 24 requisitos do Framework IA Contoso Energy e como cada um é endereçado pela stack Microsoft",
+  "assistant_persona": "Atendente Digital Contoso Energy",
+  "section_description": "Assistente de utilities Contoso Energy respondendo com base em regulação ANEEL e políticas internas.",
+  "techniques_examples": {
+    "distillation": "Destilar GPT-4o → Phi-4 para FAQs sobre conta de energia, segunda via e religação.",
+    "sft": "Padronizar saída em JSON para integrar com OMS (Outage Management System) e CRM.",
+    "rlhf": "Tom de marca Contoso Energy: educativo, transparente sobre tarifas e bandeiras, foco em eficiência.",
+    "dpo": "Ajustes pontuais para temas sensíveis (falta de energia em massa, faturas em atraso)."
+  },
+  "ft_system_prompt": "Você é o atendente digital oficial da Contoso Energy (distribuidora de energia, Brasil). Sempre que possível: (a) cite resolução ANEEL (ex: REN 1.000/2021), (b) cite produto/tarifa (ex: Tarifa Branca, Bandeira Verde/Amarela/Vermelha), (c) ofereça canal autoatendimento. Feche com próximo passo.",
+  "ft_model_label": "gpt-4o-mini-contoso-eng-ft-v2 (SFT + DPO)",
+  "ft_model_label_real": "gpt-4o-mini (simulando FT · system Contoso Energy)",
+  "knowledge_base": [
+    {
+      "id": "doc-fat-001",
+      "titulo": "Segunda Via da Conta de Energia",
+      "trecho": "Segunda via disponível no app Contoso Energy, site contoso.energy.com.br e WhatsApp 0800-CONTOSO-LUZ. Sem cobrança de taxa. Conforme REN ANEEL 1.000/2021.",
+      "tags": [
+        "fatura",
+        "segunda via",
+        "autoatendimento"
+      ]
+    },
+    {
+      "id": "doc-band-008",
+      "titulo": "Bandeiras Tarifárias Vigentes",
+      "trecho": "Bandeira Verde: sem acréscimo. Amarela: +R$ 1,885 a cada 100 kWh. Vermelha 1: +R$ 4,463. Vermelha 2: +R$ 7,877. Definida mensalmente pela ANEEL conforme custo de geração.",
+      "tags": [
+        "bandeira",
+        "tarifa",
+        "aneel"
+      ]
+    },
+    {
+      "id": "doc-tb-013",
+      "titulo": "Tarifa Branca — Como Funciona",
+      "trecho": "Tarifa Branca tem 3 postos horários: ponta (18-21h, mais cara), intermediário (17-18h e 21-22h) e fora-ponta (demais horas, mais barato). Adesão opcional para consumidores B1 conforme REN 733.",
+      "tags": [
+        "tarifa branca",
+        "horário",
+        "b1"
+      ]
+    },
+    {
+      "id": "doc-rel-021",
+      "titulo": "Religação por Falta de Pagamento",
+      "trecho": "Religação em até 24h após confirmação do pagamento (área urbana) ou 48h (rural), conforme REN 1.000. Solicitação via app, site ou 0800. Sem cobrança de taxa de religação se pago em D+0.",
+      "tags": [
+        "religação",
+        "corte",
+        "pagamento"
+      ]
+    },
+    {
+      "id": "doc-out-027",
+      "titulo": "Falta de Energia — Procedimento",
+      "trecho": "Falta de energia: verificar disjuntor → vizinhança → consultar OMS via app/WhatsApp. SLA de restabelecimento: 4h urbano, 8h rural. Registrar protocolo para acompanhamento.",
+      "tags": [
+        "interrupção",
+        "oms",
+        "sla"
+      ]
+    },
+    {
+      "id": "doc-mig-033",
+      "titulo": "Migração para Geração Distribuída (GD)",
+      "trecho": "Conexão de microgeração solar (até 75 kW) segue REN ANEEL 1.000 + Lei 14.300/2022. Vistoria em até 15 dias úteis após solicitação no portal Contoso Energy.",
+      "tags": [
+        "solar",
+        "gd",
+        "lei 14300"
+      ]
+    }
+  ],
+  "no_answer_fallback": "Não encontrei essa informação na base Contoso Energy. Posso te ajudar com fatura, bandeira tarifária, tarifa branca, religação, falta de energia ou geração solar?",
+  "modelagem_examples": [
+    {
+      "keywords": [
+        "fatura",
+        "conta",
+        "segunda via"
+      ],
+      "base": "A segunda via da conta de energia geralmente está disponível no site ou app da distribuidora. Verifique os canais oficiais.",
+      "ft": "Segunda via Contoso Energy — sem taxa (REN 1.000/2021):\n• App Contoso Energy → Faturas\n• Site contoso.energy.com.br\n• WhatsApp **0800-CONTOSO-LUZ**\nQuer que eu envie o link de pagamento via Pix?"
+    },
+    {
+      "keywords": [
+        "bandeira",
+        "amarela",
+        "vermelha",
+        "aumento"
+      ],
+      "base": "As bandeiras tarifárias indicam o custo de geração de energia no mês. Verifique no site da ANEEL ou na sua conta.",
+      "ft": "Bandeiras vigentes (definidas pela ANEEL):\n• **Verde**: sem acréscimo\n• **Amarela**: +R$ 1,885 / 100 kWh\n• **Vermelha 1**: +R$ 4,463 / 100 kWh\n• **Vermelha 2**: +R$ 7,877 / 100 kWh\nQuer dicas de economia para a bandeira atual?"
+    },
+    {
+      "keywords": [
+        "acabou",
+        "sem luz",
+        "apagão",
+        "queda"
+      ],
+      "base": "Em caso de falta de energia, verifique o disjuntor e contate a distribuidora local.",
+      "ft": "Procedimento Contoso Energy:\n1. Verifique o **disjuntor geral** (chave geral desligada?)\n2. Confirme se vizinhos também estão sem energia\n3. Consulte OMS no app ou **WhatsApp 0800-CONTOSO-LUZ**\nSLA: **4h urbano · 8h rural**. Me passa o CEP que abro o protocolo agora?"
+    }
+  ],
+  "modelagem_default": {
+    "base": "Olá! Posso ajudar com informações gerais sobre energia. Como posso ajudar?",
+    "ft": "Olá! Sou o atendente digital Contoso Energy. Posso ajudar com:\n• Faturas, segunda via e Pix\n• Bandeiras tarifárias e Tarifa Branca\n• Falta de energia e religação\n• Geração solar e eficiência energética\nQual o seu CEP ou nº de instalação?"
+  },
+  "evaluator_dataset": [
+    {
+      "id": "ex-01",
+      "pergunta": "Como tiro a segunda via da conta?",
+      "resposta_modelo_a": "Segunda via gratuita no app Contoso Energy, site ou WhatsApp 0800-CONTOSO-LUZ, conforme REN ANEEL 1.000/2021.",
+      "resposta_modelo_b": "Vai no site, acho que tem lá."
+    },
+    {
+      "id": "ex-02",
+      "pergunta": "Quanto custa a bandeira vermelha 2?",
+      "resposta_modelo_a": "A Bandeira Vermelha 2 acresce R$ 7,877 a cada 100 kWh consumidos, conforme tabela ANEEL vigente.",
+      "resposta_modelo_b": "É bem caro, mas não lembro o valor exato."
+    },
+    {
+      "id": "ex-03",
+      "pergunta": "Vale a pena Tarifa Branca?",
+      "resposta_modelo_a": "Depende do seu perfil de consumo. Se você concentra uso fora do horário de ponta (18-21h), a Tarifa Branca (REN 733) tende a ser mais barata.",
+      "resposta_modelo_b": "Sempre vale, é mais moderna."
+    },
+    {
+      "id": "ex-04",
+      "pergunta": "Cortaram minha luz, paguei agora. Quando volta?",
+      "resposta_modelo_a": "Após confirmação do pagamento, a religação ocorre em até 24h em área urbana ou 48h em área rural, conforme REN 1.000.",
+      "resposta_modelo_b": "Religam quando der, geralmente rápido."
+    },
+    {
+      "id": "ex-05",
+      "pergunta": "Posso instalar painel solar em casa?",
+      "resposta_modelo_a": "Sim, microgeração até 75 kW segue REN ANEEL 1.000 e Lei 14.300/2022. Vistoria em até 15 dias úteis após solicitação no portal.",
+      "resposta_modelo_b": "Acho que precisa de muita autorização, melhor desistir."
+    }
+  ],
+  "governance_benign_responses": [
+    "Posso te ajudar com fatura, bandeira tarifária, religação, falta de energia ou geração solar. Em que posso ser útil?",
+    "A Bandeira Amarela acresce R$ 1,885 a cada 100 kWh consumidos, conforme tabela ANEEL vigente.",
+    "Religação após pagamento ocorre em até 24h (urbano) ou 48h (rural), conforme REN ANEEL 1.000."
+  ],
+  "governance_system_prompt": "Você é o atendente Contoso Energy. Responda em pt-BR, educativo e transparente sobre tarifas.",
+  "suggested_prompts": {
+    "rag_chat": [
+      {
+        "label": "bandeira tarifária",
+        "prompt": "Qual a bandeira tarifária deste mês?"
+      },
+      {
+        "label": "GD solar",
+        "prompt": "Como funciona a geração distribuída solar?"
+      },
+      {
+        "label": "religação",
+        "prompt": "Qual o prazo de religação após pagamento?"
+      },
+      {
+        "label": "política segurança",
+        "prompt": "Quais EPIs para trabalho em linha viva?"
+      },
+      {
+        "label": "férias campo",
+        "prompt": "Como funciona a escala de férias para equipes de campo?"
+      },
+      {
+        "label": "código de conduta",
+        "prompt": "Posso receber treinamento de fornecedor de equipamento?"
+      }
+    ],
+    "modelagem": [
+      {
+        "label": "→ atendimento",
+        "prompt": "Tive falta de energia, o que faço?"
+      },
+      {
+        "label": "→ contas",
+        "prompt": "Por que minha conta veio mais alta este mês?"
+      },
+      {
+        "label": "→ GD",
+        "prompt": "Quero instalar painel solar, como funciona o crédito?"
+      }
+    ],
+    "hosted_agents": [
+      {
+        "label": "falta energia",
+        "prompt": "Estou sem energia na minha rua, como reporto?"
+      },
+      {
+        "label": "2ª via fatura",
+        "prompt": "Como peço segunda via da conta de luz?"
+      },
+      {
+        "label": "GD compensação",
+        "prompt": "Como vejo a compensação de créditos da minha GD?"
+      },
+      {
+        "label": "reset app",
+        "prompt": "Como reseto a senha do app Contoso Energia?"
+      }
+    ],
+    "governance_ok_example": {
+      "label": "Pergunta legítima",
+      "prompt": "Qual a bandeira tarifária deste mês?"
+    }
+  },
+  "placeholders": {
+    "rag_chat": "Pergunte ao Curador Contoso (ex.: qual a tarifa branca residencial?)",
+    "modelagem": "Pergunte algo (ex.: Quero migrar para mercado livre de energia)…",
+    "hosted_agents": "Pergunte ao hosted agent (ex.: previsão de consumo do próximo mês?)…",
+    "multiagentes": "Faça uma pergunta (ex.: migrar para mercado livre e checar viabilidade técnica)…",
+    "custo_integracao": "Faça uma pergunta (ex.: tarifa branca)…",
+    "governanca": "Tente um prompt malicioso ou benigno…  (Enter para enviar · Shift+Enter quebra linha)",
+    "prompt_versionado": "ex.: qual a tarifa branca residencial?"
+  },
+  "rag_bases": {
+    "products": "Energy Services",
+    "regulations": "Internal Regulations"
+  }
+}

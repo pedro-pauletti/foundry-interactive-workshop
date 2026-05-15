@@ -1,0 +1,66 @@
+texts:
+  intro_title: RAG corporativo con Foundry IQ
+  intro_lede: >-
+    <strong>Foundry IQ</strong> es el motor de retrieval gestionado de Foundry: indexación,
+    embeddings, hybrid search y re-ranking como servicio. La demo siguiente muestra el
+    <strong>impacto de la estrategia de retrieval</strong> sobre la misma base de conocimiento Contoso.
+  demo_eyebrow: Demo interactiva
+  demo_title: Curador Contoso — alterna entre estrategias de retrieval
+  demo_lede: >-
+    Selecciona una estrategia, haz una pregunta y observa
+    <strong>cuántos documentos se recuperaron, con qué score y qué latencia</strong>.
+    La respuesta proviene de Foundry cuando está configurado; en caso contrario, de una simulación local.
+  modes_aria: Estrategia de retrieval
+  mode_simple_name: Simple Search
+  mode_simple_desc: "keyword (BM25) puro · top-2 · ~150ms"
+  mode_semantic_name: Semantic + Rerank
+  mode_semantic_desc: "vector + reranker · top-3 · ~350ms"
+  mode_agentic_name: Agentic Retrieval
+  mode_agentic_desc: "query planning + fusion · top-3 · ~650ms"
+  dataset_aria: Base de conocimiento
+  dataset_label: "Base:"
+  dataset_auto: Auto (ambas)
+  dataset_auto_title: Consulta las dos bases y mezcla los mejores resultados
+  dataset_products_title: Índice de productos
+  dataset_regulations_title: Índice de regulaciones internas
+  try_label: "Prueba:"
+  send_button: Enviar
+  new_chat_title: Nueva conversación
+  status_ready: Listo.
+  status_reset: Conversación reiniciada.
+  status_base_prefix: "Base: "
+  status_mode_prefix: "Modo: "
+  status_retrieving: "Recuperando ({mode})…"
+  status_failure: Falló.
+  status_network_failure: Falla de red.
+  error_prefix: "Error: "
+  network_error_prefix: "Error de red: "
+  source_real_title: Real
+  source_mock_title: Simulación local
+  docs_suffix: docs
+  eval_eyebrow: Evaluación automática
+  eval_title: Ejecutar evaluation con métricas de RAG
+  eval_lede: >-
+    Ejecuta un <strong>conjunto canónico de preguntas</strong> contra la estrategia seleccionada
+    y calcula las métricas oficiales de
+    <a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators"
+       target="_blank" rel="noopener">Foundry RAG evaluators</a>:
+    <code>groundedness</code>, <code>relevance</code>, <code>retrieval</code> y
+    <code>response_completeness</code>. Umbral de pass: <strong>0.60</strong>.
+  eval_run_button: Run RAG evaluation (modo actual)
+  eval_run_loading: evaluando…
+  eval_status_initial: Usa el selector de modo arriba.
+  eval_status_running: "Modo: {mode} · base: {dataset} · ejecutando dataset…"
+  eval_status_done: "Modo: {mode} · {n} preguntas · {duration}ms · umbral {threshold}"
+  eval_error_prefix: "Error: "
+  kpi_pass_rate: Pass rate
+  kpi_grnd: Groundedness
+  kpi_rel: Relevance
+  kpi_ret: Retrieval
+  kpi_comp: Completeness
+  per_question_title: Resultados por pregunta
+  th_question: Pregunta
+  th_status: Status
+  retrieved_label: "retrieved: "
+  pass_label: PASS
+  fail_label: FAIL

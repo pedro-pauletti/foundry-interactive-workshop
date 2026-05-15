@@ -1,0 +1,61 @@
+texts:
+  intro_title: O que são Evaluations no Foundry
+  intro_lede: >-
+    <strong>Evaluations</strong> são testes automáticos para sistemas de IA generativa: você define um
+    <em>dataset</em> (perguntas + opcional <em>ground truth</em>), escolhe <em>evaluators</em>
+    (built-in ou customizados) e o Foundry retorna um <strong>scorecard</strong> com métricas agregadas
+    + drilldown por exemplo — igual a unit tests, mas para qualidade/segurança de modelos.
+  intro_quality: "<strong>Quality</strong> · <code>groundedness</code>, <code>relevance</code>, <code>coherence</code>, <code>fluency</code>, <code>similarity</code>."
+  intro_safety: "<strong>Safety</strong> · <code>hate/unfairness</code>, <code>violence</code>, <code>sexual</code>, <code>self-harm</code>, <code>protected material</code>."
+  intro_agent: "<strong>Agent</strong> · <code>intent_resolution</code>, <code>tool_call_accuracy</code>, <code>task_adherence</code>."
+  intro_rag: "<strong>RAG</strong> · <code>retrieval</code>, <code>response_completeness</code>, <code>document_retrieval</code>."
+  intro_custom: "<strong>Custom</strong> · qualquer função Python decorada com <code>@evaluator</code> — KPIs do seu domínio."
+  figure_alt: Resultados de evaluation do agente no Foundry
+  figure_caption: Scorecard agregado + drilldown por exemplo no portal Foundry — mesmo formato que esta demo reproduz localmente.
+  portal_title: Como rodar pelo portal Foundry
+  portal_lede: >-
+    Em <em>Foundry Project → Evaluations → New evaluation</em>: (1) selecione o <em>dataset</em> (JSONL),
+    (2) marque os evaluators built-in ou aponte para um custom registrado no projeto,
+    (3) escolha o <em>target</em> (prompt, deployment ou agent), (4) execute. O resultado vira um
+    relatório comparável entre runs e versões de prompt/modelo — com permanent link e export para CI/CD.
+  sdk_title: Rodar pelo SDK (azure-ai-evaluation)
+  sdk_note: >-
+    O mesmo código roda localmente (dev), no PR (CI/CD) e no Foundry (continuous evaluation).
+    Quando você passa <code>azure_ai_project</code>, o resultado também sobe para o portal
+    — visível para times de produto, qualidade e governança.
+  custom_title: Anatomia de um Custom Evaluator
+  custom_lede: >-
+    Custom Evaluator é simplesmente uma função Python que recebe os campos do dataset
+    (<code>response</code>, <code>query</code>, <code>context</code>, <code>ground_truth</code>…) e retorna
+    um <code>dict</code> com métricas. Ótimo para regras de negócio (tom de marca, compliance,
+    formato de saída etc.) que evaluators genéricos não cobrem. Exemplo — evaluator <code>tom_contoso</code>:
+  custom_note: >-
+    Esse evaluator pode ser registrado no <em>Foundry Evaluator Catalog</em> e reusado por outras BUs
+    — evaluators viram ativo de governança corporativa, não código solto em notebook.
+  demo_eyebrow: Demo Interativa
+  demo_title: Rodar batch evaluation
+  mock_badge_title: Simulação local
+  demo_lede: >-
+    Em modo <strong>real</strong>, registra os evaluators <code>contoso_tom_de_voz</code>
+    (code-based) e <code>contoso_friendliness</code> (prompt-based) no projeto Foundry,
+    cria um <code>eval</code> + <code>run</code> com dataset inline (JSONL) e faz polling
+    até concluír — igual ao SDK oficial. No modo offline, mesma estrutura mas heurísticas locais.
+  evaluators_label: Evaluators no scorecard
+  builtin_tag: (built-in)
+  custom_code_tag: (custom code-based)
+  custom_prompt_tag: (custom prompt-based)
+  target_label: Target
+  target_a: Modelo A (gpt-4o + RAG)
+  target_b: Modelo B (gpt-4o-mini sem RAG)
+  run_button: Rodar evaluation
+  scorecard_title: Scorecard agregado
+  pass_rate_label: "Pass rate:"
+  examples_title: Resultados por exemplo
+  prompt_select: Selecione evaluators + target e rode.
+  no_evaluators: Selecione ao menos um evaluator.
+  running_template: "Rodando batch contra {target}…"
+  examples_word: exemplos
+  open_report: "abrir relatório no Foundry ↗"
+  done_template: "Concluído · {ms}ms"
+  real_title: Real
+  error_prefix: "Erro: "

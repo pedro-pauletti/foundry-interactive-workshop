@@ -1,0 +1,73 @@
+section:
+  title: Criação Simplificada de Agente
+  description: 'Do Foundry Playground ao VS Code: criar o Curador Contoso em minutos com fluxos low-code e declarativos.'
+  eyebrow: Construir
+  eyebrow_icon: fa-solid fa-screwdriver-wrench
+body:
+  pillars:
+  - Engenharia de Prompt
+  - Modelagem
+  requisitos:
+  - id: 1.1.1
+    titulo: Equipes não-especialistas em IA criam agentes
+  - id: 1.1.6
+    titulo: Acelerar e popularizar a criação
+  blocks:
+  - titulo: Conceito — três superfícies, um artefato
+    html: <p>A primeira angústia da Contoso é que <strong>somente engenheiros conseguem criar agentes hoje</strong>. A stack
+      Microsoft elimina isso oferecendo <strong>três superfícies complementares</strong> que produzem o mesmo artefato (<code>agent.yaml</code>):</p><ul><li><strong>Foundry
+      Playground</strong> — UI guiada para PMs e analistas de negócio.</li><li><strong>AI Toolkit / Foundry VS Code extension</strong>
+      — fluxo low-code direto na IDE com auto-complete, debug e push para o Foundry.</li><li><strong>Declarative agent workflows</strong>
+      — multi-agente como YAML versionável, com nodes/branches/loops auditáveis.</li></ul><p>Mesmo que um agente nasça no
+      Playground, ele migra para código sem re-trabalho — o YAML resultante é idêntico ao que vai para Git.</p><figure class="section-figure"><img
+      src="/static/images/agent-playground-evaluation-metrics.png" alt="Playground do Foundry com métricas de avaliação ao
+      iterar prompts"><figcaption>Foundry Playground exibindo métricas de avaliação em tempo real ao iterar o agente &mdash;
+      mesma UI usada para criar o agente do zero.</figcaption></figure>
+  - titulo: Foundry VS Code extension (low-code workflows)
+    html: "<figure class=\"section-figure\" style=\"margin: 0 0 18px;\"><img src=\"/static/images/vscode-extension-foundry.png\"\
+      \ alt=\"Microsoft Foundry VS Code extension mostrando catálogo de modelos, agentes e tools integrados ao IDE\"><figcaption>VS\
+      \ Code + Foundry extension &mdash; catálogo de modelos, agent designer, playground local e push para o projeto Foundry,\
+      \ tudo dentro do IDE.</figcaption></figure><p>A <strong>Foundry VS Code extension</strong> (Microsoft AI Toolkit) traz\
+      \ toda a experiência do Foundry para dentro da IDE — sem trocar de contexto:</p><ul><li><strong>Model catalog</strong>\
+      \ filtrado por preço, latência e modalidade — deploy com 1 clique.</li><li><strong>Agent designer</strong> low-code:\
+      \ arrastar tools, knowledge sources e definir instruções com IntelliSense no <code>agent.yaml</code>.</li><li><strong>Local\
+      \ playground</strong> conectado ao agente remoto — testar conversa sem deploy.</li><li><strong>Trace viewer</strong>\
+      \ integrado: cada turno mostra tools chamadas, tokens, latência.</li><li><strong>Push to Foundry</strong>: commit +\
+      \ push publica nova versão no projeto Foundry escolhido.</li></ul><div class=\"code-caption\">contoso-knowledge-curator/agent.yaml\
+      \ — gerado pelo VS Code</div><pre class=\"code-block\"><code class=\"language-yaml\"># contoso-knowledge-curator/agent.yaml\n\
+      name: contoso-knowledge-curator\nversion: 3\nmodel:\n  id: gpt-4o\n  parameters:\n    temperature: 0.2\ninstructions:\
+      \ |\n  Você é o curador de conhecimento Contoso. Responda APENAS com base\n  no contexto fornecido. Se não houver evidência,\
+      \ diga\n  &quot;não encontrei na base&quot; — nunca invente.\ntools:\n  - type: foundry_iq\n    knowledge_source: contoso-docs-index\n\
+      \  - type: openapi\n    name: customer_billing\n    spec: ./tools/billing.openapi.yaml\n</code></pre><p>Esse arquivo\
+      \ é a <strong>fonte única de verdade</strong> do agente — Playground, VS Code e produção consomem o mesmo YAML.</p>"
+  - titulo: Declarative agent workflows (multi-agente como YAML)
+    html: "<p>Para casos onde <strong>um agente sozinho não basta</strong> (ex.: classificar intenção → rotear para especialista\
+      \ → consolidar resposta), o Foundry oferece <strong>declarative agent workflows</strong>: multi-agente expresso como\
+      \ grafo YAML.</p><div class=\"code-caption\">atendimento-contoso/workflow.yaml</div><pre class=\"code-block\"><code\
+      \ class=\"language-yaml\"># atendimento-contoso/workflow.yaml — Declarative agent workflow\nname: atendimento-contoso\n\
+      trigger:\n  type: chat\nnodes:\n  - id: classify\n    type: agent\n    ref: classifier-agent           # decide: billing\
+      \ | support | sales\n  - id: route\n    type: switch\n    on: ${{ classify.output.intent }}\n    cases:\n      billing:\
+      \ { next: billing_agent }\n      support: { next: support_agent }\n      sales:   { next: sales_agent }\n  - id: billing_agent\n\
+      \    type: agent\n    ref: contoso-billing-agent\n  - id: support_agent\n    type: agent\n    ref: contoso-support-agent\n\
+      \  - id: sales_agent\n    type: agent\n    ref: contoso-sales-agent\n</code></pre><ul><li><strong>Nodes</strong> são\
+      \ agentes, switches, loops, http calls — composição sem código imperativo.</li><li><strong>Versionado em Git</strong>\
+      \ e revisável por PR como qualquer outro artefato.</li><li><strong>Observability nativa</strong>: cada execução do workflow\
+      \ gera trace OpenTelemetry com cada hop.</li><li>Ideal para o cenário <em>A2A multi-agente</em> mostrado mais adiante\
+      \ no workshop.</li></ul>"
+  tutorial_titulo: Demonstrar no Foundry + VS Code
+  tutorial_passos:
+  - titulo: Criar no Foundry Playground
+    html: Abrir <em>Foundry → Playground → New Agent</em>. Selecionar modelo (<code>gpt-4o</code>), nome <strong>contoso-knowledge-curator</strong>,
+      instrução em PT-BR.
+  - titulo: Anexar Knowledge Source (Foundry IQ)
+    html: Adicionar uma <em>Knowledge Source</em> apontando para a documentação interna Contoso. Esse índice será reusado
+      na seção de RAG.
+  - titulo: Abrir o mesmo agente no VS Code
+    html: 'Pela extensão Foundry / AI Toolkit: <em>Foundry → My Agents → Open in VS Code</em>. Editar o <code>agent.yaml</code>,
+      rodar no playground local (F5) e dar push de volta.'
+  - titulo: Compor um workflow declarativo
+    html: Criar <code>workflow.yaml</code> roteando para 3 agentes especialistas (billing/support/sales) — ponte direta para
+      a demo de A2A multi-agente.
+  mensagem_chave: <strong>Time-to-first-agent passa de semanas para minutos</strong>, sem comprometer o ciclo profissional
+    — Playground, VS Code extension e workflows declarativos produzem o mesmo artefato governável.
+  body_localized: true

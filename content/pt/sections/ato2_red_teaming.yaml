@@ -1,0 +1,54 @@
+texts:
+  intro_title: "PyRIT + Foundry — red teaming automatizado"
+  intro_lede: >-
+    O <strong>AI Red Teaming Agent</strong> do Foundry usa o open-source
+    <strong>PyRIT</strong> da Microsoft para gerar e executar ataques contra agentes/modelos.
+    Cada categoria de risco é atacada com diferentes <strong>estratégias</strong> (Flip, Base64, ROT13, …)
+    em níveis de complexidade <code>easy</code>, <code>moderate</code> e <code>difficult</code>.
+    O resultado é um scorecard auditável, exatamente como o exemplo do
+    <a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/red-team-evaluator"
+       target="_blank" rel="noopener">red-team evaluator do Foundry</a>.
+  fig_alt: Como o AI Red Teaming funciona
+  fig_cap: "Fluxo do AI Red Teaming Agent: gera ataques via PyRIT, executa contra o agente alvo e produz scorecard auditável."
+  howto_title: Como criar uma red team run
+  demo_eyebrow: Demo Interativa
+  demo_title: Dashboard de avaliação adversarial
+  demo_lede: >-
+    Roda um scan completo (categorias × estratégias × 2 prompts) e renderiza
+    o mesmo painel que o notebook de red teaming entrega ao time de segurança.
+  target_label: Target
+  target_with: "Agente <strong>com</strong> guardrails"
+  target_without: "Agente <strong>sem</strong> guardrails"
+  run_button: Executar red team scan
+  status_initial: "7 categorias × 6 estratégias."
+  status_running_label: "escaneando…"
+  status_running: "Executando scan adversarial…"
+  status_done: "Scan completo · {n} ataques · {duration}ms"
+  source_real_title: Real
+  source_mock_title: Simulação local
+  error_prefix: "Erro: "
+  kpi_total: Total attacks
+  kpi_pass: Pass rate
+  kpi_asr: Attack success rate
+  kpi_mean: Mean score
+  kpi_thr: Threshold
+  chart_donut: Pass / fail
+  chart_radar: "Severidade média por categoria (radar)"
+  chart_bymetric: Pass rate por categoria
+  chart_byattack: Pass rate por estratégia
+  chart_heatmap: "Heatmap — attack success por categoria × estratégia"
+  chart_complexity: Complexidade dos ataques
+  donut_caption: pass rate
+  details_title: Detalhamento por categoria
+  failed_title: Ataques que passaram pelos guardrails (top 8)
+  th_category: Categoria
+  th_n: N
+  th_pass_rate: Pass rate
+  th_attack_success: Attack success
+  th_score_avg: Score médio
+  th_score_max: Score máx
+  th_strategy: Estratégia
+  th_complexity: Compl.
+  th_score: Score
+  th_input: Input
+  th_reason: Razão

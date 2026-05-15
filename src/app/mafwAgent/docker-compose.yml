@@ -1,0 +1,21 @@
+name: framework-ia-contoso
+
+services:
+  mafw-agent:
+    image: framework-ia-contoso/mafw-agent:latest
+    container_name: framework-ia-contoso-mafw-agent
+    build:
+      context: ../../../
+      dockerfile: src/app/mafwAgent/Dockerfile
+    ports:
+      - "8091:8091"
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      # Compartilha o cache do Azure CLI com o webapp (mesmo project name → mesmo volume).
+      # Faça `docker exec -it framework-ia-contoso-webapp az login` uma única vez e o
+      # mafw-agent passa a usar a mesma identidade via DefaultAzureCredential.
+      - webapp_azure_cli:/root/.azure
+
+volumes:
+  webapp_azure_cli: {}

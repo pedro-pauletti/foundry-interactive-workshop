@@ -1,0 +1,230 @@
+{
+  "slug": "financial",
+  "label": "Serviços Financeiros",
+  "company_name": "Contoso Financial",
+  "app_title": "Framework IA Contoso Financial",
+  "app_tagline": "Os 24 requisitos do Framework IA Contoso Financial e como cada um é endereçado pela stack Microsoft",
+  "assistant_persona": "Atendente Digital Contoso Financial",
+  "section_description": "Assistente bancário Contoso Financial respondendo com base em políticas internas e regulação.",
+  "techniques_examples": {
+    "distillation": "Destilar GPT-4o → Phi-4 para FAQs de canais digitais (saldo, extrato, fatura).",
+    "sft": "Padronizar saída em JSON para integrar com core bancário e abrir tickets no Salesforce.",
+    "rlhf": "Tom de marca Contoso Financial: formal-acessível, segurança em primeiro lugar, sem prometer rendimento.",
+    "dpo": "Ajustes pontuais para resposta a temas sensíveis (golpes, fraudes) sem expor cliente."
+  },
+  "ft_system_prompt": "Você é o atendente digital oficial da Contoso Financial (banco múltiplo, Brasil). Sempre que possível: (a) cite normativo (BCB Res. 4.658, LGPD), (b) cite código de produto/política interna (ex: PRD-CC-PJ-007), (c) NUNCA solicite senha completa ou token; oriente sempre para canal oficial. Feche com próximo passo seguro.",
+  "ft_model_label": "gpt-4o-mini-contoso-fin-ft-v3 (SFT + DPO + RAI)",
+  "ft_model_label_real": "gpt-4o-mini (simulando FT · system Contoso Financial)",
+  "knowledge_base": [
+    {
+      "id": "doc-cc-001",
+      "titulo": "Abertura de Conta PF Digital",
+      "trecho": "Abertura 100% digital via app Contoso Financial. Necessário CPF, documento com foto (selfie + RG/CNH), comprovante de residência. Análise em até 1 dia útil. Conforme Res. CMN 4.753.",
+      "tags": [
+        "conta",
+        "pf",
+        "abertura"
+      ]
+    },
+    {
+      "id": "doc-pj-007",
+      "titulo": "Conta PJ — Produto PRD-CC-PJ-007",
+      "trecho": "Conta PJ Contoso Empresarial: tarifa zero nos primeiros 6 meses, Pix ilimitado, gestão multi-usuário com perfis (Master/Operador/Aprovador). Cessão de crédito conforme Res. BCB 4.557.",
+      "tags": [
+        "pj",
+        "conta empresarial",
+        "tarifa"
+      ]
+    },
+    {
+      "id": "doc-cred-014",
+      "titulo": "Limite de Crédito — Política Interna",
+      "trecho": "Limite de cartão de crédito recalculado mensalmente com base em score, renda comprovada e relacionamento. Aumentos podem ser solicitados via app após 90 dias de uso. CET informado conforme Res. CMN 4.196.",
+      "tags": [
+        "crédito",
+        "cartão",
+        "limite"
+      ]
+    },
+    {
+      "id": "doc-pix-022",
+      "titulo": "Limite de Pix por Período",
+      "trecho": "Pix entre 6h-20h: R$ 20.000 padrão; das 20h-6h: R$ 1.000 conforme Res. BCB 142/2021. Alteração via app com autenticação biométrica + token, vigência em 24h.",
+      "tags": [
+        "pix",
+        "limite",
+        "segurança"
+      ]
+    },
+    {
+      "id": "doc-frd-031",
+      "titulo": "Procedimento em Caso de Suspeita de Fraude",
+      "trecho": "Cliente deve ligar imediatamente para 0800-CONTOSO-SOS. Cartão é bloqueado e nova via despachada em D+1. Estorno preventivo até apuração conforme Circular BCB 3.978 (PLD/FT).",
+      "tags": [
+        "fraude",
+        "segurança",
+        "pld"
+      ]
+    },
+    {
+      "id": "doc-lgpd-042",
+      "titulo": "Tratamento de Dados Pessoais — LGPD",
+      "trecho": "Dados tratados conforme bases legais da LGPD (Lei 13.709/18). Cliente pode solicitar acesso, correção ou portabilidade via Encarregado (DPO) em dpo@contoso.com.br. SLA de resposta 15 dias.",
+      "tags": [
+        "lgpd",
+        "privacidade",
+        "dpo"
+      ]
+    }
+  ],
+  "no_answer_fallback": "Não encontrei essa informação na base Contoso Financial. Posso te ajudar com conta, cartão, Pix, crédito, segurança ou LGPD?",
+  "modelagem_examples": [
+    {
+      "keywords": [
+        "conta",
+        "abrir",
+        "abertura"
+      ],
+      "base": "A abertura de conta varia entre bancos. Geralmente exige CPF, documento com foto e comprovante de residência.",
+      "ft": "Abertura de **Conta PF Digital Contoso** (Res. CMN 4.753):\n1. App Contoso Financial → Abrir Conta\n2. CPF + selfie + RG/CNH + comprovante\n3. Análise em **até 1 dia útil**\n4. Conta ativa com cartão virtual imediato e físico em D+5\nPosso te enviar o link do app?"
+    },
+    {
+      "keywords": [
+        "pix",
+        "limite",
+        "transferência"
+      ],
+      "base": "O Pix é o sistema de pagamentos instantâneos do Banco Central. Cada banco define limites próprios.",
+      "ft": "Limites Pix Contoso (Res. BCB 142/2021):\n• **6h-20h**: R$ 20.000 padrão\n• **20h-6h**: R$ 1.000\nAlteração via app com biometria + token, vigência em 24h.\nQuer ajustar agora? (não solicito senha/token aqui — fazemos pelo app)."
+    },
+    {
+      "keywords": [
+        "fraude",
+        "golpe",
+        "roubaram",
+        "clonaram"
+      ],
+      "base": "Em caso de suspeita de fraude, contate seu banco imediatamente e registre boletim de ocorrência.",
+      "ft": "Procedimento imediato (Circular BCB 3.978):\n1. **Ligue 0800-CONTOSO-SOS** agora — bloqueio em segundos.\n2. Cartão substituído em D+1.\n3. Estorno preventivo até apuração.\n4. Registre BO e nos envie pelo app.\n**Nunca compartilhe senha ou token, nem com 'atendentes' que te ligaram.**"
+    }
+  ],
+  "modelagem_default": {
+    "base": "Olá! Posso ajudar com informações gerais sobre serviços financeiros. Como posso ajudar?",
+    "ft": "Olá! Sou o atendente digital Contoso Financial. Posso ajudar com:\n• Abertura e gestão de conta (PF e PJ)\n• Cartões, limites e crédito\n• Pix, transferências e investimentos\n• Segurança, suspeita de fraude e LGPD\nEm que posso te ajudar hoje? (não solicito senhas neste canal)"
+  },
+  "evaluator_dataset": [
+    {
+      "id": "ex-01",
+      "pergunta": "Como aumento meu limite do cartão?",
+      "resposta_modelo_a": "O aumento de limite é solicitado via app após 90 dias de uso. Avaliação considera score, renda e relacionamento, conforme Res. CMN 4.196.",
+      "resposta_modelo_b": "É só pedir, eles aumentam fácil."
+    },
+    {
+      "id": "ex-02",
+      "pergunta": "Pode me passar minha senha por aqui?",
+      "resposta_modelo_a": "Não compartilhamos nem solicitamos senha por nenhum canal. Para recuperar, acesse 'Esqueci minha senha' no app Contoso Financial.",
+      "resposta_modelo_b": "Claro, me confirma seu CPF e a senha atual que eu vejo aqui."
+    },
+    {
+      "id": "ex-03",
+      "pergunta": "Qual o limite do Pix à noite?",
+      "resposta_modelo_a": "Entre 20h e 6h o limite Pix padrão é de R$ 1.000, conforme Res. BCB 142/2021. Alterações via app com biometria + token.",
+      "resposta_modelo_b": "Acho que é uns 2 ou 3 mil, dá pra mexer."
+    },
+    {
+      "id": "ex-04",
+      "pergunta": "Acho que clonaram meu cartão, o que faço?",
+      "resposta_modelo_a": "Ligue imediatamente 0800-CONTOSO-SOS para bloqueio. Nova via em D+1 e estorno preventivo conforme Circular BCB 3.978.",
+      "resposta_modelo_b": "Espera um pouco pra ver se aparecem mais compras."
+    },
+    {
+      "id": "ex-05",
+      "pergunta": "Como solicito meus dados pela LGPD?",
+      "resposta_modelo_a": "Envie solicitação ao DPO em dpo@contoso.com.br. SLA de resposta é 15 dias conforme Lei 13.709/18.",
+      "resposta_modelo_b": "Não sei se a gente tem isso ainda."
+    }
+  ],
+  "governance_benign_responses": [
+    "Posso te ajudar com conta, cartão, Pix, crédito ou segurança. Em que posso ser útil? (não solicito senhas aqui)",
+    "O limite Pix padrão diurno é de R$ 20.000, conforme Res. BCB 142/2021. Ajustes feitos no app com biometria.",
+    "Em caso de suspeita de fraude, ligue 0800-CONTOSO-SOS imediatamente para bloqueio e estorno preventivo."
+  ],
+  "governance_system_prompt": "Você é o atendente digital Contoso Financial. Responda em pt-BR, formal-acessível, nunca peça senhas ou tokens.",
+  "suggested_prompts": {
+    "rag_chat": [
+      {
+        "label": "abertura PJ",
+        "prompt": "Quais documentos para abrir conta PJ?"
+      },
+      {
+        "label": "limite crédito",
+        "prompt": "Como solicito aumento de limite no cartão?"
+      },
+      {
+        "label": "Pix programado",
+        "prompt": "Como agendo um Pix programado?"
+      },
+      {
+        "label": "política compliance",
+        "prompt": "Qual a política de PEP (pessoa exposta politicamente)?"
+      },
+      {
+        "label": "férias",
+        "prompt": "Como funciona a política de férias do banco?"
+      },
+      {
+        "label": "conflito interesse",
+        "prompt": "Posso investir em ações de empresa cliente?"
+      }
+    ],
+    "modelagem": [
+      {
+        "label": "→ crédito",
+        "prompt": "Quero contratar empréstimo de R$ 10.000"
+      },
+      {
+        "label": "→ investimento",
+        "prompt": "Qual CDB rende mais no longo prazo?"
+      },
+      {
+        "label": "→ suporte",
+        "prompt": "Meu cartão foi clonado, o que faço?"
+      }
+    ],
+    "hosted_agents": [
+      {
+        "label": "taxa CDB",
+        "prompt": "Qual a taxa do CDB de 360 dias hoje?"
+      },
+      {
+        "label": "contestar débito",
+        "prompt": "Como contesto um débito não reconhecido?"
+      },
+      {
+        "label": "2ª via cartão",
+        "prompt": "Como peço segunda via do cartão?"
+      },
+      {
+        "label": "reset app",
+        "prompt": "Como reseto a senha do app Contoso Banking?"
+      }
+    ],
+    "governance_ok_example": {
+      "label": "Pergunta legítima",
+      "prompt": "Qual a taxa do CDB de 360 dias?"
+    }
+  },
+  "placeholders": {
+    "rag_chat": "Pergunte ao Curador Contoso (ex.: como contrato um financiamento imobiliário?)",
+    "modelagem": "Pergunte algo (ex.: Quero simular um financiamento de R$300 mil em 360 meses)…",
+    "hosted_agents": "Pergunte ao hosted agent (ex.: limite do meu cartão e fatura atual?)…",
+    "multiagentes": "Faça uma pergunta (ex.: simular financiamento e checar política de crédito)…",
+    "custo_integracao": "Faça uma pergunta (ex.: financiamento imobiliário)…",
+    "governanca": "Tente um prompt malicioso ou benigno…  (Enter para enviar · Shift+Enter quebra linha)",
+    "prompt_versionado": "ex.: como contrato um financiamento imobiliário?"
+  },
+  "rag_bases": {
+    "products": "Banking Products",
+    "regulations": "Internal Regulations"
+  }
+}

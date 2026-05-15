@@ -1,0 +1,27 @@
+texts:
+  demo_eyebrow: Demo Interactiva
+  demo_title: "Mismo agente · dos runtimes — Contenedor local × Foundry Hosted"
+  demo_lede: >-
+    Elija un agente Contoso (MAF o LangGraph) y envíe la misma pregunta a los
+    dos runtimes: el <strong>contenedor local</strong> (Docker Desktop) y el
+    <strong>mismo binario alojado en Foundry Agent Service</strong>. Compare
+    respuesta, latencia y fuente — es el mismo código, solo cambia quién lo opera.
+  agent_label: "Agente:"
+  reset_title: Nueva sesión
+  toggle_hosted: Foundry Hosted (mismo contenedor)
+  toggle_local: Contenedor local (Docker Desktop)
+  try_label: "Prueba:"
+  send_button: Enviar
+  status_ready: Listo.
+  status_session_reset: Sesión reiniciada.
+  status_calling: "Llamando a {target}…"
+  status_failure: Falló.
+  status_network_failure: Falla de red.
+  runtime_label: "Runtime: {target}"
+  runtime_hosted: Foundry Hosted
+  runtime_local: Contenedor local
+  no_agents_detected: (ningún agente detectado)
+  error_prefix: "Error: "
+  network_error_prefix: "Error de red: "
+  source_real_title: Real
+  source_sim_title: Simulación local

@@ -1,0 +1,286 @@
+{
+  "pilares": [
+    { "id": "prompt", "label": "Engenharia de Prompt" },
+    { "id": "performance", "label": "Performance / Curadoria" },
+    { "id": "governanca", "label": "Governança de IA" },
+    { "id": "modelagem", "label": "Modelagem" },
+    { "id": "transversal", "label": "Transversal (Custo / Integração)" }
+  ],
+  "status": [
+    { "id": "completo", "label": "Completo", "tone": "ok" },
+    { "id": "parcial", "label": "Parcial", "tone": "warn" },
+    { "id": "integracao", "label": "Requer integração", "tone": "err" }
+  ],
+  "requisitos": [
+    {
+      "id": "1.1.1",
+      "pilar": "prompt",
+      "titulo": "Fluxo de criação simplificado",
+      "descricao": "Interação conversacional + geração automatizada de agente a partir de descrições de alto nível, reduzindo barreira para áreas de negócio.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Foundry Playgrounds, VS Code extension, workflows declarativos",
+      "status": "completo",
+      "covers": ["ato1_criacao_agente"]
+    },
+    {
+      "id": "1.1.2",
+      "pilar": "prompt",
+      "titulo": "Versionamento de prompt",
+      "descricao": "Histórico de alterações, identificação de versões, descrição de delta, rollback e auditoria completa.",
+      "servico": "Microsoft Foundry + OSS",
+      "detalhe": "Prompty (microsoft/prompty) + Foundry Projects + Agent Development Lifecycle",
+      "status": "completo",
+      "covers": ["ato1_prompt_versionado"]
+    },
+    {
+      "id": "1.1.3",
+      "pilar": "prompt",
+      "titulo": "LLM Arena",
+      "descricao": "Mesmo prompt e mesma base executados em múltiplos LLMs para comparação sistemática (qualidade, segurança, latência, custo).",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Foundry Playgrounds (model catalog + comparação lado a lado)",
+      "status": "completo",
+      "covers": ["ato1_llm_arena"]
+    },
+    {
+      "id": "1.1.4",
+      "pilar": "prompt",
+      "titulo": "Otimização de prompt (autoprompt + compressão)",
+      "descricao": "Reescrita, compressão e síntese automatizadas com avaliação por métrica (referências: DSPy, TextGrad, LLMLingua).",
+      "servico": "Microsoft Foundry + integração custom",
+      "detalhe": "Playgrounds + Prompty + Evaluators; integração com DSPy/TextGrad/LLMLingua",
+      "status": "parcial",
+      "covers": ["ato1_prompt_versionado"]
+    },
+    {
+      "id": "1.1.5",
+      "pilar": "prompt",
+      "titulo": "Ambiente de teste com paridade de produção",
+      "descricao": "Sandbox isolado, com mesmas configurações, integrações, políticas e guardrails da produção.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Foundry Projects + Hosted Agents (preview) + Playgrounds",
+      "status": "completo",
+      "covers": ["estrutura_projetos", "ato1_hosted_agents"]
+    },
+    {
+      "id": "1.1.6",
+      "pilar": "prompt",
+      "titulo": "Criação e testes de multiagentes",
+      "descricao": "Modelar, orquestrar e testar arquiteturas multiagente com visibilidade das interações.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Foundry Workflows, Agent-to-Agent (A2A), Foundry Agent Service",
+      "status": "completo",
+      "covers": ["ato1_multiagentes"]
+    },
+    {
+      "id": "1.2.1",
+      "pilar": "performance",
+      "titulo": "Métricas RAG (qualidade da pergunta, assertividade, qualidade do documento)",
+      "descricao": "Cobre Groundedness, Relevance, Retrieval e categorização de tema/assunto.",
+      "servico": "Microsoft Foundry — Evaluators",
+      "detalhe": "RAG Evaluators (Groundedness, Relevance, Retrieval) + Custom Evaluators",
+      "status": "completo",
+      "covers": ["ato1_rag_chat"]
+    },
+    {
+      "id": "1.2.2",
+      "pilar": "performance",
+      "titulo": "Persona Sintética / Prompt Injection",
+      "descricao": "Geração de bases de teste com personas e cenários adversariais (jailbreak, XPIA, PII).",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Risk & Safety Evaluators + AI Red Teaming (PyRIT) + Simulators",
+      "status": "completo",
+      "covers": ["ato2_red_teaming"]
+    },
+    {
+      "id": "1.2.3",
+      "pilar": "performance",
+      "titulo": "Framework Avaliativo de Agentes (Knowledge / Reasoning / Conversational)",
+      "descricao": "Métricas por perfil de agente alinhadas aos pilares conceituais do framework Contoso.",
+      "servico": "Microsoft Foundry — Evaluators",
+      "detalhe": "Agent Evaluators (Intent Resolution, Task Adherence, Tool Call Accuracy) + Custom Evaluators",
+      "status": "completo",
+      "covers": ["ato2_evaluators_scorecard"]
+    },
+    {
+      "id": "1.2.4",
+      "pilar": "performance",
+      "titulo": "Monitoramento por produto",
+      "descricao": "Dashboards parametrizáveis por agente/produto com métricas, alertas e segmentação.",
+      "servico": "Microsoft Foundry + Agent 365",
+      "detalhe": "Monitor across fleet (Control Plane) + Agent Monitoring Dashboard",
+      "status": "completo",
+      "covers": ["ato3_observabilidade"]
+    },
+    {
+      "id": "1.2.5",
+      "pilar": "performance",
+      "titulo": "Métricas multidimensionais customizadas",
+      "descricao": "Métricas binárias, numéricas ou qualitativas em Python ou LLM-as-a-judge, com thresholds e amostragem configuráveis.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Custom Evaluators (Python ou LLM-as-judge) + Prompty",
+      "status": "completo",
+      "covers": ["ato2_evaluators_scorecard"]
+    },
+    {
+      "id": "1.2.6",
+      "pilar": "performance",
+      "titulo": "Estudos pontuais (ad hoc)",
+      "descricao": "Datasets dedicados, com ou sem ground truth, e reprocessamento por recortes temporais.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Evaluation runs (GitHub Actions / Azure DevOps) + Foundry Projects",
+      "status": "completo",
+      "covers": ["ato2_cicd"]
+    },
+    {
+      "id": "1.2.7",
+      "pilar": "performance",
+      "titulo": "Observabilidade (drift, anomalias, dashboards)",
+      "descricao": "Telemetria ponta a ponta com detecção precoce de degradação por agente/produto.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Foundry Observability + Optimization Dashboard (Ask AI) + Monitor Model Deployments",
+      "status": "completo",
+      "covers": ["ato3_observabilidade"]
+    },
+    {
+      "id": "1.2.8",
+      "pilar": "performance",
+      "titulo": "Scorecards Modulares + Índice Único de Maturidade",
+      "descricao": "Scorecards por pilar (Knowledge / Reasoning / Conversational) com pesos, thresholds e índice único.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Agent Evaluators + Custom Evaluators ponderados + Agent Monitoring Dashboard",
+      "status": "parcial",
+      "covers": ["ato2_evaluators_scorecard"]
+    },
+    {
+      "id": "1.3.1",
+      "pilar": "governanca",
+      "titulo": "Inventário e rastreabilidade",
+      "descricao": "Inventário centralizado de sistemas/agentes de IA com responsáveis, dados, versão e dono.",
+      "servico": "Microsoft Foundry + Agent 365",
+      "detalhe": "Foundry Control Plane (Govern with Entra) + M365 Admin Center + Agent 365 data collection",
+      "status": "completo",
+      "covers": ["ato3_agent365_purview", "estrutura_projetos"]
+    },
+    {
+      "id": "1.3.2",
+      "pilar": "governanca",
+      "titulo": "Classificação de risco",
+      "descricao": "Classificar sistemas por risco, criticidade, impacto e finalidade (PL 2338) com critérios parametrizáveis.",
+      "servico": "Microsoft Foundry + Azure Policy",
+      "detalhe": "Custom Azure Policy for Foundry + Responsible AI for Foundry",
+      "status": "parcial",
+      "covers": ["ato3_classificacao_risco"]
+    },
+    {
+      "id": "1.3.3",
+      "pilar": "governanca",
+      "titulo": "Guardrail padrão (corporativo)",
+      "descricao": "Política única aplicável a todos os modelos: jailbreak, prompt injection, PII, conteúdo prejudicial.",
+      "servico": "Microsoft Foundry — Guardrails",
+      "detalhe": "Guardrails policy global (tenant) + Quickstart create guardrail policy",
+      "status": "completo",
+      "covers": ["ato3_governanca"]
+    },
+    {
+      "id": "1.3.4",
+      "pilar": "governanca",
+      "titulo": "Guardrail por sistema (configurável)",
+      "descricao": "Habilitar/desabilitar e ajustar severidade por escopo (tenant → projeto → deployment).",
+      "servico": "Microsoft Foundry — Guardrails",
+      "detalhe": "Guardrails por escopo + Custom Azure Policy for Foundry",
+      "status": "completo",
+      "covers": ["ato3_governanca"]
+    },
+    {
+      "id": "1.3.5",
+      "pilar": "governanca",
+      "titulo": "RBAC, auditoria e segregação de ambientes",
+      "descricao": "Perfis distintos por função, segregação pré-prod/prod e trilhas de auditoria.",
+      "servico": "Foundry + Entra + Purview",
+      "detalhe": "Govern with Microsoft Entra + Agent identity + Purview for Foundry",
+      "status": "completo",
+      "covers": ["ato3_governanca", "estrutura_projetos", "ato3_agent365_purview"]
+    },
+    {
+      "id": "1.3.6",
+      "pilar": "governanca",
+      "titulo": "Workflow de aprovação por nível de risco",
+      "descricao": "Aprovação hierárquica obrigatória para sistemas de maior criticidade.",
+      "servico": "Foundry + Entra + Agent 365",
+      "detalhe": "Custom Azure Policy + Entra Identity Governance + Agent 365 admin lifecycle",
+      "status": "parcial",
+      "covers": ["ato3_governanca", "ato3_classificacao_risco"]
+    },
+    {
+      "id": "1.3.7",
+      "pilar": "governanca",
+      "titulo": "Testes com evidência (acurácia, vieses, privacidade)",
+      "descricao": "Evidências auditáveis dos resultados, ações de mitigação e re-testes.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Risk & Safety Evaluators + Evaluations em CI/CD (GitHub Actions, Azure DevOps) + Foundry Projects",
+      "status": "completo",
+      "covers": ["ato2_cicd", "ato2_red_teaming"]
+    },
+    {
+      "id": "1.3.8",
+      "pilar": "governanca",
+      "titulo": "Transparência e explicabilidade",
+      "descricao": "Detalhamento técnico (variáveis, traces, métricas) e interpretações simplificadas para negócio.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Responsible AI for Foundry + Foundry Observability (traces OpenTelemetry) + Agent Dev Lifecycle",
+      "status": "parcial",
+      "covers": ["ato3_observabilidade", "ato3_governanca"]
+    },
+    {
+      "id": "1.3.9",
+      "pilar": "governanca",
+      "titulo": "Visão por requisito do PL/norma interna",
+      "descricao": "Rastreio granular de status de atendimento, evidências e prioridade por item regulatório.",
+      "servico": "Foundry + Azure Policy",
+      "detalhe": "Custom Azure Policy + dashboards customizados (Ask AI / Power BI)",
+      "status": "integracao",
+      "covers": ["ato3_classificacao_risco"]
+    },
+    {
+      "id": "1.3.10-11",
+      "pilar": "governanca",
+      "titulo": "Documentação de ciclo de vida + Dashboard de governança",
+      "descricao": "Documentação padronizada e auditável + dashboards consolidados por perfil.",
+      "servico": "Microsoft Foundry",
+      "detalhe": "Agent Development Lifecycle + Monitor across fleet + Optimization Dashboard",
+      "status": "completo",
+      "covers": ["ato3_governanca", "ato3_observabilidade"]
+    },
+    {
+      "id": "1.4",
+      "pilar": "modelagem",
+      "titulo": "Modelagem (Leaderboard, SLMs, Destilação, Fine-tune, RLHF, DPO)",
+      "descricao": "Catálogo + comparação + treino/otimização + monitoramento de modelos próprios e de mercado.",
+      "servico": "Microsoft Foundry — Models",
+      "detalhe": "Foundry Models (catálogo, fine-tune, distilation, RLHF/DPO, monitor)",
+      "status": "completo",
+      "covers": ["ato1_modelagem"]
+    },
+    {
+      "id": "1.5.1",
+      "pilar": "transversal",
+      "titulo": "Custo / consumo de tokens",
+      "descricao": "Quotas, semantic caching, load balancing e chargeback por área usuária.",
+      "servico": "APIM AI Gateway + Foundry Control Plane",
+      "detalhe": "Enforce Token Limits for Models + APIM AI Gateway (token quotas, semantic caching)",
+      "status": "completo",
+      "covers": ["ato3_custo_integracao"]
+    },
+    {
+      "id": "1.5.2",
+      "pilar": "transversal",
+      "titulo": "Integração com agentes externos (IBM, Salesforce, ServiceNow, Copilot)",
+      "descricao": "Conectar agentes externos com governança, telemetria e segurança herdadas.",
+      "servico": "Foundry + APIM + Agent 365",
+      "detalhe": "Hosted Agents (preview) + A2A + Govern MCP Tools by AI Gateway + Agent 365 data collection",
+      "status": "parcial",
+      "covers": ["ato3_custo_integracao"]
+    }
+  ]
+}

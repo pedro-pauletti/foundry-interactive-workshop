@@ -1,0 +1,17 @@
+# Top-level orchestrator for the Framework IA Contoso stack.
+#
+# Each microservice owns its own Dockerfile + compose under src/app/<svc>/
+# and is plugged in here via `include:` so every service ends up as a
+# separate image and container in Docker Desktop, all under the
+# `framework-ia-contoso` project name.
+#
+# Add a new microservice:
+#   1. Drop it under src/app/<svc>/ following the SKILL.md template.
+#   2. Append a new entry under `include:` below.
+
+name: framework-ia-contoso
+
+include:
+  - src/app/webApp/docker-compose.yml
+  - src/app/langgraphAgent/docker-compose.yml
+  - src/app/mafwAgent/docker-compose.yml

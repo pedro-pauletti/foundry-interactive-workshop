@@ -1,0 +1,36 @@
+name: framework-ia-contoso
+
+services:
+  webapp:
+    image: framework-ia-contoso/webapp:latest
+    container_name: framework-ia-contoso-webapp
+    # Build context is the project root so we can COPY agenda.md
+    build:
+      context: ../../../
+      dockerfile: src/app/webApp/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      # Hot-reload agenda.md without rebuilding
+      - ../../../agenda.md:/app/agenda.md:ro
+      # Hot-reload localized content (agenda.yaml, workshop.yaml, sections/)
+      - ../../../content:/app/content:ro
+      # Hot-reload os dados de mapeamento (24 requisitos)
+      - ../../../data/contoso:/app/data/contoso:ro
+      # Hot-reload dos packs de indústria (multi-vertical demos)
+      - ../../../data/industries:/app/data/industries:ro
+      # Imagens do usuário — drope arquivos em data/images/ no repo e referencie
+      # no HTML como /static/user-images/<arquivo>. Sem precisar rebuildar.
+      - ../../../data/images:/app/static/user-images:ro
+      # Persisted Linux Azure CLI cache for the container.
+      # One-time setup after `docker compose up`:
+      #   docker exec -it framework-ia-contoso-webapp az login
+      # The login persists across container recreations.
+      # Note: the host's Windows MSAL cache cannot be decrypted in a Linux container,
+      # so we keep the container's az identity isolated.
+      - webapp_azure_cli:/root/.azure
+
+volumes:
+  webapp_azure_cli: {}

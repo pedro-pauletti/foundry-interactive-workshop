@@ -1,0 +1,59 @@
+texts:
+  intro_title_html: '<img class="product-logo" src="/static/apim-logo.png" alt="APIM"> APIM AI Gateway → Log Analytics → Dashboard'
+  intro_lede: >-
+    Todo tráfego dos agentes/modelos do
+    <img class="product-logo product-logo--sm" src="/static/foundry-logo.png" alt="Foundry">
+    <strong>Microsoft Foundry</strong> passa pelo
+    <strong>Azure API Management AI Gateway</strong>, que emite eventos
+    estruturados (tokens, latência, modelo, agent_id, cache, custo) para
+    <strong>Log Analytics</strong>. O dashboard abaixo é um Power BI / Grafana
+    customizado consumindo esse workspace via KQL.
+  fig_arch_alt: Arquitetura de observabilidade com Application Insights
+  fig_arch_cap: "Pipeline ponta a ponta: APIM AI Gateway emite traces → Application Insights / Log Analytics → dashboards e alertas."
+  fig_metrics_alt: Dashboard de métricas dos agentes
+  fig_metrics_cap: Dashboard nativo do Foundry com métricas de uso e qualidade dos agentes.
+  fig_traces_alt: Visão de traces no inventário
+  fig_traces_cap: Drill-down em traces individuais para auditoria e debug.
+  fig_summary_alt: Sumário do monitor com Ask AI
+  fig_summary_cap: Resumo executivo com "Ask AI" sobre incidentes e tendências.
+  fig_continuous_alt: Painel de continuous evaluation
+  fig_continuous_cap: Configuração de continuous evaluation — amostragem contínua em produção.
+  fig_gateway_alt: Diagrama de arquitetura do Azure APIM AI Gateway à frente dos modelos e agentes
+  fig_gateway_cap: APIM AI Gateway centralizando token rate limiting, semantic caching, load balancing e auditoria — toda telemetria nasce aqui.
+  fig_tracing_alt: Tracing de conversa mostrando spans de turnos, tool calls e latências
+  fig_tracing_cap: Conversation tracing — cada turno expande spans de prompt, tool calls e respostas, com tokens, latência e modelo por span.
+  fig_control_alt: Foundry Control Plane consolidando observabilidade, governança e custo dos agentes
+  fig_control_cap: Foundry Control Plane — visão única de uso, qualidade, segurança e custo por agente/modelo, com drilldown para traces.
+  kql_title: Exemplo de KQL agregando uso por agente
+  demo_eyebrow: Demo Interativa
+  demo_title: Dashboard de operação dos agentes Contoso
+  window_label: "Janela:"
+  refresh_button: Atualizar
+  kpi_cost: Custo (USD)
+  kpi_requests: Requests
+  kpi_tokens: Tokens
+  kpi_p95: p95 latency
+  kpi_cache: Cache hit
+  kpi_error: Error rate
+  kpi_throttled: Throttled
+  chart_tokens: Tokens / hora
+  chart_p95: p95 latency / hora
+  chart_hist: Distribuição de latência
+  chart_cache: Cache hit rate / hora
+  chart_top_agents: Top agentes por custo
+  chart_cost_model: Custo por modelo
+  th_agent: Agente
+  th_model: Modelo
+  th_req: Req
+  th_tokens: Tokens
+  th_p95: p95
+  th_error: Erro
+  th_cache: Cache
+  th_cost: Custo
+  th_share: "%"
+  alerts_title: Alertas ativos (Ask AI sugere root cause)
+  status_querying: "consultando KQL…"
+  status_updated: "Última atualização: {at} · janela {h}h"
+  error_prefix: "Erro: "
+  src_real_title: Real
+  src_mock_title: Simulação local

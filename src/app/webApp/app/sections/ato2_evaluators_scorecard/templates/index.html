@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% set _tx = request.state.texts %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon }}"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+{% set pillars = ["Performance"] %}
+{% set requisitos = [
+  {"id": "1.2.3", "titulo": "Framework Avaliativo de Agentes (Knowledge / Reasoning / Conversational)"},
+  {"id": "1.2.5", "titulo": "Métricas multidimensionais customizadas"},
+  {"id": "1.2.8", "titulo": "Scorecards Modulares + Índice Único de Maturidade"},
+] %}
+{% include "_pillars_requisitos.html" %}
+
+<section class="page-summary">
+  <h2 class="page-summary__title">{{ _tx.get('intro_title', 'O que são Evaluations no Foundry') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('intro_lede', '') | safe }}</p>
+  <ul class="page-summary__list">
+    <li>{{ _tx.get('intro_quality', '') | safe }}</li>
+    <li>{{ _tx.get('intro_safety', '') | safe }}</li>
+    <li>{{ _tx.get('intro_agent', '') | safe }}</li>
+    <li>{{ _tx.get('intro_rag', '') | safe }}</li>
+    <li>{{ _tx.get('intro_custom', '') | safe }}</li>
+  </ul>
+  <figure class="section-figure">
+    <img src="/static/images/agent-evaluation-results.png" alt="{{ _tx.get('figure_alt', 'Resultados de evaluation do agente no Foundry') }}">
+    <figcaption>{{ _tx.get('figure_caption', 'Scorecard agregado + drilldown por exemplo no portal Foundry — mesmo formato que esta demo reproduz localmente.') }}</figcaption>
+  </figure>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <h2 class="page-summary__title">{{ _tx.get('portal_title', 'Como rodar pelo portal Foundry') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('portal_lede', '') | safe }}</p>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <h2 class="page-summary__title">{{ _tx.get('sdk_title', 'Rodar pelo SDK (azure-ai-evaluation)') }}</h2>
+<pre class="code-block"><code class="language-python">from azure.ai.evaluation import evaluate, GroundednessEvaluator, RelevanceEvaluator
+from azure.identity import DefaultAzureCredential
+
+model_config = {
+    "azure_endpoint": "https://&lt;foundry&gt;.services.ai.azure.com",
+    "azure_deployment": "gpt-4o",
+    "api_version": "2024-08-01-preview",
+}
+
+result = evaluate(
+    data="eval_dataset.jsonl",                # 1 linha = 1 pergunta + ground_truth
+    evaluators={
+        "groundedness": GroundednessEvaluator(model_config),
+        "relevance":    RelevanceEvaluator(model_config),
+        "tom_contoso":     tom_contoso,             # custom evaluator (abaixo)
+    },
+    azure_ai_project="https://&lt;foundry&gt;.services.ai.azure.com/api/projects/&lt;proj&gt;",
+    output_path="eval_result.json",
+)
+print(result["metrics"])                       # métricas agregadas
+</code></pre>
+  <p class="page-summary__lede" style="margin-top:6px;">{{ _tx.get('sdk_note', '') | safe }}</p>
+</section>
+
+<section class="page-summary" style="margin-top: 16px;">
+  <h2 class="page-summary__title">{{ _tx.get('custom_title', 'Anatomia de um Custom Evaluator') }}</h2>
+  <p class="page-summary__lede">{{ _tx.get('custom_lede', '') | safe }}</p>
+<pre class="code-block"><code class="language-python">from azure.ai.evaluation import evaluator
+
+@evaluator
+def tom_contoso(response: str) -> dict:
+    """Tom de voz Contoso: formal-amigável, sem menosprezar concorrente."""
+    issues, score = [], 1.0
+    if any(b in response.lower() for b in ["horrível", "pior", "lixo"]):
+        issues.append("Menciona concorrente de forma negativa")
+        score -= 0.5
+    if len(response) &lt; 30:
+        issues.append("Resposta muito curta para tom corporativo")
+        score -= 0.2
+    return {"score": max(0, score), "passed": score &gt;= 0.7, "issues": issues}
+</code></pre>
+  <p class="page-summary__lede" style="margin-top:6px;">{{ _tx.get('custom_note', '') | safe }}</p>
+</section>
+
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-bolt"></i> {{ _tx.get('demo_eyebrow', 'Demo Interativa') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Rodar batch evaluation') }}
+    <span id="eval-source-badge" class="source-badge source-badge--mock" title="{{ _tx.get('mock_badge_title', 'Simulação local') }}"><i class="fa-solid fa-flask"></i></span>
+  </h2>
+  <p class="page-summary__lede" style="font-size:13px;margin-top:8px;">{{ _tx.get('demo_lede', '') | safe }}</p>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+
+  <div class="eval-controls" data-tx-no-evaluators="{{ _tx.get('no_evaluators', 'Selecione ao menos um evaluator.') }}" data-tx-running="{{ _tx.get('running_template', 'Rodando batch contra {target}…') }}" data-tx-examples="{{ _tx.get('examples_word', 'exemplos') }}" data-tx-open-report="{{ _tx.get('open_report', 'abrir relatório no Foundry ↗') }}" data-tx-done="{{ _tx.get('done_template', 'Concluído · {ms}ms') }}" data-tx-real-title="{{ _tx.get('real_title', 'Real') }}" data-tx-mock-title="{{ _tx.get('mock_badge_title', 'Simulação local') }}" data-tx-error="{{ _tx.get('error_prefix', 'Erro: ') }}">
+    <div class="eval-group">
+      <label class="eval-group__label">{{ _tx.get('evaluators_label', 'Evaluators no scorecard') }}</label>
+      <div class="eval-checkboxes">
+        <label class="eval-check"><input type="checkbox" data-ev="groundedness" checked> Groundedness <span class="muted">{{ _tx.get('builtin_tag', '(built-in)') }}</span></label>
+        <label class="eval-check"><input type="checkbox" data-ev="relevance" checked> Relevance <span class="muted">{{ _tx.get('builtin_tag', '(built-in)') }}</span></label>
+        <label class="eval-check"><input type="checkbox" data-ev="tom_contoso" checked> contoso_tom_de_voz <span class="muted">{{ _tx.get('custom_code_tag', '(custom code-based)') }}</span></label>
+        <label class="eval-check"><input type="checkbox" data-ev="friendliness" checked> contoso_friendliness <span class="muted">{{ _tx.get('custom_prompt_tag', '(custom prompt-based)') }}</span></label>
+      </div>
+    </div>
+    <div class="eval-group">
+      <label class="eval-group__label">{{ _tx.get('target_label', 'Target') }}</label>
+      <div class="eval-radios">
+        <label class="eval-radio"><input type="radio" name="target" value="modelo_a" checked> {{ _tx.get('target_a', 'Modelo A (gpt-4o + RAG)') }}</label>
+        <label class="eval-radio"><input type="radio" name="target" value="modelo_b"> {{ _tx.get('target_b', 'Modelo B (gpt-4o-mini sem RAG)') }}</label>
+      </div>
+    </div>
+    <button type="button" id="run-eval" class="btn btn--primary"><i class="fa-solid fa-play"></i> {{ _tx.get('run_button', 'Rodar evaluation') }}</button>
+  </div>
+
+  <div id="eval-results" class="eval-results" style="display:none;">
+    <div class="scorecard">
+      <h3 style="margin:0 0 12px;">{{ _tx.get('scorecard_title', 'Scorecard agregado') }} <span id="eval-target" class="muted" style="font-size:13px;"></span></h3>
+      <div id="eval-aggregate" class="agg-grid"></div>
+      <div class="pass-rate">{{ _tx.get('pass_rate_label', 'Pass rate:') }} <strong id="eval-pass-rate"></strong> · <span id="eval-duration" class="muted"></span></div>
+    </div>
+    <h3 style="margin:18px 0 8px;">{{ _tx.get('examples_title', 'Resultados por exemplo') }}</h3>
+    <div id="eval-examples"></div>
+  </div>
+
+  <p id="eval-status" class="muted" style="font-size:12px;margin-top:10px;">{{ _tx.get('prompt_select', 'Selecione evaluators + target e rode.') }}</p>
+</section>
+
+<style>
+  .eval-controls { display: grid; gap: 16px; padding: 4px 0 16px; }
+  .eval-group__label { display:block; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-color); margin-bottom:8px; font-weight:600; }
+  .eval-checkboxes, .eval-radios { display: flex; flex-wrap: wrap; gap: 14px; }
+  .eval-check, .eval-radio { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+  .agg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .agg-card { background: var(--background-light); border: 1px solid var(--border-color); border-left: 3px solid var(--accent-color); padding: 12px; border-radius: 6px; }
+  .agg-card__name { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .agg-card__value { font-size: 28px; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+  .agg-card.bad { border-left-color: #ef4444; }
+  .agg-card.warn { border-left-color: #f59e0b; }
+  .agg-card.good { border-left-color: #10b981; }
+  .pass-rate { font-size: 13px; padding: 8px 12px; background: var(--background-light); border-radius: 6px; }
+  .ex-row { padding: 10px 14px; background: var(--background-light); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; }
+  .ex-row__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .ex-row__id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-color); }
+  .ex-row__q { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .ex-row__r { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; padding: 6px 10px; background: var(--background-dark); border-radius: 4px; }
+  .ex-scores { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ex-score { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--background-dark); border: 1px solid var(--border-color); }
+  .ex-score.bad { color: #fca5a5; border-color: rgba(239,68,68,0.4); }
+  .ex-score.good { color: #6ee7b7; border-color: rgba(16,185,129,0.4); }
+  .ex-issues { font-size: 12px; color: #fca5a5; margin-top: 4px; }
+</style>
+
+<script>
+(function () {
+  const ctrl = document.querySelector('.eval-controls');
+  const TX = ctrl ? ctrl.dataset : {};
+  const runBtn = document.getElementById('run-eval');
+  const status = document.getElementById('eval-status');
+  const results = document.getElementById('eval-results');
+
+  function colorFor(score) { return score >= 0.85 ? 'good' : score >= 0.7 ? 'warn' : 'bad'; }
+
+  runBtn.addEventListener('click', async () => {
+    const evaluators = Array.from(document.querySelectorAll('.eval-check input:checked')).map(i => i.dataset.ev);
+    const target = document.querySelector('input[name="target"]:checked').value;
+    if (!evaluators.length) { status.textContent = TX.txNoEvaluators || 'Selecione ao menos um evaluator.'; return; }
+    runBtn.disabled = true;
+    status.textContent = (TX.txRunning || 'Rodando batch contra {target}…').replace('{target}', target);
+    try {
+      const res = await fetch('/sections/ato2_evaluators_scorecard/api/run', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ evaluators, target }),
+      });
+      const data = await res.json();
+      document.getElementById('eval-target').textContent = '· ' + data.target;
+      const aggEl = document.getElementById('eval-aggregate');
+      aggEl.innerHTML = '';
+      Object.entries(data.aggregate).forEach(([k, v]) => {
+        const card = document.createElement('div');
+        card.className = 'agg-card ' + colorFor(v);
+        card.innerHTML = '<div class="agg-card__name">' + k + '</div><div class="agg-card__value">' + v.toFixed(2) + '</div>';
+        aggEl.appendChild(card);
+      });
+      document.getElementById('eval-pass-rate').textContent = (data.pass_rate * 100).toFixed(0) + '%';
+      let durTxt = data.duration_ms + 'ms · ' + data.examples.length + ' ' + (TX.txExamples || 'exemplos');
+      if (data.source === 'real' && data.eval_id) {
+        durTxt += ' · eval_id=' + data.eval_id.substring(0, 14) + '…';
+        if (data.report_url) {
+          durTxt += ' · <a href="' + data.report_url + '" target="_blank" rel="noopener">' + (TX.txOpenReport || 'abrir relatório no Foundry ↗') + '</a>';
+        }
+      }
+      document.getElementById('eval-duration').innerHTML = durTxt;
+      const badge = document.getElementById('eval-source-badge');
+      badge.className = 'source-badge source-badge--' + data.source;
+      badge.title = data.source === 'real' ? (TX.txRealTitle || 'Real') : (TX.txMockTitle || 'Simulação local');
+      badge.innerHTML = '<i class="fa-solid ' + (data.source === 'real' ? 'fa-bolt' : 'fa-flask') + '"></i>';
+
+      const exEl = document.getElementById('eval-examples');
+      exEl.innerHTML = '';
+      data.examples.forEach(ex => {
+        const row = document.createElement('div');
+        row.className = 'ex-row';
+        let scoresHtml = '';
+        Object.entries(ex.scores).forEach(([k, v]) => {
+          scoresHtml += '<span class="ex-score ' + (v >= 0.7 ? 'good' : 'bad') + '">' + k + ': ' + v.toFixed(2) + '</span>';
+        });
+        let issuesHtml = '';
+        if (ex.custom && ex.custom.issues && ex.custom.issues.length) {
+          issuesHtml = '<div class="ex-issues">⚠ ' + ex.custom.issues.join(' · ') + '</div>';
+        }
+        row.innerHTML =
+          '<div class="ex-row__head"><span class="ex-row__id">' + ex.id + '</span></div>' +
+          '<div class="ex-row__q"></div>' +
+          '<div class="ex-row__r"></div>' +
+          '<div class="ex-scores">' + scoresHtml + '</div>' + issuesHtml;
+        row.querySelector('.ex-row__q').textContent = ex.pergunta;
+        row.querySelector('.ex-row__r').textContent = ex.resposta;
+        exEl.appendChild(row);
+      });
+      results.style.display = 'block';
+      const icon = data.source === 'real' ? 'fa-bolt' : 'fa-flask';
+      const titleTxt = data.source === 'real' ? (TX.txRealTitle || 'Real') : (TX.txMockTitle || 'Simulação local');
+      status.innerHTML = '<span class="source-badge source-badge--' + data.source + '" title="' + titleTxt + '"><i class="fa-solid ' + icon + '"></i></span> · ' + (TX.txDone || 'Concluído · {ms}ms').replace('{ms}', data.duration_ms);
+    } catch (e) {
+      status.textContent = (TX.txError || 'Erro: ') + e.message;
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+texts:
+  intro_title_html: '<img class="product-logo" src="/static/apim-logo.png" alt="APIM"> APIM AI Gateway → Log Analytics → Dashboard'
+  intro_lede: >-
+    Todo el tráfico de los agentes/modelos de
+    <img class="product-logo product-logo--sm" src="/static/foundry-logo.png" alt="Foundry">
+    <strong>Microsoft Foundry</strong> pasa por
+    <strong>Azure API Management AI Gateway</strong>, que emite eventos
+    estructurados (tokens, latencia, modelo, agent_id, cache, costo) a
+    <strong>Log Analytics</strong>. El dashboard abajo es un Power BI / Grafana
+    personalizado que consume ese workspace vía KQL.
+  fig_arch_alt: Arquitectura de observabilidad con Application Insights
+  fig_arch_cap: "Pipeline de extremo a extremo: APIM AI Gateway emite traces → Application Insights / Log Analytics → dashboards y alertas."
+  fig_metrics_alt: Dashboard de métricas de los agentes
+  fig_metrics_cap: Dashboard nativo de Foundry con métricas de uso y calidad de los agentes.
+  fig_traces_alt: Vista de traces en el inventario
+  fig_traces_cap: Drill-down en traces individuales para auditoría y debug.
+  fig_summary_alt: Resumen del monitor con Ask AI
+  fig_summary_cap: Resumen ejecutivo con "Ask AI" sobre incidentes y tendencias.
+  fig_continuous_alt: Panel de continuous evaluation
+  fig_continuous_cap: Configuración de continuous evaluation — muestreo continuo en producción.
+  fig_gateway_alt: Diagrama de arquitectura de Azure APIM AI Gateway al frente de los modelos y agentes
+  fig_gateway_cap: APIM AI Gateway centralizando token rate limiting, semantic caching, load balancing y auditoría — toda la telemetría nace aquí.
+  fig_tracing_alt: Tracing de conversación mostrando spans de turnos, tool calls y latencias
+  fig_tracing_cap: Conversation tracing — cada turno expande spans de prompt, tool calls y respuestas, con tokens, latencia y modelo por span.
+  fig_control_alt: Foundry Control Plane consolidando observabilidad, gobernanza y costo de los agentes
+  fig_control_cap: Foundry Control Plane — vista única de uso, calidad, seguridad y costo por agente/modelo, con drilldown a traces.
+  kql_title: Ejemplo de KQL agregando uso por agente
+  demo_eyebrow: Demo interactiva
+  demo_title: Dashboard de operación de los agentes Contoso
+  window_label: "Ventana:"
+  refresh_button: Actualizar
+  kpi_cost: Costo (USD)
+  kpi_requests: Requests
+  kpi_tokens: Tokens
+  kpi_p95: p95 latency
+  kpi_cache: Cache hit
+  kpi_error: Error rate
+  kpi_throttled: Throttled
+  chart_tokens: Tokens / hora
+  chart_p95: p95 latency / hora
+  chart_hist: Distribución de latencia
+  chart_cache: Cache hit rate / hora
+  chart_top_agents: Top agentes por costo
+  chart_cost_model: Costo por modelo
+  th_agent: Agente
+  th_model: Modelo
+  th_req: Req
+  th_tokens: Tokens
+  th_p95: p95
+  th_error: Error
+  th_cache: Cache
+  th_cost: Costo
+  th_share: "%"
+  alerts_title: Alertas activas (Ask AI sugiere root cause)
+  status_querying: "consultando KQL…"
+  status_updated: "Última actualización: {at} · ventana {h}h"
+  error_prefix: "Error: "
+  src_real_title: Real
+  src_mock_title: Simulación local

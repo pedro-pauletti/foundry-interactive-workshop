@@ -1,0 +1,31 @@
+section:
+  title: Mapeo de Requisitos Contoso × Stack Microsoft
+  description: >-
+    Los requisitos del Framework IA Contoso y cómo cada producto o capacidad
+    de la stack Microsoft (Foundry, Agent 365, APIM, Entra, Purview) los aborda.
+  eyebrow: Sección 1 · Visión General del Mapeo
+
+texts:
+  how_to_read_eyebrow: Cómo leer esta tabla
+  how_to_read_title: Cada fila = un requisito del Framework IA Contoso
+  how_to_read_lede: >-
+    Esta es la <strong>visión consolidada</strong> de la Sección 2 del documento de mapeo. Use la
+    búsqueda libre y los filtros por <strong>pilar</strong> y por <strong>estado de cumplimiento</strong>
+    para llegar rápidamente al requisito de interés. Las demás secciones de la agenda demuestran en
+    detalle las capacidades aquí referenciadas.
+  legend_complete: "<span class=\"badge badge--ok\">Completo</span> &mdash; cubierto de forma nativa por un producto de la stack."
+  legend_partial: "<span class=\"badge badge--warn\">Parcial</span> &mdash; cubierto combinando productos o requiere personalización."
+  legend_integration: "<span class=\"badge badge--err\">Requiere integración</span> &mdash; depende de orquestación con un sistema/dashboard externo."
+  free_search_label: Búsqueda libre
+  free_search_placeholder: Buscar por requisito, descripción o servicio…
+  clear_filters: Limpiar filtros
+  filter_pillar: Pilar
+  filter_status: Estado
+  filter_all: Todos
+  th_id: ID
+  th_pillar: Pilar
+  th_requirement: Requisito
+  th_service: Servicio Microsoft
+  th_status: Estado
+  th_demo: Ver demo
+  count_template: "{visible} de {total} requisitos mostrados"

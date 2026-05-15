@@ -1,0 +1,38 @@
+texts:
+  demo_eyebrow: Live demo
+  demo_title: Prompt optimization — LLMLingua
+  demo_lede: >-
+    Paste a verbose prompt and try techniques from
+    <a href="https://github.com/microsoft/LLMLingua" target="_blank" rel="noopener">
+    <strong>LLMLingua</strong></a> (token-importance compression with up to 20× reduction in
+    some scenarios). Tokens are estimated locally and everything runs offline for the demo.
+    The <strong>Foundry prompt-optimizer</strong> currently lives only in the Foundry portal &mdash;
+    use it there for complementary structured rewriting.
+  mock_badge_title: Local heuristic approximating LLMLingua
+  original_prompt: Original prompt
+  tokens_label: "tokens:"
+  default_prompt: >-
+    Could you please help me with the following question? I would really like you to act as a Contoso customer support expert. It is very important that you reply only based on the context provided below, and basically do not make anything up please. Note: if you really don't know the answer, I would like you to simply say you did not find it in the knowledge base. Customer question: how do I port my number from another carrier to Contoso? What documents do I need and how long does the whole process take? Context: Number portability lets the customer keep their number when switching carriers. ID and tax ID are required. The deadline is up to 3 business days.
+  prompt_placeholder: Paste a long, verbose, or redundant prompt here…
+  question_label: "Target question (question-aware):"
+  default_question: how do I port my number?
+  ratio_label: "Target ratio (LLMLingua):"
+  technique_compress: Compress
+  technique_question_aware: Question-aware
+  technique_coarse_to_fine: Coarse-to-fine
+  result_title_prefix: Result —
+  metric_original: Original tokens
+  metric_optimized: Optimized tokens
+  metric_ratio: Compression ratio
+  metric_saved: Tokens saved
+  metric_cost: $ saved *
+  cost_footnote: "* estimate based on $2.50 / 1M input tokens (gpt-4o); run in production for real values."
+  optimized_prompt_label: Optimized prompt
+  notes_label: Optimization notes
+  processing: processing…
+  error_prefix: "Error: "
+  reduction_template: "-{pct}% tokens"
+  no_reduction: no reduction
+  tech_label_compress: LLMLingua Compress
+  tech_label_question_aware: LLMLingua Question-aware
+  tech_label_coarse_to_fine: LLMLingua Coarse-to-fine

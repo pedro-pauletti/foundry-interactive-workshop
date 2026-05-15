@@ -1,0 +1,111 @@
+# Workshop navigation — Portuguese (source of truth)
+# Each item maps to a section package under src/app/webApp/app/sections/{id}/
+# `id` and `slug` MUST stay identical across all languages.
+items:
+  - id: mapeamento
+    slug: mapeamento
+    title: Mapeamento Requisitos Contoso × Stack Microsoft
+    description: Tabela filtrável dos 24 requisitos do Framework IA Contoso e como cada produto Microsoft endereça cada um
+    icon: fa-solid fa-table-list
+
+  - id: visao_geral
+    slug: visao_geral
+    title: Visão Geral da Stack & Arquitetura Integrada
+    description: Pilares Contoso, ciclo dev/operações e componentes da stack Microsoft (Foundry, Agent 365, APIM, Entra, Purview)
+    icon: fa-solid fa-diagram-project
+
+  - id: estrutura_projetos
+    slug: estrutura_projetos
+    title: Estrutura de Projetos do Foundry
+    description: Ambiente de teste com paridade de produção, inventário, RBAC, auditoria e segregação de ambientes
+    icon: fa-solid fa-sitemap
+
+  - id: ato1_criacao_agente
+    slug: ato1_criacao_agente
+    title: Criação Simplificada de Agente
+    description: Foundry Playgrounds, VS Code extension e declarative agent workflows para sair de uma descrição de alto nível para um agente funcional
+    icon: fa-solid fa-wand-magic-sparkles
+
+  - id: ato1_hosted_agents
+    slug: ato1_hosted_agents
+    title: Hosted Agents
+    description: Foundry Hosted Agents como runtime gerenciado — endpoint estável, identidade no Entra, threads e tools nativas, sem operar infraestrutura
+    icon: fa-solid fa-server
+
+  - id: ato1_prompt_versionado
+    slug: ato1_prompt_versionado
+    title: Prompt como Ativo Versionado
+    description: Prompty, Foundry Projects e Agent Development Lifecycle para versionar, auditar e revisar prompts
+    icon: fa-solid fa-code-branch
+
+  - id: ato1_llm_arena
+    slug: ato1_llm_arena
+    title: LLM Arena & Comparação de Modelos
+    description: Catálogo de modelos do Foundry e comparação objetiva qualidade × custo × latência
+    icon: fa-solid fa-trophy
+
+  - id: ato1_rag_chat
+    slug: ato1_rag_chat
+    title: RAG com Foundry IQ
+    description: Agente conectado a base de conhecimento corporativa com chat ao vivo, grounding via Foundry IQ e evaluation com métricas RAG
+    icon: fa-solid fa-comments
+
+  - id: ato1_multiagentes
+    slug: ato1_multiagentes
+    title: Multi-Agentes com MAF e Foundry Workflows
+    description: Padrões de orquestração do Microsoft Agent Framework (sequential, concurrent, handoff, group chat, magentic) e Foundry Workflows declarativos
+    icon: fa-solid fa-sitemap
+
+  - id: ato1_modelagem
+    slug: ato1_modelagem
+    title: Modelagem e Fine-tuning
+    description: SLMs, destilação, fine-tuning, RLHF e DPO no Foundry Models com comparação interativa entre modelo base e modelo especializado
+    icon: fa-solid fa-microchip
+
+  - id: ato2_evaluators_scorecard
+    slug: ato2_evaluators_scorecard
+    title: Evaluations & Custom Evaluators
+    description: Knowledge / Reasoning / Conversational, Custom Evaluators e índice único de maturidade
+    icon: fa-solid fa-clipboard-check
+
+  - id: ato2_red_teaming
+    slug: ato2_red_teaming
+    title: AI Red Teaming
+    description: Risk & Safety Evaluators, simulators e AI Red Teaming via PyRIT
+    icon: fa-solid fa-shield-virus
+
+  - id: ato2_cicd
+    slug: ato2_cicd
+    title: CI/CD de Avaliações com Evidência Auditável
+    description: Evaluation runs em GitHub Actions e Azure DevOps gerando evidência para o pilar de governança
+    icon: fa-solid fa-code-pull-request
+
+  - id: ato3_observabilidade
+    slug: ato3_observabilidade
+    title: Observabilidade em Produção
+    description: Agent Monitoring Dashboard, Optimization Dashboard com Ask AI, traces OpenTelemetry e dashboard customizado com métricas do AI Gateway via Log Analytics
+    icon: fa-solid fa-chart-line
+
+  - id: ato3_governanca
+    slug: ato3_governanca
+    title: Governança & Guardrails
+    description: Foundry Control Plane, Guardrails, Entra e Custom Azure Policy
+    icon: fa-solid fa-shield-halved
+
+  - id: ato3_agent365_purview
+    slug: ato3_agent365_purview
+    title: Agent 365 e Purview
+    description: Inventário corporativo de agentes, DLP e compliance regulatório
+    icon: fa-solid fa-id-badge
+
+  - id: ato3_classificacao_risco
+    slug: ato3_classificacao_risco
+    title: Classificação de Risco
+    description: Critérios parametrizáveis, alinhamento ao PL 2338 e Custom Azure Policy for Foundry para enforcement de risco
+    icon: fa-solid fa-triangle-exclamation
+
+  - id: ato3_custo_integracao
+    slug: ato3_custo_integracao
+    title: Integração com Agentes Externos (A2A)
+    description: APIM AI Gateway, semantic caching, A2A multi-agent e MCP Tools
+    icon: fa-solid fa-network-wired

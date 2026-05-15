@@ -1,0 +1,59 @@
+texts:
+  intro_title_html: '<img class="product-logo" src="/static/apim-logo.png" alt="APIM"> APIM AI Gateway → Log Analytics → Dashboard'
+  intro_lede: >-
+    All traffic to
+    <img class="product-logo product-logo--sm" src="/static/foundry-logo.png" alt="Foundry">
+    <strong>Microsoft Foundry</strong> agents/models flows through
+    <strong>Azure API Management AI Gateway</strong>, which emits structured
+    events (tokens, latency, model, agent_id, cache, cost) to
+    <strong>Log Analytics</strong>. The dashboard below is a custom Power BI / Grafana
+    consuming that workspace via KQL.
+  fig_arch_alt: Observability architecture with Application Insights
+  fig_arch_cap: "End-to-end pipeline: APIM AI Gateway emits traces → Application Insights / Log Analytics → dashboards and alerts."
+  fig_metrics_alt: Agent metrics dashboard
+  fig_metrics_cap: Native Foundry dashboard with agent usage and quality metrics.
+  fig_traces_alt: Trace inventory view
+  fig_traces_cap: Drill-down into individual traces for audit and debug.
+  fig_summary_alt: Monitor summary with Ask AI
+  fig_summary_cap: Executive summary with "Ask AI" over incidents and trends.
+  fig_continuous_alt: Continuous evaluation panel
+  fig_continuous_cap: Continuous evaluation configuration — continuous sampling in production.
+  fig_gateway_alt: Azure APIM AI Gateway architecture diagram fronting models and agents
+  fig_gateway_cap: APIM AI Gateway centralizing token rate limiting, semantic caching, load balancing, and auditing — all telemetry originates here.
+  fig_tracing_alt: Conversation tracing showing turn spans, tool calls, and latencies
+  fig_tracing_cap: Conversation tracing — each turn expands into spans for prompt, tool calls, and responses, with tokens, latency, and model per span.
+  fig_control_alt: Foundry Control Plane consolidating observability, governance, and cost across agents
+  fig_control_cap: Foundry Control Plane — single view of usage, quality, safety, and cost per agent/model, with drilldown to traces.
+  kql_title: Example KQL aggregating usage per agent
+  demo_eyebrow: Interactive demo
+  demo_title: Contoso agents operations dashboard
+  window_label: "Window:"
+  refresh_button: Refresh
+  kpi_cost: Cost (USD)
+  kpi_requests: Requests
+  kpi_tokens: Tokens
+  kpi_p95: p95 latency
+  kpi_cache: Cache hit
+  kpi_error: Error rate
+  kpi_throttled: Throttled
+  chart_tokens: Tokens / hour
+  chart_p95: p95 latency / hour
+  chart_hist: Latency distribution
+  chart_cache: Cache hit rate / hour
+  chart_top_agents: Top agents by cost
+  chart_cost_model: Cost by model
+  th_agent: Agent
+  th_model: Model
+  th_req: Req
+  th_tokens: Tokens
+  th_p95: p95
+  th_error: Error
+  th_cache: Cache
+  th_cost: Cost
+  th_share: "%"
+  alerts_title: Active alerts (Ask AI suggests root cause)
+  status_querying: "querying KQL…"
+  status_updated: "Last update: {at} · window {h}h"
+  error_prefix: "Error: "
+  src_real_title: Real
+  src_mock_title: Local simulation

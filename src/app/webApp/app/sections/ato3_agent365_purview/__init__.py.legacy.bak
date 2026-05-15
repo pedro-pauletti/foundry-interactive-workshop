@@ -1,0 +1,630 @@
+from section_factory import make_content_router
+
+MENU_TITLE = "Agent 365 e Purview"
+MENU_ICON = "fa-solid fa-id-badge"
+
+SECTION = {
+    "title": MENU_TITLE,
+    "description": "Inventário corporativo de agentes + DLP, classificação e auditoria via Purview — "
+                   "e como expor o seu agente no Agent 365.",
+    "eyebrow": "Operar & Governar",
+    "eyebrow_icon": "fa-solid fa-tower-broadcast",
+}
+
+
+def _code_block(lang: str, code: str, caption: str = "") -> str:
+    import html as _html
+    safe = _html.escape(code)
+    cap = f'<div class="code-caption">{caption}</div>' if caption else ""
+    return f'{cap}<pre class="code-block"><code class="language-{lang}">{safe}</code></pre>'
+
+
+# ---------------------------------------------------------------------------
+# Code samples — Agent 365 SDK (Python) & app registration
+# Refs:
+#   https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-sdk?tabs=python
+#   https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration
+#   https://learn.microsoft.com/en-us/microsoft-agent-365/developer/get-started
+# ---------------------------------------------------------------------------
+INSTALL_SDK = '''pip install microsoft-agent365'''
+
+REGISTER_AGENT_PY = '''# Registrar o agente no Agent 365 (one-time)
+from microsoft_agent365 import AgentClient
+from azure.identity import DefaultAzureCredential
+
+client = AgentClient(credential=DefaultAzureCredential())
+
+agent = client.agents.create(
+    display_name="Curador de Conhecimento Contoso",
+    description="Responde dúvidas internas com base na documentação corporativa.",
+    publisher="Contoso",
+    # Endpoint de runtime — Foundry Hosted Agent OU URL HTTPS própria.
+    endpoint={
+        "type": "foundry_hosted",
+        "foundry_agent_id": "asst_xxxxxxxxxxxxxxxx",
+        "project_endpoint": "https://<projeto>.services.ai.azure.com/api/projects/<projeto>",
+    },
+    # App registration que representa o agente no Entra (ver passo 2).
+    client_app_id="<application-id-do-app-registration>",
+    # Capacidades que o agente expõe ao Microsoft 365.
+    capabilities=["chat", "search", "actions"],
+)
+print("Agente registrado em Agent 365:", agent.id)
+'''
+
+INVOKE_PY = '''# Conversar com o agente via Agent 365 SDK
+from microsoft_agent365 import AgentClient
+from azure.identity import DefaultAzureCredential
+
+client = AgentClient(credential=DefaultAzureCredential())
+
+conv = client.conversations.create(agent_id=agent.id)
+client.messages.send(
+    conversation_id=conv.id,
+    content="Quais planos de fibra para home office?",
+)
+
+for msg in client.messages.list(conversation_id=conv.id):
+    print(msg.role, "→", msg.content)
+'''
+
+APP_REGISTRATION_BICEP = '''// app-registration.bicep — App registration mínima para Agent 365
+// Refs: learn.microsoft.com/.../custom-client-app-registration
+resource agentApp 'Microsoft.Graph/applications@v1.0' = {
+  uniqueName: 'curador-contoso-agent'
+  displayName: 'Curador de Conhecimento Contoso'
+  signInAudience: 'AzureADMyOrg'
+  api: {
+    requestedAccessTokenVersion: 2
+  }
+  requiredResourceAccess: [
+    {
+      // Microsoft Graph
+      resourceAppId: '00000003-0000-0000-c000-000000000000'
+      resourceAccess: [
+        // openid / profile / offline_access — login do usuário
+        { id: '37f7f235-527c-4136-accd-4a02d197296e', type: 'Scope' }
+        { id: '14dad69e-099b-42c9-810b-d002981feec1', type: 'Scope' }
+        { id: '7427e0e9-2fba-42fe-b0c0-848c9e6a8182', type: 'Scope' }
+      ]
+    }
+    {
+      // Microsoft Agent 365 service
+      resourceAppId: '<agent-365-service-app-id>'
+      resourceAccess: [
+        { id: '<scope-Agent.Invoke>', type: 'Scope' }
+      ]
+    }
+  ]
+}
+'''
+
+
+# ---------------------------------------------------------------------------
+# Content blocks
+# ---------------------------------------------------------------------------
+BLOCK_O_QUE_E = (
+    '<div class="product-logo-row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px;">'
+    '<img class="product-logo product-logo--lg" src="/static/agent365-logo.png" alt="Microsoft Agent 365">'
+    '<img class="product-logo product-logo--lg" src="/static/purview-logo.png" alt="Microsoft Purview">'
+    '<img class="product-logo product-logo--lg" src="/static/entra-logo.png" alt="Microsoft Entra ID">'
+    '</div>'
+    "<p><strong>Microsoft Agent 365</strong> é o <em>Admin Center</em> + runtime de superfícies dos "
+    "agentes corporativos: catálogo único, identidade no Entra, ciclo de vida, descoberta no "
+    "Microsoft 365 Chat / Teams / Outlook e governança via Purview.</p>"
+    "<p><strong>Microsoft Purview</strong> aplica DLP, classificação de informação e auditoria — "
+    "o mesmo motor já usado para Microsoft 365 e dados corporativos da Contoso, agora estendido "
+    "para prompts, respostas e tool-calls dos agentes.</p>"
+    "<ul>"
+    "<li><strong>Inventário único</strong> de agentes Foundry, Copilot Studio e parceiros.</li>"
+    "<li><strong>Identidade de agente</strong> no Entra ID — cada agente é um <em>principal</em> auditável.</li>"
+    "<li><strong>Purview DLP</strong> sobre prompts, respostas e dados retornados pelo RAG.</li>"
+    "<li><strong>Classificação automática</strong> dos dados sensíveis acessados.</li>"
+    "<li><strong>Auditoria unificada</strong> com o resto do ecossistema Microsoft 365.</li>"
+    "</ul>"
+)
+
+BLOCK_COMO_EXPOR = (
+    "<p>Expor um agente no Agent 365 é um fluxo de <strong>quatro passos</strong>:</p>"
+    "<ol>"
+    "<li><strong>Ter um runtime</strong> — um Hosted Agent no Foundry (recomendado) "
+    "ou um endpoint HTTPS próprio que aceite o protocolo de chamada do Agent 365.</li>"
+    "<li><strong>App registration</strong> no Entra ID que representa o agente "
+    "(<em>custom client app registration</em>).</li>"
+    "<li><strong>Registrar o agente</strong> no Agent 365 via SDK Python (ou portal).</li>"
+    "<li><strong>Publicar para a organização</strong> e aplicar políticas Purview.</li>"
+    "</ol>"
+    "<p>A documentação oficial cobre cada passo:</p>"
+    "<ul>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/get-started\" target=\"_blank\" rel=\"noopener\">Get started — Agent 365 developer</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-sdk?tabs=python\" target=\"_blank\" rel=\"noopener\">Agent 365 SDK (Python)</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration\" target=\"_blank\" rel=\"noopener\">Custom client app registration</a></li>"
+    "</ul>"
+)
+
+BLOCK_PASSO1 = (
+    "<p>Se você seguiu a seção <em>Hosted Agents</em>, o runtime já está pronto: "
+    "anote o <code>asst_...</code> do agente e o endpoint do projeto Foundry. Você vai "
+    "usar esses dois valores no passo 3.</p>"
+    "<p>Se preferir um runtime próprio (LangGraph / MAFW expostos via APIM), o Agent 365 "
+    "aceita endpoints HTTPS desde que implementem o contrato documentado em "
+    "<em>Agent 365 SDK → Custom endpoints</em>.</p>"
+)
+
+BLOCK_PASSO2 = (
+    "<p>O Agent 365 exige uma <strong>app registration própria</strong> (não reaproveitar "
+    "a do webapp). Ela representa a identidade do agente quando ele:</p>"
+    "<ul>"
+    "<li>recebe tokens delegados do usuário que está conversando;</li>"
+    "<li>chama Microsoft Graph em nome desse usuário;</li>"
+    "<li>aparece no inventário corporativo com o publisher correto.</li>"
+    "</ul>"
+    "<p>Mínimo necessário (resumo da doc <em>custom-client-app-registration</em>):</p>"
+    "<ul>"
+    "<li><code>signInAudience</code> = <strong>AzureADMyOrg</strong> (single-tenant) ou "
+    "<strong>AzureADMultipleOrgs</strong> conforme distribuição.</li>"
+    "<li><strong>Redirect URI</strong> de tipo <em>Public client/native</em> "
+    "(<code>http://localhost</code>) — Agent 365 usa fluxo de device code / interactive.</li>"
+    "<li>Ativar <strong>Allow public client flows</strong>.</li>"
+    "<li><strong>API permissions</strong>: <code>openid</code>, <code>profile</code>, "
+    "<code>offline_access</code> (Microsoft Graph) + escopo <code>Agent.Invoke</code> "
+    "do Agent 365 service.</li>"
+    "</ul>"
+    "<p>Em IaC, fica algo assim:</p>"
+    + _code_block("bicep", APP_REGISTRATION_BICEP, "infra/app-registration.bicep")
+)
+
+BLOCK_PASSO3 = (
+    "<p>Instale o SDK e registre o agente — uma única vez por ambiente:</p>"
+    + _code_block("bash", INSTALL_SDK, "")
+    + _code_block("python", REGISTER_AGENT_PY, "register_agent.py")
+    + "<p>O <code>endpoint.type=\"foundry_hosted\"</code> aponta para o Hosted Agent criado "
+    "no ato anterior. Para runtime próprio use <code>type=\"https\"</code> + "
+    "<code>url</code>.</p>"
+)
+
+BLOCK_PASSO4 = (
+    "<p>Após registrado, o agente já é <strong>chamável via SDK</strong>:</p>"
+    + _code_block("python", INVOKE_PY, "invoke_agent.py")
+    + "<p>Para que ele apareça automaticamente em <strong>Microsoft 365 Chat</strong>, "
+    "<strong>Teams</strong> e <strong>Outlook</strong> dos colaboradores Contoso:</p>"
+    "<ul>"
+    "<li>No <em>Microsoft Admin Center → Agent 365</em>, mude o estado do agente para "
+    "<strong>Published</strong> e selecione o escopo (toda a Contoso, BU, grupo do Entra…).</li>"
+    "<li>Aplique uma <strong>Purview DLP policy</strong> ao agente (ex.: bloquear envio de CPF "
+    "em respostas, classificar conteúdo retornado como <em>Confidential</em>).</li>"
+    "<li>O <strong>Compliance Portal</strong> passa a registrar prompts, respostas e tool-calls "
+    "para auditoria e e-Discovery.</li>"
+    "</ul>"
+)
+
+
+BODY = {
+    "pillars": ["Governança", "Transversal", "Operação"],
+    "requisitos": [
+        {"id": "1.3.6", "titulo": "Trilha de auditoria por agente / versão"},
+        {"id": "1.3.7", "titulo": "Inventário corporativo de agentes"},
+        {"id": "1.3.8", "titulo": "DLP, classificação e proteção de dados"},
+    ],
+    "blocks": [
+        {"titulo": "O que é Agent 365 + Purview", "html": BLOCK_O_QUE_E},
+        {"titulo": "Como expor um agente no Agent 365 — visão geral", "html": BLOCK_COMO_EXPOR},
+        {"titulo": "Passo 1 · Ter um runtime (Hosted Agent ou próprio)", "html": BLOCK_PASSO1},
+        {"titulo": "Passo 2 · App registration no Entra ID", "html": BLOCK_PASSO2},
+        {"titulo": "Passo 3 · Registrar via Agent 365 SDK (Python)", "html": BLOCK_PASSO3},
+        {"titulo": "Passo 4 · Publicar e aplicar políticas Purview", "html": BLOCK_PASSO4},
+    ],
+    "tutorial_titulo": "Demonstrar ao vivo",
+    "tutorial_passos": [
+        {
+            "titulo": "Mostrar o inventário no Admin Center → Agent 365",
+            "html": "Catálogo de agentes da Contoso, com publisher, owners, versões e estado.",
+        },
+        {
+            "titulo": "Onboard do Curador",
+            "html": "Rodar o script <code>register_agent.py</code> apontando para o Hosted Agent "
+                    "criado na seção anterior — ver o agente surgir no inventário em segundos.",
+        },
+        {
+            "titulo": "Conversar via Microsoft 365 Chat",
+            "html": "Abrir o <em>M365 Chat</em>, mencionar o Curador (<code>@Curador Contoso</code>) e "
+                    "rodar uma pergunta — o tracing aparece tanto no Foundry quanto no Compliance Portal.",
+        },
+        {
+            "titulo": "Aplicar Purview DLP",
+            "html": "Criar uma policy que bloqueia respostas com PII e ver o agente recusar "
+                    "automaticamente — auditável no Compliance Portal.",
+        },
+    ],
+    "mensagem_chave": (
+        "<strong>Agent 365 = onboarding corporativo do agente</strong>. Com um Hosted Agent + "
+        "uma app registration + uma chamada do SDK, o Curador Contoso aparece no Microsoft 365 "
+        "Chat, Teams e Outlook de todos os colaboradores — e entra automaticamente no perímetro "
+        "de governança Purview, evitando shadow-AI."
+    ),
+    "extra_html": (
+        '<hr class="section-separator" aria-hidden="true">'
+        '<section class="page-summary" style="margin-top: 16px;">'
+          '<span class="page-eyebrow"><i class="fa-solid fa-image"></i> Telas reais &middot; Agent 365 Admin Center</span>'
+          '<h2 class="page-summary__title">Como o Curador aparece no inventário corporativo</h2>'
+          '<p class="page-summary__lede">'
+          'Depois do <code>register_agent.py</code> rodar, o agente passa a existir no '
+          '<strong>Microsoft 365 Admin Center &rarr; Agent 365</strong>. As quatro telas abaixo cobrem '
+          'o ciclo: <em>registry</em> &rarr; <em>overview</em> &rarr; <em>details</em> &rarr; <em>agent map</em> '
+          '(visão multi-agente).'
+          '</p>'
+        '</section>'
+        '<div class="section-figure section-figure--row" style="margin-top: 16px;">'
+          '<figure>'
+            '<img src="/static/images/agent-in-registry-agent-365.png" '
+            'alt="Agente listado no registry do Agent 365">'
+            '<figcaption>1. <strong>Registry</strong> &mdash; o Curador entra no inventário corporativo, '
+            'com publisher, owners e estado.</figcaption>'
+          '</figure>'
+          '<figure>'
+            '<img src="/static/images/agent-overview-agent-365.png" '
+            'alt="Tela de overview do agente no Agent 365">'
+            '<figcaption>2. <strong>Overview</strong> &mdash; cartão executivo: descrição, owners, '
+            'políticas aplicadas e métricas resumidas.</figcaption>'
+          '</figure>'
+          '<figure>'
+            '<img src="/static/images/agent-details-agent365.png" '
+            'alt="Tela de detalhes técnicos do agente no Agent 365">'
+            '<figcaption>3. <strong>Details</strong> &mdash; tools, knowledge sources, identidade '
+            'no Entra, versão e telemetria por turno.</figcaption>'
+          '</figure>'
+          '<figure>'
+            '<img src="/static/images/agent-map-agent-365.png" '
+            'alt="Visão de Agent Map mostrando relações entre agentes">'
+            '<figcaption>4. <strong>Agent Map</strong> &mdash; topologia de agentes que se chamam '
+            '(A2A) e tools compartilhadas, base para análises de blast-radius.</figcaption>'
+          '</figure>'
+        '</div>'
+    ),
+}
+
+BLOCK_O_QUE_E_EN = (
+    '<div class="product-logo-row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px;">'
+    '<img class="product-logo product-logo--lg" src="/static/agent365-logo.png" alt="Microsoft Agent 365">'
+    '<img class="product-logo product-logo--lg" src="/static/purview-logo.png" alt="Microsoft Purview">'
+    '<img class="product-logo product-logo--lg" src="/static/entra-logo.png" alt="Microsoft Entra ID">'
+    '</div>'
+    "<p><strong>Microsoft Agent 365</strong> is the <em>Admin Center</em> + surface runtime for "
+    "enterprise agents: single catalog, Entra identity, lifecycle, discovery in "
+    "Microsoft 365 Chat / Teams / Outlook and governance via Purview.</p>"
+    "<p><strong>Microsoft Purview</strong> applies DLP, information classification and auditing — "
+    "the same engine already used for Microsoft 365 and Contoso corporate data, now extended "
+    "to agent prompts, responses and tool-calls.</p>"
+    "<ul>"
+    "<li><strong>Single inventory</strong> of Foundry, Copilot Studio and partner agents.</li>"
+    "<li><strong>Agent identity</strong> in Entra ID — every agent is an auditable <em>principal</em>.</li>"
+    "<li><strong>Purview DLP</strong> over prompts, responses and RAG-returned data.</li>"
+    "<li><strong>Automatic classification</strong> of accessed sensitive data.</li>"
+    "<li><strong>Unified auditing</strong> with the rest of the Microsoft 365 ecosystem.</li>"
+    "</ul>"
+)
+BLOCK_O_QUE_E_ES = (
+    '<div class="product-logo-row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px;">'
+    '<img class="product-logo product-logo--lg" src="/static/agent365-logo.png" alt="Microsoft Agent 365">'
+    '<img class="product-logo product-logo--lg" src="/static/purview-logo.png" alt="Microsoft Purview">'
+    '<img class="product-logo product-logo--lg" src="/static/entra-logo.png" alt="Microsoft Entra ID">'
+    '</div>'
+    "<p><strong>Microsoft Agent 365</strong> es el <em>Admin Center</em> + runtime de superficies de "
+    "los agentes corporativos: catálogo único, identidad en Entra, ciclo de vida, descubrimiento en "
+    "Microsoft 365 Chat / Teams / Outlook y gobernanza vía Purview.</p>"
+    "<p><strong>Microsoft Purview</strong> aplica DLP, clasificación de información y auditoría — "
+    "el mismo motor ya usado para Microsoft 365 y los datos corporativos de Contoso, ahora extendido "
+    "a prompts, respuestas y tool-calls de los agentes.</p>"
+    "<ul>"
+    "<li><strong>Inventario único</strong> de agentes Foundry, Copilot Studio y de partners.</li>"
+    "<li><strong>Identidad de agente</strong> en Entra ID — cada agente es un <em>principal</em> auditable.</li>"
+    "<li><strong>Purview DLP</strong> sobre prompts, respuestas y datos retornados por el RAG.</li>"
+    "<li><strong>Clasificación automática</strong> de los datos sensibles accedidos.</li>"
+    "<li><strong>Auditoría unificada</strong> con el resto del ecosistema Microsoft 365.</li>"
+    "</ul>"
+)
+
+BLOCK_COMO_EXPOR_EN = (
+    "<p>Exposing an agent in Agent 365 is a <strong>four-step</strong> flow:</p>"
+    "<ol>"
+    "<li><strong>Have a runtime</strong> — a Hosted Agent on Foundry (recommended) "
+    "or your own HTTPS endpoint implementing the Agent 365 calling protocol.</li>"
+    "<li><strong>App registration</strong> in Entra ID representing the agent "
+    "(<em>custom client app registration</em>).</li>"
+    "<li><strong>Register the agent</strong> in Agent 365 via the Python SDK (or portal).</li>"
+    "<li><strong>Publish to the organization</strong> and apply Purview policies.</li>"
+    "</ol>"
+    "<p>Official docs cover each step:</p>"
+    "<ul>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/get-started\" target=\"_blank\" rel=\"noopener\">Get started — Agent 365 developer</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-sdk?tabs=python\" target=\"_blank\" rel=\"noopener\">Agent 365 SDK (Python)</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration\" target=\"_blank\" rel=\"noopener\">Custom client app registration</a></li>"
+    "</ul>"
+)
+BLOCK_COMO_EXPOR_ES = (
+    "<p>Exponer un agente en Agent 365 es un flujo de <strong>cuatro pasos</strong>:</p>"
+    "<ol>"
+    "<li><strong>Tener un runtime</strong> — un Hosted Agent en Foundry (recomendado) "
+    "o un endpoint HTTPS propio que implemente el protocolo de llamada del Agent 365.</li>"
+    "<li><strong>App registration</strong> en Entra ID que representa al agente "
+    "(<em>custom client app registration</em>).</li>"
+    "<li><strong>Registrar el agente</strong> en Agent 365 vía SDK Python (o portal).</li>"
+    "<li><strong>Publicar a la organización</strong> y aplicar políticas Purview.</li>"
+    "</ol>"
+    "<p>La documentación oficial cubre cada paso:</p>"
+    "<ul>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/get-started\" target=\"_blank\" rel=\"noopener\">Get started — Agent 365 developer</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-sdk?tabs=python\" target=\"_blank\" rel=\"noopener\">Agent 365 SDK (Python)</a></li>"
+    "<li><a href=\"https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration\" target=\"_blank\" rel=\"noopener\">Custom client app registration</a></li>"
+    "</ul>"
+)
+
+BLOCK_PASSO1_EN = (
+    "<p>If you followed the <em>Hosted Agents</em> section, the runtime is already in place: "
+    "note down the agent's <code>asst_...</code> and the Foundry project endpoint. You will "
+    "use these two values in step 3.</p>"
+    "<p>If you prefer your own runtime (LangGraph / MAFW exposed via APIM), Agent 365 "
+    "accepts HTTPS endpoints as long as they implement the contract documented in "
+    "<em>Agent 365 SDK → Custom endpoints</em>.</p>"
+)
+BLOCK_PASSO1_ES = (
+    "<p>Si seguiste la sección <em>Hosted Agents</em>, el runtime ya está listo: "
+    "anota el <code>asst_...</code> del agente y el endpoint del proyecto Foundry. Los "
+    "usarás en el paso 3.</p>"
+    "<p>Si prefieres un runtime propio (LangGraph / MAFW expuesto vía APIM), Agent 365 "
+    "acepta endpoints HTTPS siempre que implementen el contrato documentado en "
+    "<em>Agent 365 SDK → Custom endpoints</em>.</p>"
+)
+
+BLOCK_PASSO2_EN = (
+    "<p>Agent 365 requires its <strong>own app registration</strong> (do not reuse the "
+    "webapp's). It represents the agent's identity when it:</p>"
+    "<ul>"
+    "<li>receives delegated tokens from the conversing user;</li>"
+    "<li>calls Microsoft Graph on behalf of that user;</li>"
+    "<li>appears in the corporate inventory with the correct publisher.</li>"
+    "</ul>"
+    "<p>Minimum required (summary of <em>custom-client-app-registration</em>):</p>"
+    "<ul>"
+    "<li><code>signInAudience</code> = <strong>AzureADMyOrg</strong> (single-tenant) or "
+    "<strong>AzureADMultipleOrgs</strong> depending on distribution.</li>"
+    "<li><strong>Redirect URI</strong> of type <em>Public client/native</em> "
+    "(<code>http://localhost</code>) — Agent 365 uses device code / interactive flow.</li>"
+    "<li>Enable <strong>Allow public client flows</strong>.</li>"
+    "<li><strong>API permissions</strong>: <code>openid</code>, <code>profile</code>, "
+    "<code>offline_access</code> (Microsoft Graph) + <code>Agent.Invoke</code> "
+    "scope from the Agent 365 service.</li>"
+    "</ul>"
+    "<p>In IaC it looks like this:</p>"
+    + _code_block("bicep", APP_REGISTRATION_BICEP, "infra/app-registration.bicep")
+)
+BLOCK_PASSO2_ES = (
+    "<p>Agent 365 exige una <strong>app registration propia</strong> (no reaprovechar "
+    "la del webapp). Representa la identidad del agente cuando:</p>"
+    "<ul>"
+    "<li>recibe tokens delegados del usuario que está conversando;</li>"
+    "<li>llama a Microsoft Graph en nombre de ese usuario;</li>"
+    "<li>aparece en el inventario corporativo con el publisher correcto.</li>"
+    "</ul>"
+    "<p>Mínimo necesario (resumen de <em>custom-client-app-registration</em>):</p>"
+    "<ul>"
+    "<li><code>signInAudience</code> = <strong>AzureADMyOrg</strong> (single-tenant) o "
+    "<strong>AzureADMultipleOrgs</strong> según la distribución.</li>"
+    "<li><strong>Redirect URI</strong> de tipo <em>Public client/native</em> "
+    "(<code>http://localhost</code>) — Agent 365 usa device code / interactive.</li>"
+    "<li>Activar <strong>Allow public client flows</strong>.</li>"
+    "<li><strong>API permissions</strong>: <code>openid</code>, <code>profile</code>, "
+    "<code>offline_access</code> (Microsoft Graph) + scope <code>Agent.Invoke</code> "
+    "del Agent 365 service.</li>"
+    "</ul>"
+    "<p>En IaC queda así:</p>"
+    + _code_block("bicep", APP_REGISTRATION_BICEP, "infra/app-registration.bicep")
+)
+
+BLOCK_PASSO3_EN = (
+    "<p>Install the SDK and register the agent — one-time per environment:</p>"
+    + _code_block("bash", INSTALL_SDK, "")
+    + _code_block("python", REGISTER_AGENT_PY, "register_agent.py")
+    + "<p>The <code>endpoint.type=\"foundry_hosted\"</code> points to the Hosted Agent "
+    "created in the previous act. For your own runtime use <code>type=\"https\"</code> + "
+    "<code>url</code>.</p>"
+)
+BLOCK_PASSO3_ES = (
+    "<p>Instala el SDK y registra el agente — una vez por ambiente:</p>"
+    + _code_block("bash", INSTALL_SDK, "")
+    + _code_block("python", REGISTER_AGENT_PY, "register_agent.py")
+    + "<p><code>endpoint.type=\"foundry_hosted\"</code> apunta al Hosted Agent creado "
+    "en el acto anterior. Para runtime propio usa <code>type=\"https\"</code> + "
+    "<code>url</code>.</p>"
+)
+
+BLOCK_PASSO4_EN = (
+    "<p>Once registered, the agent is <strong>callable via SDK</strong>:</p>"
+    + _code_block("python", INVOKE_PY, "invoke_agent.py")
+    + "<p>For it to appear automatically in <strong>Microsoft 365 Chat</strong>, "
+    "<strong>Teams</strong> and <strong>Outlook</strong> for Contoso users:</p>"
+    "<ul>"
+    "<li>In <em>Microsoft Admin Center → Agent 365</em>, change the agent state to "
+    "<strong>Published</strong> and pick the scope (entire Contoso, BU, Entra group…).</li>"
+    "<li>Apply a <strong>Purview DLP policy</strong> to the agent (e.g. block sending CPF "
+    "in answers, classify returned content as <em>Confidential</em>).</li>"
+    "<li>The <strong>Compliance Portal</strong> starts logging prompts, responses and tool-calls "
+    "for auditing and e-Discovery.</li>"
+    "</ul>"
+)
+BLOCK_PASSO4_ES = (
+    "<p>Una vez registrado, el agente queda <strong>invocable vía SDK</strong>:</p>"
+    + _code_block("python", INVOKE_PY, "invoke_agent.py")
+    + "<p>Para que aparezca automáticamente en <strong>Microsoft 365 Chat</strong>, "
+    "<strong>Teams</strong> y <strong>Outlook</strong> de los colaboradores Contoso:</p>"
+    "<ul>"
+    "<li>En <em>Microsoft Admin Center → Agent 365</em>, cambiar el estado del agente a "
+    "<strong>Published</strong> y elegir el alcance (toda la Contoso, BU, grupo Entra…).</li>"
+    "<li>Aplicar una <strong>Purview DLP policy</strong> al agente (ej.: bloquear envío de CPF "
+    "en respuestas, clasificar contenido como <em>Confidential</em>).</li>"
+    "<li>El <strong>Compliance Portal</strong> empieza a registrar prompts, respuestas y tool-calls "
+    "para auditoría y e-Discovery.</li>"
+    "</ul>"
+)
+
+BODY_I18N = {
+    "en": {
+        "body_localized": True,
+        "blocks": [
+            {"titulo": "What Agent 365 + Purview is", "html": BLOCK_O_QUE_E_EN},
+            {"titulo": "How to expose an agent in Agent 365 — overview", "html": BLOCK_COMO_EXPOR_EN},
+            {"titulo": "Step 1 · Have a runtime (Hosted Agent or your own)", "html": BLOCK_PASSO1_EN},
+            {"titulo": "Step 2 · App registration in Entra ID", "html": BLOCK_PASSO2_EN},
+            {"titulo": "Step 3 · Register via Agent 365 SDK (Python)", "html": BLOCK_PASSO3_EN},
+            {"titulo": "Step 4 · Publish and apply Purview policies", "html": BLOCK_PASSO4_EN},
+        ],
+        "tutorial_titulo": "Live demo",
+        "tutorial_passos": [
+            {
+                "titulo": "Show the inventory in Admin Center → Agent 365",
+                "html": "Contoso agent catalog, with publisher, owners, versions and state.",
+            },
+            {
+                "titulo": "Onboard the Curator",
+                "html": "Run <code>register_agent.py</code> pointing at the Hosted Agent "
+                        "created in the previous section — see it appear in the inventory within seconds.",
+            },
+            {
+                "titulo": "Chat via Microsoft 365 Chat",
+                "html": "Open <em>M365 Chat</em>, mention the Curator (<code>@Contoso Curator</code>) and "
+                        "run a question — tracing appears both in Foundry and in the Compliance Portal.",
+            },
+            {
+                "titulo": "Apply Purview DLP",
+                "html": "Create a policy that blocks PII in responses and watch the agent refuse "
+                        "automatically — auditable in the Compliance Portal.",
+            },
+        ],
+        "mensagem_chave": (
+            "<strong>Agent 365 = corporate onboarding for the agent</strong>. With a Hosted Agent + "
+            "an app registration + one SDK call, the Contoso Curator appears in Microsoft 365 "
+            "Chat, Teams and Outlook for every employee — and is automatically inside the Purview "
+            "governance perimeter, avoiding shadow-AI."
+        ),
+        "extra_html": (
+            '<hr class="section-separator" aria-hidden="true">'
+            '<section class="page-summary" style="margin-top: 16px;">'
+              '<span class="page-eyebrow"><i class="fa-solid fa-image"></i> Real screens &middot; Agent 365 Admin Center</span>'
+              '<h2 class="page-summary__title">How the Curator shows up in the corporate inventory</h2>'
+              '<p class="page-summary__lede">'
+              'Once <code>register_agent.py</code> runs, the agent exists in '
+              '<strong>Microsoft 365 Admin Center &rarr; Agent 365</strong>. The four screens below cover '
+              'the cycle: <em>registry</em> &rarr; <em>overview</em> &rarr; <em>details</em> &rarr; <em>agent map</em> '
+              '(multi-agent view).'
+              '</p>'
+            '</section>'
+            '<div class="section-figure section-figure--row" style="margin-top: 16px;">'
+              '<figure>'
+                '<img src="/static/images/agent-in-registry-agent-365.png" '
+                'alt="Agent listed in the Agent 365 registry">'
+                '<figcaption>1. <strong>Registry</strong> &mdash; the Curator enters the corporate inventory, '
+                'with publisher, owners and state.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-overview-agent-365.png" '
+                'alt="Agent overview screen in Agent 365">'
+                '<figcaption>2. <strong>Overview</strong> &mdash; executive card: description, owners, '
+                'applied policies and summary metrics.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-details-agent365.png" '
+                'alt="Agent technical details in Agent 365">'
+                '<figcaption>3. <strong>Details</strong> &mdash; tools, knowledge sources, Entra identity, '
+                'version and per-turn telemetry.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-map-agent-365.png" '
+                'alt="Agent Map view showing agent relationships">'
+                '<figcaption>4. <strong>Agent Map</strong> &mdash; topology of agents calling each other '
+                '(A2A) and shared tools, basis for blast-radius analysis.</figcaption>'
+              '</figure>'
+            '</div>'
+        ),
+    },
+    "es": {
+        "body_localized": True,
+        "blocks": [
+            {"titulo": "Qué es Agent 365 + Purview", "html": BLOCK_O_QUE_E_ES},
+            {"titulo": "Cómo exponer un agente en Agent 365 — visión general", "html": BLOCK_COMO_EXPOR_ES},
+            {"titulo": "Paso 1 · Tener un runtime (Hosted Agent o propio)", "html": BLOCK_PASSO1_ES},
+            {"titulo": "Paso 2 · App registration en Entra ID", "html": BLOCK_PASSO2_ES},
+            {"titulo": "Paso 3 · Registrar vía Agent 365 SDK (Python)", "html": BLOCK_PASSO3_ES},
+            {"titulo": "Paso 4 · Publicar y aplicar políticas Purview", "html": BLOCK_PASSO4_ES},
+        ],
+        "tutorial_titulo": "Demostrar en vivo",
+        "tutorial_passos": [
+            {
+                "titulo": "Mostrar el inventario en Admin Center → Agent 365",
+                "html": "Catálogo de agentes Contoso, con publisher, owners, versiones y estado.",
+            },
+            {
+                "titulo": "Onboard del Curador",
+                "html": "Ejecutar <code>register_agent.py</code> apuntando al Hosted Agent "
+                        "creado en la sección anterior — verlo aparecer en el inventario en segundos.",
+            },
+            {
+                "titulo": "Conversar vía Microsoft 365 Chat",
+                "html": "Abrir <em>M365 Chat</em>, mencionar al Curador (<code>@Curador Contoso</code>) y "
+                        "lanzar una pregunta — el tracing aparece tanto en Foundry como en Compliance Portal.",
+            },
+            {
+                "titulo": "Aplicar Purview DLP",
+                "html": "Crear una policy que bloquea PII en respuestas y ver al agente rechazar "
+                        "automáticamente — auditable en el Compliance Portal.",
+            },
+        ],
+        "mensagem_chave": (
+            "<strong>Agent 365 = onboarding corporativo del agente</strong>. Con un Hosted Agent + "
+            "una app registration + una llamada del SDK, el Curador Contoso aparece en Microsoft 365 "
+            "Chat, Teams y Outlook de todos los colaboradores — y entra automáticamente en el perímetro "
+            "de gobernanza Purview, evitando shadow-AI."
+        ),
+        "extra_html": (
+            '<hr class="section-separator" aria-hidden="true">'
+            '<section class="page-summary" style="margin-top: 16px;">'
+              '<span class="page-eyebrow"><i class="fa-solid fa-image"></i> Pantallas reales &middot; Agent 365 Admin Center</span>'
+              '<h2 class="page-summary__title">Cómo aparece el Curador en el inventario corporativo</h2>'
+              '<p class="page-summary__lede">'
+              'Después de ejecutar <code>register_agent.py</code>, el agente existe en '
+              '<strong>Microsoft 365 Admin Center &rarr; Agent 365</strong>. Las cuatro pantallas siguientes cubren '
+              'el ciclo: <em>registry</em> &rarr; <em>overview</em> &rarr; <em>details</em> &rarr; <em>agent map</em> '
+              '(visión multi-agente).'
+              '</p>'
+            '</section>'
+            '<div class="section-figure section-figure--row" style="margin-top: 16px;">'
+              '<figure>'
+                '<img src="/static/images/agent-in-registry-agent-365.png" '
+                'alt="Agente listado en el registry de Agent 365">'
+                '<figcaption>1. <strong>Registry</strong> &mdash; el Curador entra en el inventario corporativo, '
+                'con publisher, owners y estado.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-overview-agent-365.png" '
+                'alt="Pantalla overview del agente en Agent 365">'
+                '<figcaption>2. <strong>Overview</strong> &mdash; tarjeta ejecutiva: descripción, owners, '
+                'políticas aplicadas y métricas resumidas.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-details-agent365.png" '
+                'alt="Detalles técnicos del agente en Agent 365">'
+                '<figcaption>3. <strong>Details</strong> &mdash; tools, knowledge sources, identidad en Entra, '
+                'versión y telemetría por turno.</figcaption>'
+              '</figure>'
+              '<figure>'
+                '<img src="/static/images/agent-map-agent-365.png" '
+                'alt="Vista Agent Map de relaciones entre agentes">'
+                '<figcaption>4. <strong>Agent Map</strong> &mdash; topología de agentes que se llaman '
+                '(A2A) y tools compartidas, base para análisis de blast-radius.</figcaption>'
+              '</figure>'
+            '</div>'
+        ),
+    },
+}
+
+router = make_content_router("ato3_agent365_purview", SECTION, BODY, body_i18n=BODY_I18N)
+__all__ = ["router", "MENU_TITLE", "MENU_ICON"]

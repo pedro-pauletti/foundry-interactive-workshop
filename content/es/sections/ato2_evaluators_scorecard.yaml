@@ -1,0 +1,61 @@
+texts:
+  intro_title: Qué son las Evaluations en Foundry
+  intro_lede: >-
+    <strong>Evaluations</strong> son pruebas automáticas para sistemas de IA generativa: defines un
+    <em>dataset</em> (preguntas + opcional <em>ground truth</em>), eliges <em>evaluators</em>
+    (built-in o personalizados) y Foundry devuelve un <strong>scorecard</strong> con métricas agregadas
+    + drilldown por ejemplo — como unit tests, pero para calidad/seguridad de modelos.
+  intro_quality: "<strong>Quality</strong> · <code>groundedness</code>, <code>relevance</code>, <code>coherence</code>, <code>fluency</code>, <code>similarity</code>."
+  intro_safety: "<strong>Safety</strong> · <code>hate/unfairness</code>, <code>violence</code>, <code>sexual</code>, <code>self-harm</code>, <code>protected material</code>."
+  intro_agent: "<strong>Agent</strong> · <code>intent_resolution</code>, <code>tool_call_accuracy</code>, <code>task_adherence</code>."
+  intro_rag: "<strong>RAG</strong> · <code>retrieval</code>, <code>response_completeness</code>, <code>document_retrieval</code>."
+  intro_custom: "<strong>Custom</strong> · cualquier función Python decorada con <code>@evaluator</code> — KPIs de tu dominio."
+  figure_alt: Resultados de evaluación del agente en Foundry
+  figure_caption: Scorecard agregado + drilldown por ejemplo en el portal Foundry — mismo formato que esta demo reproduce localmente.
+  portal_title: Cómo ejecutar desde el portal Foundry
+  portal_lede: >-
+    En <em>Foundry Project → Evaluations → New evaluation</em>: (1) selecciona el <em>dataset</em> (JSONL),
+    (2) marca los evaluators built-in o apunta a uno personalizado registrado en el proyecto,
+    (3) elige el <em>target</em> (prompt, deployment o agent), (4) ejecuta. El resultado se vuelve un
+    reporte comparable entre runs y versiones de prompt/modelo — con permanent link y export a CI/CD.
+  sdk_title: Ejecutar vía SDK (azure-ai-evaluation)
+  sdk_note: >-
+    El mismo código corre localmente (dev), en PR (CI/CD) y en Foundry (continuous evaluation).
+    Cuando pasas <code>azure_ai_project</code>, el resultado también sube al portal
+    — visible para equipos de producto, calidad y gobernanza.
+  custom_title: Anatomía de un Custom Evaluator
+  custom_lede: >-
+    Un Custom Evaluator es simplemente una función Python que recibe los campos del dataset
+    (<code>response</code>, <code>query</code>, <code>context</code>, <code>ground_truth</code>…) y devuelve
+    un <code>dict</code> con métricas. Ideal para reglas de negocio (tono de marca, compliance,
+    formato de salida etc.) que los evaluators genéricos no cubren. Ejemplo — evaluator <code>tom_contoso</code>:
+  custom_note: >-
+    Este evaluator puede registrarse en el <em>Foundry Evaluator Catalog</em> y reusarse por otras BUs
+    — los evaluators se vuelven activo de gobernanza corporativa, no código suelto en notebook.
+  demo_eyebrow: Demo interactiva
+  demo_title: Ejecutar batch evaluation
+  mock_badge_title: Simulación local
+  demo_lede: >-
+    En modo <strong>real</strong>, registra los evaluators <code>contoso_tom_de_voz</code>
+    (code-based) y <code>contoso_friendliness</code> (prompt-based) en el proyecto Foundry,
+    crea un <code>eval</code> + <code>run</code> con dataset inline (JSONL) y hace polling
+    hasta concluir — igual al SDK oficial. En modo offline, misma estructura pero heurísticas locales.
+  evaluators_label: Evaluators en el scorecard
+  builtin_tag: (built-in)
+  custom_code_tag: (custom code-based)
+  custom_prompt_tag: (custom prompt-based)
+  target_label: Target
+  target_a: Modelo A (gpt-4o + RAG)
+  target_b: Modelo B (gpt-4o-mini sin RAG)
+  run_button: Ejecutar evaluation
+  scorecard_title: Scorecard agregado
+  pass_rate_label: "Pass rate:"
+  examples_title: Resultados por ejemplo
+  prompt_select: Selecciona evaluators + target y ejecuta.
+  no_evaluators: Selecciona al menos un evaluator.
+  running_template: "Ejecutando batch contra {target}…"
+  examples_word: ejemplos
+  open_report: "abrir reporte en Foundry ↗"
+  done_template: "Completado · {ms}ms"
+  real_title: Real
+  error_prefix: "Error: "

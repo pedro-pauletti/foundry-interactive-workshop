@@ -1,0 +1,38 @@
+texts:
+  demo_eyebrow: Demo en vivo
+  demo_title: Optimización de prompt — LLMLingua
+  demo_lede: >-
+    Pegue un prompt verboso y pruebe técnicas de
+    <a href="https://github.com/microsoft/LLMLingua" target="_blank" rel="noopener">
+    <strong>LLMLingua</strong></a> (compresión por importancia de token, con hasta 20× de reducción
+    en algunos escenarios). Los tokens se estiman localmente y todo se ejecuta offline para la demo.
+    El <strong>Foundry prompt-optimizer</strong> solo existe hoy en el portal de Foundry &mdash;
+    úselo allí para reescritura estructurada complementaria.
+  mock_badge_title: Heurística local que aproxima LLMLingua
+  original_prompt: Prompt original
+  tokens_label: "tokens:"
+  default_prompt: >-
+    Por favor, ¿podría ayudarme con la siguiente pregunta? Me gustaría mucho que actuara como un experto en atención al cliente de Contoso. Es muy importante que responda solo basándose en el contexto proporcionado a continuación, y básicamente no invente nada por favor. Nota: si realmente no sabe la respuesta, me gustaría que simplemente dijera que no la encontró en la base. Pregunta del cliente: ¿cómo hago para portar mi número de otra operadora a Contoso? ¿Qué documentos necesito y cuánto tiempo demora todo el proceso? Contexto: La portabilidad numérica permite al cliente mantener su número al cambiar de operadora. Es necesario presentar identificación y CPF. El plazo es de hasta 3 días hábiles.
+  prompt_placeholder: Pegue aquí un prompt largo, verboso o redundante…
+  question_label: "Pregunta objetivo (question-aware):"
+  default_question: ¿cómo hago la portabilidad?
+  ratio_label: "Target ratio (LLMLingua):"
+  technique_compress: Compress
+  technique_question_aware: Question-aware
+  technique_coarse_to_fine: Coarse-to-fine
+  result_title_prefix: Resultado —
+  metric_original: Tokens originales
+  metric_optimized: Tokens optimizados
+  metric_ratio: Compression ratio
+  metric_saved: Tokens ahorrados
+  metric_cost: $ ahorrados *
+  cost_footnote: "* estimación basada en $2.50 / 1M input tokens (gpt-4o); ejecute en producción para valores reales."
+  optimized_prompt_label: Prompt optimizado
+  notes_label: Notas de la optimización
+  processing: procesando…
+  error_prefix: "Error: "
+  reduction_template: "-{pct}% tokens"
+  no_reduction: sin reducción
+  tech_label_compress: LLMLingua Compress
+  tech_label_question_aware: LLMLingua Question-aware
+  tech_label_coarse_to_fine: LLMLingua Coarse-to-fine

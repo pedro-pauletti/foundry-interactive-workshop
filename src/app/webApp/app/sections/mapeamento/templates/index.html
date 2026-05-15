@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}{{ request.state.t_section('title', section.title) }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="fa-solid fa-table-list"></i> {{ request.state.t_section('eyebrow', section.eyebrow) }}</span>
+  <h1 class="page-title">{{ request.state.t_section('title', section.title) }}</h1>
+  <p class="page-subtitle">{{ request.state.t_section('description', section.description) }}</p>
+</header>
+
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary" aria-labelledby="map-intro">
+  <span class="page-eyebrow"><i class="fa-solid fa-compass"></i> {{ request.state.texts.get('how_to_read_eyebrow', 'Como ler esta tabela') }}</span>
+  <h2 id="map-intro" class="page-summary__title">{{ request.state.texts.get('how_to_read_title', 'Cada linha = um requisito do Framework IA Contoso') }}</h2>
+  <p class="page-summary__lede">
+    {{ request.state.texts.get('how_to_read_lede', '') | safe }}
+  </p>
+  <ul class="page-summary__list">
+    <li>{{ request.state.texts.get('legend_complete', '') | safe }}</li>
+    <li>{{ request.state.texts.get('legend_partial', '') | safe }}</li>
+    <li>{{ request.state.texts.get('legend_integration', '') | safe }}</li>
+  </ul>
+</section>
+
+<section class="card card--active" id="map-toolbar" style="margin-top: 16px;">
+  <div class="row" style="gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;">
+    <div style="flex: 1 1 280px; min-width: 240px;">
+      <label for="map-search" class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">
+        {{ request.state.texts.get('free_search_label', 'Busca livre') }}
+      </label>
+      <input id="map-search" type="search" placeholder="{{ request.state.texts.get('free_search_placeholder', 'Buscar por requisito, descrição ou serviço…') }}"
+             class="input" autocomplete="off"
+             style="width: 100%; margin-top: 6px; padding: 10px 14px; border-radius: 12px;
+                    background: var(--background-light); border: 1px solid var(--border-color);
+                    color: var(--text-primary); font-size: 14px;">
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="button" id="map-clear" class="btn btn--ghost" style="margin-top: 22px;">
+        <i class="fa-solid fa-broom"></i> {{ request.state.texts.get('clear_filters', 'Limpar filtros') }}
+      </button>
+    </div>
+  </div>
+
+  <div style="margin-top: 6px;">
+    <span class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">{{ request.state.texts.get('filter_pillar', 'Pilar') }}</span>
+    <div class="chip-row" id="map-chips-pilar" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px;">
+      <button type="button" class="chip chip--active" data-filter-type="pilar" data-filter-value="">{{ request.state.texts.get('filter_all', 'Todos') }}</button>
+      {% for p in data.pilares %}
+        <button type="button" class="chip" data-filter-type="pilar" data-filter-value="{{ p.id }}">{{ request.state.t_label('pillar', p.label) }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="margin-top: 12px;">
+    <span class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">{{ request.state.texts.get('filter_status', 'Status') }}</span>
+    <div class="chip-row" id="map-chips-status" style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px;">
+      <button type="button" class="chip chip--active" data-filter-type="status" data-filter-value="">{{ request.state.texts.get('filter_all', 'Todos') }}</button>
+      {% for s in data.status %}
+        <button type="button" class="chip chip--{{ s.tone }}" data-filter-type="status" data-filter-value="{{ s.id }}">{{ request.state.t_label('status', s.label) }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="between" style="margin-top: 14px;">
+    <span class="muted" id="map-count" data-count-template="{{ request.state.texts.get('count_template', '{visible} de {total} requisitos exibidos') }}" style="font-size: 13px;"></span>
+  </div>
+</section>
+
+<section style="margin-top: 16px; overflow-x: auto;">
+  <table class="table table--compact" id="map-table" style="min-width: 100%;">
+    <thead>
+      <tr>
+        <th style="width: 90px;">{{ request.state.texts.get('th_id', 'ID') }}</th>
+        <th style="width: 150px;">{{ request.state.texts.get('th_pillar', 'Pilar') }}</th>
+        <th>{{ request.state.texts.get('th_requirement', 'Requisito') }}</th>
+        <th>{{ request.state.texts.get('th_service', 'Serviço Microsoft') }}</th>
+        <th style="width: 130px;">{{ request.state.texts.get('th_status', 'Status') }}</th>
+        <th style="width: 220px;">{{ request.state.texts.get('th_demo', 'Ver demo') }}</th>
+      </tr>
+    </thead>
+    <tbody id="map-tbody">
+      {% set menu_by_slug = {} %}
+      {% for it in request.state.menu %}{% set _ = menu_by_slug.update({it.slug: it}) %}{% endfor %}
+      {% for r in data.requisitos %}
+        {% set pilar = (data.pilares | selectattr('id', 'equalto', r.pilar) | list | first) %}
+        {% set status = (data.status | selectattr('id', 'equalto', r.status) | list | first) %}
+        <tr data-pilar="{{ r.pilar }}" data-status="{{ r.status }}"
+            data-search="{{ (r.id ~ ' ' ~ r.titulo ~ ' ' ~ r.descricao ~ ' ' ~ r.servico ~ ' ' ~ r.detalhe) | lower }}"
+            id="req-{{ r.id | replace('.', '-') }}">
+          <td><code>{{ r.id }}</code></td>
+          <td>{{ request.state.t_label('pillar', pilar.label) if pilar else r.pilar }}</td>
+          <td>
+            <strong>{{ request.state.t_label('requisito', r.titulo) }}</strong>
+            <div class="muted" style="font-size: 12px; margin-top: 3px;">{{ r.descricao }}</div>
+          </td>
+          <td>
+            <strong>{{ r.servico }}</strong>
+            <div class="muted" style="font-size: 12px; margin-top: 3px;">{{ r.detalhe }}</div>
+          </td>
+          <td>
+            <span class="badge badge--{{ status.tone if status else '' }}">{{ request.state.t_label('status', status.label) if status else r.status }}</span>
+          </td>
+          <td>
+            {% if r.covers %}
+              <div class="cover-links">
+                {% for slug in r.covers %}
+                  {% set mi = menu_by_slug.get(slug) %}
+                  {% if mi %}
+                    <a class="cover-link" href="{{ mi.url }}" title="{{ mi.description or mi.title }}">
+                      <i class="{{ mi.icon }}"></i><span>{{ mi.title }}</span>
+                    </a>
+                  {% else %}
+                    <a class="cover-link" href="/sections/{{ slug }}"><i class="fa-solid fa-arrow-right"></i><span>{{ slug }}</span></a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <span class="muted" style="font-size:12px;">—</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<style>
+  .chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--background-light);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { border-color: var(--primary-color); color: var(--text-primary); }
+  .chip--active {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+  }
+  .chip--ok.chip--active { border-color: #22c55e; background: rgba(34, 197, 94, 0.18); }
+  .chip--warn.chip--active { border-color: #f59e0b; background: rgba(245, 158, 11, 0.18); }
+  .chip--err.chip--active { border-color: #ef4444; background: rgba(239, 68, 68, 0.18); }
+  .badge--ok { background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+  .badge--warn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+  .badge--err { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+  [data-theme="white"] .badge--ok { color: #15803d; }
+  [data-theme="white"] .badge--warn { color: #b45309; }
+  [data-theme="white"] .badge--err { color: #b91c1c; }
+  .btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--background-light);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn--ghost:hover { border-color: var(--primary-color); }
+  #map-table tbody tr.is-hidden { display: none; }
+  .cover-links { display: flex; flex-direction: column; gap: 4px; }
+  .cover-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px; border-radius: 6px;
+    background: var(--primary-light, rgba(43,142,240,0.12));
+    border: 1px solid var(--border-color);
+    color: var(--text-primary); text-decoration: none;
+    font-size: 12px; line-height: 1.2;
+  }
+  .cover-link:hover { border-color: var(--primary-color); }
+  .cover-link i { font-size: 11px; opacity: 0.8; }
+</style>
+
+<script>
+  (function () {
+    const tbody = document.getElementById('map-tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const search = document.getElementById('map-search');
+    const count = document.getElementById('map-count');
+    const chipsPilar = document.getElementById('map-chips-pilar');
+    const chipsStatus = document.getElementById('map-chips-status');
+    const clearBtn = document.getElementById('map-clear');
+
+    let filterPilar = '';
+    let filterStatus = '';
+    let filterText = '';
+
+    function apply() {
+      const term = filterText.trim().toLowerCase();
+      let visible = 0;
+      rows.forEach(r => {
+        const okPilar = !filterPilar || r.dataset.pilar === filterPilar;
+        const okStatus = !filterStatus || r.dataset.status === filterStatus;
+        const okText = !term || (r.dataset.search || '').includes(term);
+        const show = okPilar && okStatus && okText;
+        r.classList.toggle('is-hidden', !show);
+        if (show) visible++;
+      });
+      count.textContent = (count.dataset.countTemplate || '{visible} de {total} requisitos exibidos')
+        .replace('{visible}', visible)
+        .replace('{total}', rows.length);
+    }
+
+    function bindChips(container, setter) {
+      container.addEventListener('click', e => {
+        const btn = e.target.closest('.chip');
+        if (!btn) return;
+        container.querySelectorAll('.chip').forEach(c => c.classList.remove('chip--active'));
+        btn.classList.add('chip--active');
+        setter(btn.dataset.filterValue);
+        apply();
+      });
+    }
+
+    bindChips(chipsPilar, v => filterPilar = v);
+    bindChips(chipsStatus, v => filterStatus = v);
+    search.addEventListener('input', e => { filterText = e.target.value; apply(); });
+    clearBtn.addEventListener('click', () => {
+      filterPilar = ''; filterStatus = ''; filterText = '';
+      search.value = '';
+      [chipsPilar, chipsStatus].forEach(c => {
+        c.querySelectorAll('.chip').forEach(b => b.classList.remove('chip--active'));
+        const all = c.querySelector('.chip[data-filter-value=""]');
+        if (all) all.classList.add('chip--active');
+      });
+      apply();
+    });
+
+    apply();
+  })();
+</script>
+{% endblock %}

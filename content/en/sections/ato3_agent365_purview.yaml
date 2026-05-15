@@ -1,0 +1,122 @@
+section:
+  title: Agent 365 e Purview
+  description: Inventário corporativo de agentes + DLP, classificação e auditoria via Purview — e como expor o seu agente
+    no Agent 365.
+  eyebrow: Operar & Governar
+  eyebrow_icon: fa-solid fa-tower-broadcast
+body:
+  pillars:
+  - Governança
+  - Transversal
+  - Operação
+  requisitos:
+  - id: 1.3.6
+    titulo: Trilha de auditoria por agente / versão
+  - id: 1.3.7
+    titulo: Inventário corporativo de agentes
+  - id: 1.3.8
+    titulo: DLP, classificação e proteção de dados
+  blocks:
+  - titulo: What Agent 365 + Purview is
+    html: '<div class="product-logo-row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 16px;"><img
+      class="product-logo product-logo--lg" src="/static/agent365-logo.png" alt="Microsoft Agent 365"><img class="product-logo
+      product-logo--lg" src="/static/purview-logo.png" alt="Microsoft Purview"><img class="product-logo product-logo--lg"
+      src="/static/entra-logo.png" alt="Microsoft Entra ID"></div><p><strong>Microsoft Agent 365</strong> is the <em>Admin
+      Center</em> + surface runtime for enterprise agents: single catalog, Entra identity, lifecycle, discovery in Microsoft
+      365 Chat / Teams / Outlook and governance via Purview.</p><p><strong>Microsoft Purview</strong> applies DLP, information
+      classification and auditing — the same engine already used for Microsoft 365 and Contoso corporate data, now extended
+      to agent prompts, responses and tool-calls.</p><ul><li><strong>Single inventory</strong> of Foundry, Copilot Studio
+      and partner agents.</li><li><strong>Agent identity</strong> in Entra ID — every agent is an auditable <em>principal</em>.</li><li><strong>Purview
+      DLP</strong> over prompts, responses and RAG-returned data.</li><li><strong>Automatic classification</strong> of accessed
+      sensitive data.</li><li><strong>Unified auditing</strong> with the rest of the Microsoft 365 ecosystem.</li></ul>'
+  - titulo: How to expose an agent in Agent 365 — overview
+    html: <p>Exposing an agent in Agent 365 is a <strong>four-step</strong> flow:</p><ol><li><strong>Have a runtime</strong>
+      — a Hosted Agent on Foundry (recommended) or your own HTTPS endpoint implementing the Agent 365 calling protocol.</li><li><strong>App
+      registration</strong> in Entra ID representing the agent (<em>custom client app registration</em>).</li><li><strong>Register
+      the agent</strong> in Agent 365 via the Python SDK (or portal).</li><li><strong>Publish to the organization</strong>
+      and apply Purview policies.</li></ol><p>Official docs cover each step:</p><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/developer/get-started"
+      target="_blank" rel="noopener">Get started — Agent 365 developer</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/developer/agent-365-sdk?tabs=python"
+      target="_blank" rel="noopener">Agent 365 SDK (Python)</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/developer/custom-client-app-registration"
+      target="_blank" rel="noopener">Custom client app registration</a></li></ul>
+  - titulo: Step 1 · Have a runtime (Hosted Agent or your own)
+    html: '<p>If you followed the <em>Hosted Agents</em> section, the runtime is already in place: note down the agent''s
+      <code>asst_...</code> and the Foundry project endpoint. You will use these two values in step 3.</p><p>If you prefer
+      your own runtime (LangGraph / MAFW exposed via APIM), Agent 365 accepts HTTPS endpoints as long as they implement the
+      contract documented in <em>Agent 365 SDK → Custom endpoints</em>.</p>'
+  - titulo: Step 2 · App registration in Entra ID
+    html: "<p>Agent 365 requires its <strong>own app registration</strong> (do not reuse the webapp's). It represents the\
+      \ agent's identity when it:</p><ul><li>receives delegated tokens from the conversing user;</li><li>calls Microsoft Graph\
+      \ on behalf of that user;</li><li>appears in the corporate inventory with the correct publisher.</li></ul><p>Minimum\
+      \ required (summary of <em>custom-client-app-registration</em>):</p><ul><li><code>signInAudience</code> = <strong>AzureADMyOrg</strong>\
+      \ (single-tenant) or <strong>AzureADMultipleOrgs</strong> depending on distribution.</li><li><strong>Redirect URI</strong>\
+      \ of type <em>Public client/native</em> (<code>http://localhost</code>) — Agent 365 uses device code / interactive flow.</li><li>Enable\
+      \ <strong>Allow public client flows</strong>.</li><li><strong>API permissions</strong>: <code>openid</code>, <code>profile</code>,\
+      \ <code>offline_access</code> (Microsoft Graph) + <code>Agent.Invoke</code> scope from the Agent 365 service.</li></ul><p>In\
+      \ IaC it looks like this:</p><div class=\"code-caption\">infra/app-registration.bicep</div><pre class=\"code-block\"\
+      ><code class=\"language-bicep\">// app-registration.bicep — App registration mínima para Agent 365\n// Refs: learn.microsoft.com/.../custom-client-app-registration\n\
+      resource agentApp &#x27;Microsoft.Graph/applications@v1.0&#x27; = {\n  uniqueName: &#x27;curador-contoso-agent&#x27;\n\
+      \  displayName: &#x27;Curador de Conhecimento Contoso&#x27;\n  signInAudience: &#x27;AzureADMyOrg&#x27;\n  api: {\n\
+      \    requestedAccessTokenVersion: 2\n  }\n  requiredResourceAccess: [\n    {\n      // Microsoft Graph\n      resourceAppId:\
+      \ &#x27;00000003-0000-0000-c000-000000000000&#x27;\n      resourceAccess: [\n        // openid / profile / offline_access\
+      \ — login do usuário\n        { id: &#x27;37f7f235-527c-4136-accd-4a02d197296e&#x27;, type: &#x27;Scope&#x27; }\n  \
+      \      { id: &#x27;14dad69e-099b-42c9-810b-d002981feec1&#x27;, type: &#x27;Scope&#x27; }\n        { id: &#x27;7427e0e9-2fba-42fe-b0c0-848c9e6a8182&#x27;,\
+      \ type: &#x27;Scope&#x27; }\n      ]\n    }\n    {\n      // Microsoft Agent 365 service\n      resourceAppId: &#x27;&lt;agent-365-service-app-id&gt;&#x27;\n\
+      \      resourceAccess: [\n        { id: &#x27;&lt;scope-Agent.Invoke&gt;&#x27;, type: &#x27;Scope&#x27; }\n      ]\n\
+      \    }\n  ]\n}\n</code></pre>"
+  - titulo: Step 3 · Register via Agent 365 SDK (Python)
+    html: "<p>Install the SDK and register the agent — one-time per environment:</p><pre class=\"code-block\"><code class=\"\
+      language-bash\">pip install microsoft-agent365</code></pre><div class=\"code-caption\">register_agent.py</div><pre class=\"\
+      code-block\"><code class=\"language-python\"># Registrar o agente no Agent 365 (one-time)\nfrom microsoft_agent365 import\
+      \ AgentClient\nfrom azure.identity import DefaultAzureCredential\n\nclient = AgentClient(credential=DefaultAzureCredential())\n\
+      \nagent = client.agents.create(\n    display_name=&quot;Curador de Conhecimento Contoso&quot;,\n    description=&quot;Responde\
+      \ dúvidas internas com base na documentação corporativa.&quot;,\n    publisher=&quot;Contoso&quot;,\n    # Endpoint\
+      \ de runtime — Foundry Hosted Agent OU URL HTTPS própria.\n    endpoint={\n        &quot;type&quot;: &quot;foundry_hosted&quot;,\n\
+      \        &quot;foundry_agent_id&quot;: &quot;asst_xxxxxxxxxxxxxxxx&quot;,\n        &quot;project_endpoint&quot;: &quot;https://&lt;projeto&gt;.services.ai.azure.com/api/projects/&lt;projeto&gt;&quot;,\n\
+      \    },\n    # App registration que representa o agente no Entra (ver passo 2).\n    client_app_id=&quot;&lt;application-id-do-app-registration&gt;&quot;,\n\
+      \    # Capacidades que o agente expõe ao Microsoft 365.\n    capabilities=[&quot;chat&quot;, &quot;search&quot;, &quot;actions&quot;],\n\
+      )\nprint(&quot;Agente registrado em Agent 365:&quot;, agent.id)\n</code></pre><p>The <code>endpoint.type=\"foundry_hosted\"\
+      </code> points to the Hosted Agent created in the previous act. For your own runtime use <code>type=\"https\"</code>\
+      \ + <code>url</code>.</p>"
+  - titulo: Step 4 · Publish and apply Purview policies
+    html: "<p>Once registered, the agent is <strong>callable via SDK</strong>:</p><div class=\"code-caption\">invoke_agent.py</div><pre\
+      \ class=\"code-block\"><code class=\"language-python\"># Conversar com o agente via Agent 365 SDK\nfrom microsoft_agent365\
+      \ import AgentClient\nfrom azure.identity import DefaultAzureCredential\n\nclient = AgentClient(credential=DefaultAzureCredential())\n\
+      \nconv = client.conversations.create(agent_id=agent.id)\nclient.messages.send(\n    conversation_id=conv.id,\n    content=&quot;Quais\
+      \ planos de fibra para home office?&quot;,\n)\n\nfor msg in client.messages.list(conversation_id=conv.id):\n    print(msg.role,\
+      \ &quot;→&quot;, msg.content)\n</code></pre><p>For it to appear automatically in <strong>Microsoft 365 Chat</strong>,\
+      \ <strong>Teams</strong> and <strong>Outlook</strong> for Contoso users:</p><ul><li>In <em>Microsoft Admin Center →\
+      \ Agent 365</em>, change the agent state to <strong>Published</strong> and pick the scope (entire Contoso, BU, Entra\
+      \ group…).</li><li>Apply a <strong>Purview DLP policy</strong> to the agent (e.g. block sending CPF in answers, classify\
+      \ returned content as <em>Confidential</em>).</li><li>The <strong>Compliance Portal</strong> starts logging prompts,\
+      \ responses and tool-calls for auditing and e-Discovery.</li></ul>"
+  tutorial_titulo: Live demo
+  tutorial_passos:
+  - titulo: Show the inventory in Admin Center → Agent 365
+    html: Contoso agent catalog, with publisher, owners, versions and state.
+  - titulo: Onboard the Curator
+    html: Run <code>register_agent.py</code> pointing at the Hosted Agent created in the previous section — see it appear
+      in the inventory within seconds.
+  - titulo: Chat via Microsoft 365 Chat
+    html: Open <em>M365 Chat</em>, mention the Curator (<code>@Contoso Curator</code>) and run a question — tracing appears
+      both in Foundry and in the Compliance Portal.
+  - titulo: Apply Purview DLP
+    html: Create a policy that blocks PII in responses and watch the agent refuse automatically — auditable in the Compliance
+      Portal.
+  mensagem_chave: <strong>Agent 365 = corporate onboarding for the agent</strong>. With a Hosted Agent + an app registration
+    + one SDK call, the Contoso Curator appears in Microsoft 365 Chat, Teams and Outlook for every employee — and is automatically
+    inside the Purview governance perimeter, avoiding shadow-AI.
+  extra_html: '<hr class="section-separator" aria-hidden="true"><section class="page-summary" style="margin-top: 16px;"><span
+    class="page-eyebrow"><i class="fa-solid fa-image"></i> Real screens &middot; Agent 365 Admin Center</span><h2 class="page-summary__title">How
+    the Curator shows up in the corporate inventory</h2><p class="page-summary__lede">Once <code>register_agent.py</code>
+    runs, the agent exists in <strong>Microsoft 365 Admin Center &rarr; Agent 365</strong>. The four screens below cover the
+    cycle: <em>registry</em> &rarr; <em>overview</em> &rarr; <em>details</em> &rarr; <em>agent map</em> (multi-agent view).</p></section><div
+    class="section-figure section-figure--row" style="margin-top: 16px;"><figure><img src="/static/images/agent-in-registry-agent-365.png"
+    alt="Agent listed in the Agent 365 registry"><figcaption>1. <strong>Registry</strong> &mdash; the Curator enters the corporate
+    inventory, with publisher, owners and state.</figcaption></figure><figure><img src="/static/images/agent-overview-agent-365.png"
+    alt="Agent overview screen in Agent 365"><figcaption>2. <strong>Overview</strong> &mdash; executive card: description,
+    owners, applied policies and summary metrics.</figcaption></figure><figure><img src="/static/images/agent-details-agent365.png"
+    alt="Agent technical details in Agent 365"><figcaption>3. <strong>Details</strong> &mdash; tools, knowledge sources, Entra
+    identity, version and per-turn telemetry.</figcaption></figure><figure><img src="/static/images/agent-map-agent-365.png"
+    alt="Agent Map view showing agent relationships"><figcaption>4. <strong>Agent Map</strong> &mdash; topology of agents
+    calling each other (A2A) and shared tools, basis for blast-radius analysis.</figcaption></figure></div>'
+  body_localized: true

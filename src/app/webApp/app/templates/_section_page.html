@@ -1,0 +1,120 @@
+{# Shared "section page" template — didactic content + tutorial steps. #}
+{# Expected vars: section (title/eyebrow/description), section_body dict with:
+   - pillars: list of strings (chips at top)
+   - requisitos: list of {id, titulo} (cobertos pela seção; link para a tabela)
+   - blocks: list of {titulo?, html} — explicação didática (substitui resumo/bullets)
+   - tutorial_titulo: string ("Tutorial" por default)
+   - tutorial_lede: optional string
+   - tutorial_passos: list of {titulo, html} (substitui passos)
+   - extra_html: optional raw HTML antes da mensagem-chave
+   - mensagem_chave: string
+#}
+{% extends "base.html" %}
+{% set _t_section = request.state.t_section %}
+{% set _section_title = _t_section('title', section.title) %}
+{% set _section_desc = _t_section('description', section.description) %}
+{% set _section_eyebrow = _t_section('eyebrow', section.eyebrow) %}
+{% block title %}{{ _section_title }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  <span class="page-eyebrow"><i class="{{ section.eyebrow_icon | default('fa-solid fa-bookmark') }}"></i> {{ _section_eyebrow }}</span>
+  <h1 class="page-title">{{ _section_title }}</h1>
+  <p class="page-subtitle">{{ _section_desc }}</p>
+</header>
+
+{% if request.state.lang and request.state.lang != 'pt' and not section_body.body_localized %}
+  {% set _body_notice = request.state.t('section_page.body_lang_notice') %}
+  {% if _body_notice and _body_notice != 'section_page.body_lang_notice' %}
+  <div class="note-block note-block--info" style="margin-bottom: 18px;">
+    <span class="note-block__icon"><i class="fa-solid fa-language"></i></span>
+    <div class="note-block__body">{{ _body_notice | safe }}</div>
+  </div>
+  {% endif %}
+{% endif %}
+
+<hr class="section-separator" aria-hidden="true">
+
+{% if section_body.pillars or section_body.requisitos %}
+<section class="page-summary">
+  {% if section_body.pillars %}
+    <span class="page-eyebrow"><i class="fa-solid fa-bullseye"></i> {{ request.state.t('section_page.pillars_label') }}</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px;">
+      {% for p in section_body.pillars %}
+        <span class="badge" style="background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 999px; font-size: 13px;">{{ request.state.t_label('pillar', p) }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if section_body.requisitos %}
+    <p class="muted" style="font-size: 13px; margin-bottom: 6px;">{{ request.state.t('section_page.requirements_label') }}</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+      {% for r in section_body.requisitos %}
+        <a href="/sections/mapeamento#req-{{ r.id | replace('.', '-') }}" class="badge"
+           style="background: var(--background-light); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 8px; font-size: 12px; text-decoration: none;">
+          <code>{{ r.id }}</code> · {{ request.state.t_label('requisito', r.titulo) }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if section_body.blocks %}
+  {% for blk in section_body.blocks %}
+    <section class="page-summary" style="margin-top: 16px;">
+      {% if blk.titulo %}<h2 class="page-summary__title">{{ blk.titulo }}</h2>{% endif %}
+      <div class="page-summary__lede">{{ blk.html | safe }}</div>
+    </section>
+  {% endfor %}
+{% elif section_body.resumo or section_body.bullets %}
+  <section class="page-summary" style="margin-top: 16px;">
+    {% if section_body.resumo_titulo %}<h2 class="page-summary__title">{{ section_body.resumo_titulo }}</h2>{% endif %}
+    {% if section_body.resumo %}<p class="page-summary__lede">{{ section_body.resumo | safe }}</p>{% endif %}
+    {% if section_body.bullets %}
+      <ul class="page-summary__list">
+        {% for b in section_body.bullets %}<li>{{ b | safe }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endif %}
+
+{% set _passos = section_body.tutorial_passos or section_body.passos %}
+{% if _passos %}
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary">
+  <span class="page-eyebrow"><i class="fa-solid fa-graduation-cap"></i> {{ request.state.t('section_page.tutorial') }}</span>
+  <h2 class="page-summary__title">{{ section_body.tutorial_titulo | default(section_body.passos_titulo) | default(request.state.t('section_page.howto_default')) }}</h2>
+  {% if section_body.tutorial_lede or section_body.passos_lede %}
+    <p class="page-summary__lede">{{ (section_body.tutorial_lede or section_body.passos_lede) | safe }}</p>
+  {% endif %}
+</section>
+
+{% for passo in _passos %}
+  <section class="card card--active" style="margin-top: 16px;">
+    <div class="row" style="gap: 10px; margin-bottom: 14px;">
+      <span class="card-icon" style="margin: 0;"><i class="fa-solid fa-{{ loop.index }}"></i></span>
+      <div>
+        <h3 class="card-title" style="margin: 0;">{{ passo.titulo }}</h3>
+      </div>
+    </div>
+    <div style="font-size: 14px; line-height: 1.7;">{{ passo.html | safe }}</div>
+  </section>
+{% endfor %}
+{% endif %}
+
+{% if section_body.extra_html %}
+  {{ section_body.extra_html | safe }}
+{% endif %}
+
+{% if section_body.mensagem_chave %}
+<div class="note-block note-block--important" style="margin-top: 22px;">
+  <span class="note-block__icon"><i class="fa-solid fa-quote-left"></i></span>
+  <div class="note-block__body">
+    <span class="note-block__title">{{ request.state.t('section_page.key_message') }}</span>
+    {{ section_body.mensagem_chave | safe }}
+  </div>
+</div>
+{% endif %}
+
+{% block extra_content %}{% endblock %}
+{% endblock %}

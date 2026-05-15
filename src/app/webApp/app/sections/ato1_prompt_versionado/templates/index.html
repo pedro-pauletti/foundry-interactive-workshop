@@ -1,0 +1,237 @@
+{% extends "_section_page.html" %}
+
+{% set _tx = request.state.texts %}
+
+{% block extra_content %}
+<hr class="section-separator" aria-hidden="true">
+
+<section class="page-summary" style="margin-top: 16px;">
+  <span class="page-eyebrow"><i class="fa-solid fa-flask"></i> {{ _tx.get('demo_eyebrow', 'Live demo') }}</span>
+  <h2 class="page-summary__title">{{ _tx.get('demo_title', 'Otimização de prompt — LLMLingua') }}</h2>
+  <p class="page-summary__lede">
+    {{ _tx.get('demo_lede', '') | safe }}
+    <span class="source-badge source-badge--mock" title="{{ _tx.get('mock_badge_title', 'Heurística local que aproxima o LLMLingua') }}"><i class="fa-solid fa-flask"></i></span>
+  </p>
+</section>
+
+<section class="card card--active" style="margin-top: 16px;">
+  <div class="row" style="gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+    <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-pen-to-square"></i> {{ _tx.get('original_prompt', 'Prompt original') }}</h3>
+    <span style="margin-left: auto; font-size: 12px; color: var(--text-secondary);">
+      {{ _tx.get('tokens_label', 'tokens:') }} <strong id="po-orig-tokens">0</strong>
+    </span>
+  </div>
+
+  <textarea id="po-prompt" rows="8" class="po-textarea"
+    placeholder="{{ _tx.get('prompt_placeholder', 'Cole aqui um prompt longo, verboso ou redundante…') }}">{{ _tx.get('default_prompt', '') }}</textarea>
+
+  <div class="row" style="gap: 10px; flex-wrap: wrap; margin-top: 14px; align-items: center;">
+    <label style="font-size: 13px; color: var(--text-secondary);">
+      {{ _tx.get('question_label', 'Pergunta-alvo (question-aware):') }}
+    </label>
+    <input id="po-question" type="text" class="po-input"
+      placeholder="{{ request.state.industry_pack.get('placeholders', {}).get('prompt_versionado', 'ex.: como faço portabilidade?') }}"
+      value="{{ _tx.get('default_question', 'como faço para fazer a portabilidade?') }}" />
+  </div>
+
+  <div class="row" style="gap: 10px; align-items: center; margin-top: 12px;">
+    <label style="font-size: 13px; color: var(--text-secondary);">
+      {{ _tx.get('ratio_label', 'Target ratio (LLMLingua):') }}
+    </label>
+    <input id="po-ratio" type="range" min="0.1" max="0.9" step="0.05" value="0.5" style="flex: 1; max-width: 240px;"/>
+    <span id="po-ratio-label" style="font-weight: 600;">0.50</span>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <p style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; margin: 6px 0;">
+      <i class="fa-brands fa-github"></i> LLMLingua (microsoft/LLMLingua)
+    </p>
+    <div class="row po-buttons-row" style="gap: 8px; flex-wrap: wrap;"
+         data-tx-processing="{{ _tx.get('processing', 'processando…') }}"
+         data-tx-error-prefix="{{ _tx.get('error_prefix', 'Erro: ') }}"
+         data-tx-reduction="{{ _tx.get('reduction_template', '-{pct}% tokens') }}"
+         data-tx-no-reduction="{{ _tx.get('no_reduction', 'sem redução') }}"
+         data-tx-tech-compress="{{ _tx.get('tech_label_compress', 'LLMLingua Compress') }}"
+         data-tx-tech-question-aware="{{ _tx.get('tech_label_question_aware', 'LLMLingua Question-aware') }}"
+         data-tx-tech-coarse-to-fine="{{ _tx.get('tech_label_coarse_to_fine', 'LLMLingua Coarse-to-fine') }}">
+      <button class="btn btn-primary po-btn" data-technique="llmlingua_compress">
+        <i class="fa-solid fa-compress"></i> {{ _tx.get('technique_compress', 'Compress') }}
+      </button>
+      <button class="btn btn-secondary po-btn" data-technique="llmlingua_question_aware">
+        <i class="fa-solid fa-bullseye"></i> {{ _tx.get('technique_question_aware', 'Question-aware') }}
+      </button>
+      <button class="btn btn-secondary po-btn" data-technique="llmlingua_coarse_to_fine">
+        <i class="fa-solid fa-layer-group"></i> {{ _tx.get('technique_coarse_to_fine', 'Coarse-to-fine') }}
+      </button>
+    </div>
+  </div>
+</section>
+
+<section id="po-result" class="card" style="margin-top: 16px; display: none;">
+  <div class="row" style="gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+    <h3 class="card-title" style="margin: 0;">
+      <i class="fa-solid fa-arrow-right-arrow-left"></i>
+      {{ _tx.get('result_title_prefix', 'Resultado —') }} <span id="po-tech-label" style="color: var(--primary-color);"></span>
+    </h3>
+    <span class="badge" id="po-saved-badge"
+      style="margin-left: auto; padding: 6px 12px; border-radius: 999px;
+             background: var(--primary-light); color: var(--text-primary); font-size: 12px;">
+    </span>
+  </div>
+
+  <div class="po-metrics-grid">
+    <div class="po-metric"><div class="po-metric__label">{{ _tx.get('metric_original', 'Tokens originais') }}</div><div class="po-metric__value" id="po-m-orig">–</div></div>
+    <div class="po-metric"><div class="po-metric__label">{{ _tx.get('metric_optimized', 'Tokens otimizados') }}</div><div class="po-metric__value" id="po-m-opt">–</div></div>
+    <div class="po-metric"><div class="po-metric__label">{{ _tx.get('metric_ratio', 'Compression ratio') }}</div><div class="po-metric__value" id="po-m-ratio">–</div></div>
+    <div class="po-metric"><div class="po-metric__label">{{ _tx.get('metric_saved', 'Tokens salvos') }}</div><div class="po-metric__value" id="po-m-saved">–</div></div>
+    <div class="po-metric"><div class="po-metric__label">{{ _tx.get('metric_cost', '$ economizados *') }}</div><div class="po-metric__value" id="po-m-cost">–</div></div>
+  </div>
+  <p style="font-size: 11px; color: var(--text-secondary); margin: 6px 0 14px;">
+    {{ _tx.get('cost_footnote', '* estimativa baseada em $2.50 / 1M input tokens (gpt-4o); rode em produção para valores reais.') }}
+  </p>
+
+  <h4 style="margin: 14px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary);">
+    {{ _tx.get('optimized_prompt_label', 'Prompt otimizado') }}
+  </h4>
+  <pre class="po-result-pre"><code id="po-output"></code></pre>
+
+  <h4 style="margin: 14px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary);">
+    {{ _tx.get('notes_label', 'Notas da otimização') }}
+  </h4>
+  <ul id="po-notes" style="font-size: 13px; line-height: 1.6;"></ul>
+</section>
+
+<style>
+  .po-textarea, .po-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  .po-textarea { min-height: 140px; resize: vertical; }
+  .po-input { font-family: inherit; max-width: 360px; }
+  .po-textarea:focus, .po-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(43, 142, 240, 0.15);
+  }
+  .po-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .po-metric {
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .po-metric__label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 4px;
+  }
+  .po-metric__value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  .po-btn:disabled { opacity: 0.6; cursor: wait; }
+</style>
+
+<script>
+(() => {
+  const btnRow = document.querySelector('.po-buttons-row');
+  const ROW = btnRow ? btnRow.dataset : {};
+  const TECH_LABELS = {
+    llmlingua_compress: ROW.txTechCompress || 'LLMLingua Compress',
+    llmlingua_question_aware: ROW.txTechQuestionAware || 'LLMLingua Question-aware',
+    llmlingua_coarse_to_fine: ROW.txTechCoarseToFine || 'LLMLingua Coarse-to-fine',
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const promptEl = $('po-prompt');
+  const questionEl = $('po-question');
+  const ratioEl = $('po-ratio');
+  const ratioLabel = $('po-ratio-label');
+  const result = $('po-result');
+
+  const updateOrigTokens = () => {
+    const t = Math.max(1, Math.floor((promptEl.value || '').length / 4));
+    $('po-orig-tokens').textContent = promptEl.value.trim() ? t : 0;
+  };
+  promptEl.addEventListener('input', updateOrigTokens);
+  updateOrigTokens();
+
+  ratioEl.addEventListener('input', () => {
+    ratioLabel.textContent = parseFloat(ratioEl.value).toFixed(2);
+  });
+
+  document.querySelectorAll('.po-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const technique = btn.dataset.technique;
+      const prompt = (promptEl.value || '').trim();
+      if (!prompt) {
+        promptEl.focus();
+        return;
+      }
+      document.querySelectorAll('.po-btn').forEach(b => b.disabled = true);
+      const oldText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (ROW.txProcessing || 'processando…');
+      try {
+        const res = await fetch('/sections/ato1_prompt_versionado/api/optimize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            technique,
+            question: questionEl.value || null,
+            target_ratio: parseFloat(ratioEl.value),
+          }),
+        });
+        const data = await res.json();
+        renderResult(data);
+      } catch (e) {
+        alert((ROW.txErrorPrefix || 'Erro: ') + e.message);
+      } finally {
+        document.querySelectorAll('.po-btn').forEach(b => b.disabled = false);
+        btn.innerHTML = oldText;
+      }
+    });
+  });
+
+  function renderResult(data) {
+    $('po-tech-label').textContent = TECH_LABELS[data.technique] || data.technique;
+    $('po-m-orig').textContent = data.original_tokens;
+    $('po-m-opt').textContent = data.optimized_tokens;
+    $('po-m-ratio').textContent = (data.compression_ratio * 100).toFixed(0) + '%';
+    $('po-m-saved').textContent = data.saved_tokens;
+    $('po-m-cost').textContent = '$' + data.cost_saved_usd.toFixed(6);
+    const pct = Math.max(0, 100 - Math.round(data.compression_ratio * 100));
+    $('po-saved-badge').innerHTML = pct > 0
+      ? '<i class="fa-solid fa-arrow-down"></i> ' + (ROW.txReduction || '-{pct}% tokens').replace('{pct}', pct)
+      : '<i class="fa-solid fa-equals"></i> ' + (ROW.txNoReduction || 'sem redução');
+    $('po-output').textContent = data.optimized_prompt;
+    const ul = $('po-notes');
+    ul.innerHTML = '';
+    (data.notes || []).forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      ul.appendChild(li);
+    });
+    result.style.display = 'block';
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+})();
+</script>
+{% endblock %}
