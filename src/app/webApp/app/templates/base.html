@@ -45,28 +45,57 @@
           },
         });
       }
+      var dispatchCache = {};
+      function getDispatch(pathOnly) {
+        if (Object.prototype.hasOwnProperty.call(dispatchCache, pathOnly)) {
+          return Promise.resolve(dispatchCache[pathOnly]);
+        }
+        return origFetch(pathOnly + '.dispatch.json', { method: 'GET' }).then(function (r) {
+          if (!r.ok) { dispatchCache[pathOnly] = null; return null; }
+          return r.json().then(function (j) { dispatchCache[pathOnly] = j; return j; })
+                  .catch(function () { dispatchCache[pathOnly] = null; return null; });
+        }).catch(function () { dispatchCache[pathOnly] = null; return null; });
+      }
+      function pickFixture(pathOnly, init, isStream) {
+        var defaultFixture = pathOnly + (isStream ? '.sample.sse' : '.sample.json');
+        var bodyStr = '';
+        try { if (init && init.body) bodyStr = String(init.body).toLowerCase(); } catch (e) {}
+        if (!bodyStr) return Promise.resolve(defaultFixture);
+        return getDispatch(pathOnly).then(function (entries) {
+          if (!entries || !Array.isArray(entries)) return defaultFixture;
+          for (var i = 0; i < entries.length; i++) {
+            var e = entries[i];
+            if (e && e.match && bodyStr.indexOf(String(e.match).toLowerCase()) !== -1) {
+              return e.fixture || defaultFixture;
+            }
+          }
+          return defaultFixture;
+        });
+      }
       window.fetch = function (input, init) {
         try {
           var method = (init && init.method) || (typeof input === 'string' ? 'GET' : (input.method || 'GET'));
           var url = (typeof input === 'string') ? input : input.url;
           if (method.toUpperCase() === 'POST' && /\/sections\/[^/]+\/api\//.test(url)) {
             var isStream = /\/stream(\?|$)/.test(url);
-            var fixture = url.split('?')[0] + (isStream ? '.sample.sse' : '.sample.json');
+            var pathOnly = url.split('?')[0];
             return sleep(450 + Math.floor(Math.random() * 600)).then(function () {
-              return origFetch(fixture, { method: 'GET' }).then(function (r) {
-                if (!r.ok) return r;
-                if (isStream) {
-                  return r.text().then(function (text) {
-                    return new Response(streamFromText(text), {
-                      status: 200,
-                      headers: { 'Content-Type': 'text/event-stream' },
+              return pickFixture(pathOnly, init, isStream).then(function (fixture) {
+                return origFetch(fixture, { method: 'GET' }).then(function (r) {
+                  if (!r.ok) return r;
+                  if (isStream) {
+                    return r.text().then(function (text) {
+                      return new Response(streamFromText(text), {
+                        status: 200,
+                        headers: { 'Content-Type': 'text/event-stream' },
+                      });
                     });
-                  });
-                }
-                return r.text().then(function (txt) {
-                  return new Response(txt, {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
+                  }
+                  return r.text().then(function (txt) {
+                    return new Response(txt, {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' },
+                    });
                   });
                 });
               });
