@@ -365,6 +365,13 @@ def main() -> int:
             ("agentic", '"mode":"agentic"',
              {"mode": "agentic", "dataset": "auto"}),
         ],
+        # Observability dashboard — different window selectors produce different
+        # KPI totals, time-series length and histograms.
+        "/sections/ato3_observabilidade/api/metrics": [
+            ("w6",  '"window_hours":6',  {"window_hours": 6}),
+            ("w24", '"window_hours":24', {"window_hours": 24}),
+            ("w72", '"window_hours":72', {"window_hours": 72}),
+        ],
         # A2A orchestrator (SSE) — match the chips on this section.
         # First-match wins; keep "langgraph" before "fibra"/"contratar".
         "/sections/ato3_custo_integracao/api/orchestrate/stream": [

@@ -450,12 +450,19 @@ _MOCK_AGENTS = [
 
 
 def _build_mock(window_hours: int, notes: Optional[List[str]] = None) -> MetricsResponse:
-    random.seed(int(time.time()) // 60)
     hours = max(1, min(72, window_hours))
+    # Seed deterministically per-window so toggling 6h/24h/72h produces
+    # visibly different KPIs (instead of every window scaling identically).
+    random.seed(int(time.time()) // 600 * 100 + hours)
+
+    # Scale base request volume continuously with the window so 6h, 24h and
+    # 72h totals are clearly distinct (≈ ¼×, 1×, 3× respectively).
+    vol_scale = hours / 24.0
 
     by_agent: List[AgentRow] = []
     for a in _MOCK_AGENTS:
-        reqs = random.randint(1500, 9000) * (hours // 24 if hours >= 24 else 1)
+        reqs = int(random.randint(1500, 9000) * vol_scale)
+        reqs = max(reqs, 50)
         ptok = reqs * random.randint(180, 420)
         ctok = reqs * random.randint(80, 260)
         in_p, out_p = _price_for(a["model"])
