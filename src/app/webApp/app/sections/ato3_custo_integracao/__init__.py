@@ -410,10 +410,50 @@ async def orchestrate_stream(payload: A2ARequest, request: Request):
         async def mock_gen():
             import asyncio as _a
             import json as _j
+
+            q = payload.message.lower()
+            # Multi-agent intent: contratar + cancelamento → vendas + regulamentos
+            is_multi = ("contratar" in q or "fechar" in q) and any(
+                w in q for w in ["cancelamento", "política", "politica", "regulamento", "fidelidade", "rescisão", "rescisao"]
+            )
+
+            yield f"data: {_j.dumps({'type':'start','message':payload.message})}\n\n"
+            await _a.sleep(1.0)
+
+            if is_multi:
+                targets = ["especialista-vendas", "especialista-regulamentos"]
+                previews = {
+                    "especialista-vendas": (
+                        "Posso fechar o Contoso Fibra 500Mbps por R$129/mês com Wi-Fi 6 "
+                        "incluso. Para encerrar a contratação preciso do CEP e melhor "
+                        "horário de instalação."
+                    ),
+                    "especialista-regulamentos": (
+                        "Política POL-CANC-014: cancelamento sem multa após 12 meses de "
+                        "fidelidade. Antes disso, multa proporcional (R$40/mês restante). "
+                        "Solicitação por app, telefone ou loja com efeito em até 2 dias úteis."
+                    ),
+                }
+                # fan-out — both tool_start emitted close together
+                for t in targets:
+                    meta = _AGENTS[t]
+                    yield f"data: {_j.dumps({'type':'tool_start','tool':t,'agent_id':t,'agent_name':meta['name'],'host':meta['host'],'icon':meta['icon'],'input':payload.message})}\n\n"
+                    await _a.sleep(0.25)
+                await _a.sleep(1.6)
+                # tool_end — vendas first, then regulamentos
+                for t in targets:
+                    yield f"data: {_j.dumps({'type':'tool_end','tool':t,'agent_id':t,'preview':previews[t]})}\n\n"
+                    await _a.sleep(0.9)
+                final = (
+                    "**Resposta consolidada (2 agentes):**\n\n"
+                    "• **Vendas** — " + previews["especialista-vendas"] + "\n\n"
+                    "• **Regulamentos** — " + previews["especialista-regulamentos"]
+                )
+                yield f"data: {_j.dumps({'type':'done','answer':final,'tool_calls':targets,'duration_ms':3800,'source':'mock'})}\n\n"
+                return
+
             target = _mock_route(payload.message)
             meta = _AGENTS[target]
-            yield f"data: {_j.dumps({'type':'start','message':payload.message})}\n\n"
-            await _a.sleep(1.3)
             yield f"data: {_j.dumps({'type':'tool_start','tool':target,'agent_id':target,'agent_name':meta['name'],'host':meta['host'],'icon':meta['icon'],'input':payload.message})}\n\n"
             await _a.sleep(2.0)
             preview = _MOCK_RESPONSES[target][:240]
