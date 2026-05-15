@@ -126,32 +126,48 @@ _TOOL_TO_AGENT_ID = {
 # ============================================================================
 _MOCK_RESPONSES = {
     "especialista-produtos": (
-        "Contoso Controle 5GB sai por R$54,99/mês com ligações ilimitadas. "
-        "Por +R$15/mês, o plano de 10GB inclui Disney+ e Globoplay."
+        "Catálogo Contoso Fibra: 300Mbps SKU FB-300 R$99/mês · 500Mbps SKU FB-500 "
+        "R$129/mês · 1Gbps SKU FB-1000 R$179/mês. Todos com Wi-Fi 6 e instalação gratuita."
     ),
     "especialista-regulamentos": (
-        "Política POL-LGPD-001 v3 (DPO): dados pessoais devem ser tratados com "
-        "base legal explícita e retidos apenas pelo tempo necessário."
+        "Política POL-EMAIL-002 v2 (Segurança da Informação): e-mail corporativo é "
+        "exclusivo para uso profissional; encaminhamento externo bloqueado para "
+        "labels Confidential e Restricted (Purview)."
     ),
     "especialista-vendas": (
         "Posso fechar o Contoso Fibra 500Mbps por R$129/mês com Wi-Fi 6 incluso, "
         "se você confirmar CEP e melhor horário de instalação."
     ),
     "especialista-suporte-tecnico": (
-        "Para resetar a senha do Contoso App: app → 'Esqueci minha senha' → CPF → "
-        "código por SMS em até 30s. Se preferir, abro um chamado técnico."
+        "Modem com luz vermelha = sem sinal óptico. Passos: 1) verifique o cabo "
+        "de fibra na ONT, 2) reinicie o modem por 30s, 3) se persistir, abro "
+        "chamado técnico nível 2 com SLA de 24h."
+    ),
+    "langgraph-contoso": (
+        "Visão consolidada (langgraph): Contoso Fibra tem 3 tiers — 300 / 500 / "
+        "1000 Mbps a R$99 / R$129 / R$179 por mês. Todos incluem Wi-Fi 6, "
+        "instalação grátis e fidelidade de 12 meses. Cobertura em 4.000+ municípios."
     ),
 }
 
 
 def _mock_route(query: str) -> str:
     q = query.lower()
-    if any(w in q for w in ["fatura", "boleto", "pagar", "pix", "débito", "plano", "preço", "oferta", "contratar"]):
-        return "especialista-vendas"
-    if any(w in q for w in ["senha", "app", "não funciona", "erro", "modem", "wi-fi", "5g", "internet"]):
-        return "especialista-suporte-tecnico"
-    if any(w in q for w in ["política", "lgpd", "rh", "segurança"]):
+    # Multi-agent intent: contratar + cancelamento/política → vendas (primário)
+    # mas a mensagem cita ambos; mantemos vendas como rota principal.
+    if "langgraph" in q:
+        return "langgraph-contoso"
+    if any(w in q for w in ["política", "politica", "lgpd", "rh", "segurança", "seguranca", "regulamento", "uso aceitável", "uso aceitavel", "cancelamento"]):
+        # "cancelamento" cai em regulamentos só quando não tem "contratar"
+        if "contratar" in q or "fechar" in q:
+            return "especialista-vendas"
         return "especialista-regulamentos"
+    if any(w in q for w in ["liste sku", "sku", "catálogo", "catalogo", "quais planos", "lista de planos"]):
+        return "especialista-produtos"
+    if any(w in q for w in ["modem", "luz vermelha", "wi-fi", "wifi", "internet caiu", "não funciona", "nao funciona", "erro", "senha", "5g"]):
+        return "especialista-suporte-tecnico"
+    if any(w in q for w in ["fatura", "boleto", "pagar", "pix", "débito", "debito", "plano", "preço", "preco", "oferta", "contratar", "fechar", "fibra"]):
+        return "especialista-vendas"
     return "especialista-produtos"
 
 
