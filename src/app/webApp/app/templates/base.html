@@ -45,6 +45,33 @@
           },
         });
       }
+      // SSE-aware streamer: emits one event block at a time with a realistic
+      // delay between hops, so multi-agent orchestration traces feel like a
+      // live run instead of a single instant dump.
+      function streamSSE(text) {
+        var enc = new TextEncoder();
+        // Split on blank line separators (SSE event boundary).
+        var blocks = text.split(/\n\n/).filter(function (b) { return b.trim().length > 0; });
+        var idx = 0;
+        function delayFor(block) {
+          if (/"type"\s*:\s*"start"/.test(block)) return 300;
+          if (/"type"\s*:\s*"tool_start"/.test(block)) return 250;
+          if (/"type"\s*:\s*"tool_end"/.test(block)) return 900;
+          if (/"type"\s*:\s*"hop"/.test(block)) return 400;
+          if (/"type"\s*:\s*"done"/.test(block)) return 500;
+          return 500;
+        }
+        return new ReadableStream({
+          pull: function (controller) {
+            if (idx >= blocks.length) { controller.close(); return; }
+            var block = blocks[idx++];
+            var wait = delayFor(block);
+            return sleep(wait).then(function () {
+              controller.enqueue(enc.encode(block + '\n\n'));
+            });
+          },
+        });
+      }
       var dispatchCache = {};
       function getDispatch(pathOnly) {
         if (Object.prototype.hasOwnProperty.call(dispatchCache, pathOnly)) {
@@ -79,13 +106,15 @@
           if (method.toUpperCase() === 'POST' && /\/sections\/[^/]+\/api\//.test(url)) {
             var isStream = /\/stream(\?|$)/.test(url);
             var pathOnly = url.split('?')[0];
-            return sleep(450 + Math.floor(Math.random() * 600)).then(function () {
+            var initialDelay = isStream ? (200 + Math.floor(Math.random() * 200))
+                                        : (450 + Math.floor(Math.random() * 600));
+            return sleep(initialDelay).then(function () {
               return pickFixture(pathOnly, init, isStream).then(function (fixture) {
                 return origFetch(fixture, { method: 'GET' }).then(function (r) {
                   if (!r.ok) return r;
                   if (isStream) {
                     return r.text().then(function (text) {
-                      return new Response(streamFromText(text), {
+                      return new Response(streamSSE(text), {
                         status: 200,
                         headers: { 'Content-Type': 'text/event-stream' },
                       });
