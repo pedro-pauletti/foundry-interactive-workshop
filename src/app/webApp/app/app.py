@@ -350,6 +350,7 @@ async def inject_menu(request: Request, call_next):
     request.state.demo_mode = get_mode(request)
     request.state.real_mode_disabled = real_mode_disabled()
     request.state.static_version = STATIC_VERSION
+    request.state.static_demo = os.getenv("STATIC_BUILD", "0").lower() in ("1", "true", "yes")
     return await call_next(request)
 
 

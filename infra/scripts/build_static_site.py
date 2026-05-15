@@ -150,6 +150,88 @@ def main() -> int:
         # parses regardless of Content-Type.
         _write(out_dir / rel, json.dumps(payload, ensure_ascii=False, indent=2))
 
+    # 3b. Capture mock responses for the per-section interactive demos so the
+    # base.html fetch shim can serve them when running in STATIC_DEMO mode.
+    json_post_samples = [
+        ("/sections/ato1_hosted_agents/api/chat",
+         {"message": "Plano controle 5GB", "target": "hosted",
+          "agent_id": "mafw", "session_id": None}),
+        ("/sections/ato1_modelagem/api/compare",
+         {"message": "Resuma o plano controle 5GB"}),
+        ("/sections/ato1_prompt_versionado/api/optimize",
+         {"prompt": "Você é um assistente de telecom da Contoso. "
+                    "Responda perguntas dos clientes de forma clara.",
+          "technique": "llmlingua_compress", "question": None, "target_ratio": 0.5}),
+        ("/sections/ato1_rag_chat/api/chat",
+         {"message": "Quais são os planos controle?",
+          "mode": "agentic", "dataset": "auto",
+          "previous_response_id": None}),
+        ("/sections/ato1_rag_chat/api/evaluate",
+         {"mode": "agentic", "dataset": "auto"}),
+        ("/sections/ato2_evaluators_scorecard/api/run",
+         {"evaluators": ["groundedness", "relevance", "tom_contoso", "friendliness"],
+          "target": "modelo_a"}),
+        ("/sections/ato2_red_teaming/api/run",
+         {"target": "with_guardrails"}),
+        ("/sections/ato3_classificacao_risco/api/policy/evaluate",
+         {"finalidade": "atendimento", "publico": "consumidor",
+          "dados": "pessoais", "criticidade": "alta",
+          "impact_assessment": True}),
+        ("/sections/ato3_custo_integracao/api/mcp/invoke",
+         {"tool": "Salesforce.lookup_account", "gateway": True}),
+        ("/sections/ato3_governanca/api/chat",
+         {"message": "Como faço pagamento?", "guardrails": ["pii", "toxicity"]}),
+        ("/sections/ato3_observabilidade/api/metrics",
+         {"window_hours": 24}),
+    ]
+    sse_post_samples = [
+        ("/sections/ato1_multiagentes/api/run/stream",
+         {"message": "Cliente quer trocar de plano e portabilidade",
+          "pattern": "sequential"}),
+        ("/sections/ato3_custo_integracao/api/orchestrate/stream",
+         {"message": "Quero ativar débito automático", "enable_caching": False}),
+    ]
+    get_section_stubs = [
+        "/sections/ato2_red_teaming/api/config",
+        "/sections/ato2_evaluators_scorecard/api/dataset",
+        "/sections/ato3_custo_integracao/api/agents",
+        "/sections/ato3_custo_integracao/api/mcp/tools",
+        "/sections/ato1_multiagentes/api/patterns",
+    ]
+    captured = 0
+    cookies = {"demo_mode": "mock"}
+    for path, body in json_post_samples:
+        try:
+            r = client.post(path, json=body, cookies=cookies)
+            if r.status_code >= 400:
+                print(f"[build] WARN POST {path} -> {r.status_code}", file=sys.stderr)
+                continue
+            _write(out_dir / (path.lstrip("/") + ".sample.json"), r.text)
+            captured += 1
+        except Exception as e:
+            print(f"[build] WARN POST {path} -> {e!r}", file=sys.stderr)
+    for path, body in sse_post_samples:
+        try:
+            r = client.post(path, json=body, cookies=cookies)
+            if r.status_code >= 400:
+                print(f"[build] WARN SSE {path} -> {r.status_code}", file=sys.stderr)
+                continue
+            _write(out_dir / (path.lstrip("/") + ".sample.sse"), r.text)
+            captured += 1
+        except Exception as e:
+            print(f"[build] WARN SSE {path} -> {e!r}", file=sys.stderr)
+    for path in get_section_stubs:
+        try:
+            r = client.get(path, cookies=cookies)
+            if r.status_code >= 400:
+                print(f"[build] WARN GET {path} -> {r.status_code}", file=sys.stderr)
+                continue
+            _write(out_dir / path.lstrip("/"), r.text)
+            captured += 1
+        except Exception as e:
+            print(f"[build] WARN GET {path} -> {e!r}", file=sys.stderr)
+    print(f"[build] captured {captured} demo API fixtures")
+
     # 4. Pages housekeeping.
     _write(out_dir / ".nojekyll", "")
     # 404 falls back to the home page so SPA-ish navigation still lands somewhere.

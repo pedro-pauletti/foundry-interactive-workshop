@@ -43,6 +43,7 @@ jobs:
           DISABLE_REAL_MODE: "1"
           DEMO_MODE_DEFAULT: "mock"
           LANG_DEFAULT: "pt"
+          STATIC_BUILD: "1"
           PAGES_BASE_URL: ${{ steps.base.outputs.base_url }}
         run: |
           python infra/scripts/build_static_site.py --out dist --base-url "$PAGES_BASE_URL"

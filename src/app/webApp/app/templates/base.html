@@ -22,6 +22,61 @@
       } catch (e) {}
     })();
   </script>
+  <script>
+    // STATIC_DEMO flag — true on GitHub Pages snapshots (no live backend).
+    // When set, intercept POSTs / streaming POSTs to per-section APIs and
+    // serve pre-captured mock fixtures so every demo still produces a result.
+    window.STATIC_DEMO = {{ 'true' if request.state.static_demo else 'false' }};
+    (function () {
+      if (!window.STATIC_DEMO) return;
+      var origFetch = window.fetch.bind(window);
+      function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+      function streamFromText(text, chunkSize) {
+        chunkSize = chunkSize || 96;
+        var enc = new TextEncoder();
+        var i = 0;
+        return new ReadableStream({
+          pull: function (controller) {
+            if (i >= text.length) { controller.close(); return; }
+            var end = Math.min(text.length, i + chunkSize);
+            controller.enqueue(enc.encode(text.slice(i, end)));
+            i = end;
+            return sleep(35);
+          },
+        });
+      }
+      window.fetch = function (input, init) {
+        try {
+          var method = (init && init.method) || (typeof input === 'string' ? 'GET' : (input.method || 'GET'));
+          var url = (typeof input === 'string') ? input : input.url;
+          if (method.toUpperCase() === 'POST' && /\/sections\/[^/]+\/api\//.test(url)) {
+            var isStream = /\/stream(\?|$)/.test(url);
+            var fixture = url.split('?')[0] + (isStream ? '.sample.sse' : '.sample.json');
+            return sleep(450 + Math.floor(Math.random() * 600)).then(function () {
+              return origFetch(fixture, { method: 'GET' }).then(function (r) {
+                if (!r.ok) return r;
+                if (isStream) {
+                  return r.text().then(function (text) {
+                    return new Response(streamFromText(text), {
+                      status: 200,
+                      headers: { 'Content-Type': 'text/event-stream' },
+                    });
+                  });
+                }
+                return r.text().then(function (txt) {
+                  return new Response(txt, {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                  });
+                });
+              });
+            });
+          }
+        } catch (e) {}
+        return origFetch(input, init);
+      };
+    })();
+  </script>
 </head>
 <body>
   <div class="app-shell">
